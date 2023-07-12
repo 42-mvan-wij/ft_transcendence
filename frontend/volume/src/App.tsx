@@ -7,8 +7,10 @@ import Home from "src/components/Home";
 import Settings from "./components/settings/Settings";
 import { AuthProvider } from "./utils/authLogic";
 import TwoFactor from "./components/login/TwoFactor";
+import UserIsOnline from "./components/common/UserIsOnline";
 
 function App() {
+	UserIsOnline();
 	return (
 		<>
 			<AuthProvider>

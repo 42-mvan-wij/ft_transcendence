@@ -8,12 +8,26 @@ import { PersonalChat } from 'src/chat/personal/chat/entities/personal_chat.enti
 import { Match } from 'src/pong/match/entities/match.entity';
 import { pubSub } from 'src/app.module';
 
+export const g_online_users: [ string, number ][] = [];
+
 @Injectable()
 export class UserService {
 	constructor(
 		@InjectRepository(User)
 		private readonly userRepository: Repository<User>,
 	) {}
+
+	async userIsOnline(userId: string) {
+		for (let i in g_online_users) {
+			if (g_online_users[i][0] === userId) {
+				g_online_users[i][1] = Date.now();
+				return true;
+			}
+		}
+		g_online_users.push([ userId, Date.now() ]);
+		// console.log("user is online:", g_online_users[g_online_users.length - 1]);
+		return true;
+	}
 
 	async getAllUsers(): Promise<Array<User>> {
 		return this.userRepository.find();

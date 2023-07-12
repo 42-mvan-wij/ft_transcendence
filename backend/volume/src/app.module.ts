@@ -18,6 +18,7 @@ import { RankingModule } from './pong/ranking/ranking.module';
 import { MatchModule } from './pong/match/match.module';
 import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
 import * as cp from 'cookie-parser';
+import { UserActivityModule } from './user/user-activity.module';
 
 export const pubSub = new PubSub();
 const cookieParser = cp();
@@ -58,6 +59,7 @@ const cookieParser = cp();
 		TypeOrmModule.forRootAsync({ useClass: TypeOrmConfigService }),
 		AuthModule,
 		UserModule,
+		UserActivityModule,
 		LoginModule,
 		GroupChatModule,
 		GroupMessageModule,

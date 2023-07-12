@@ -26,6 +26,12 @@ export class UserResolver {
 		private userAvatarService: UserAvatarService,
 	) {}
 
+	@UseGuards(JwtAuthGuard)
+	@Mutation(() => Boolean)
+	async userIsOnline(@AuthUser() user: UserInfo) {
+		return this.userService.userIsOnline(user.userUid);
+	}
+
 	@Query(() => [User])
 	async allUsersQuery() {
 		return this.userService.getAllUsers();
