@@ -105,13 +105,7 @@ export default function SettingsModule(): JSX.Element {
 							onChange={handleChange}
 						/>
 					</label>
-					<h3>2FA</h3>
-					<input
-						type="text"
-						name="2FA"
-						placeholder="phonenumber or leave blank to disable"
-						onChange={handleChange}
-					/>
+					<h3>Enable 2FA</h3>
 					<label className="switch">
 						<input type="checkbox" />
 						<span className="slider round"></span>
