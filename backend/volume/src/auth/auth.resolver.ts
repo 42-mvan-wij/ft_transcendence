@@ -1,7 +1,11 @@
-import { ExecutionContext } from '@nestjs/common';
+import { UseGuards } from '@nestjs/common';
 import { Resolver, Query, Mutation, GqlExecutionContext } from '@nestjs/graphql';
+import { UserInfo } from './user-info.interface';
 import { UserService } from 'src/user/user.service';
 import { AuthService } from './auth.service';
+import { AuthUser } from './decorators/auth-user.decorator';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
+const QRCode = require('qrcode');
 
 @Resolver()
 export class AuthResolver {
@@ -10,34 +14,29 @@ export class AuthResolver {
 		private readonly userService: UserService,
 	) {}
 
-	// @
 	@Query()
 	async QRCodeQuery() {
 
 	}
 
-	@Mutation()
-	async setTwoFactorMutation() {
-		
+	@UseGuards(JwtAuthGuard)
+	@Mutation(() => String)
+	async enableTwoFactorMutation(@AuthUser() userInfo: UserInfo) {
+		const user = await this.userService.getUserById(userInfo.userUid);
+		if (user.twoFAEnabled == false) {
+			const { secret, otpAuthUrl } = await this.authService.generateTwoFASecret();
+			await this.userService.setTwoFA(secret, user);
+			return QRCode.toDataURL(otpAuthUrl);
+		}
+		return null;
 	}
 
-	// @Query(() => Boolean)
-	// async loginQuery(@Context() context: GraphQLContext) {
-	// 	return this.authService.isCookieValid(context.req);
-	// }
-
-	// @Query(() => Boolean)
-	// async loginQuery(context: ExecutionContext) {
-	// 	const req =  GqlExecutionContext.create(context).getContext().req;
-	// 	return this.authService.isCookieValid(req);
-	// }
-	//
-	// // async logoutMutation(@Context() context: GraphQLContext) {
-	// @Mutation(() => Boolean)
-	// async logoutMutation(context: ExecutionContext) {
-	// 	const gqlContext = GqlExecutionContext.create(context);
-	//
-	// 	gqlContext.getContext().res.setHeader('Clear-Site-Data', '"cookies", "storage"');
-	// 	return true;
-	// }
+	@UseGuards(JwtAuthGuard)
+	@Mutation()
+	async disableTwoFactorMutation(@AuthUser() userInfo: UserInfo) {	
+		const user = await this.userService.getUserById(userInfo.userUid);
+		if (user.twoFAEnabled == true) {
+			this.userService.unsetTwoFA(user);
+		}
+	}
 }

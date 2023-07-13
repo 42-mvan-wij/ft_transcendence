@@ -7,6 +7,7 @@ import { GroupChat } from 'src/chat/group/chat/entities/group_chat.entity';
 import { PersonalChat } from 'src/chat/personal/chat/entities/personal_chat.entity';
 import { Match } from 'src/pong/match/entities/match.entity';
 import { pubSub } from 'src/app.module';
+import { authenticator } from 'otplib';
 
 @Injectable()
 export class UserService {
@@ -44,18 +45,16 @@ export class UserService {
 		return await this.userRepository.save(user);
 	}
 
-	async setTwoFA(secret: string, userId: string) {
-		const user = await this.getUserById(userId);
+	async setTwoFA(secret: string, user: User): Promise<User> {
 		user.twoFASecret = secret;
 		user.twoFAEnabled = true;
-		await this.userRepository.save(user);
+		return await this.userRepository.save(user);
 	}
 
-	async unsetTwoFa(userId: string) {
-		const user = await this.getUserById(userId);
+	async unsetTwoFA(user: User): Promise<User> {
 		user.twoFASecret = null;
 		user.twoFAEnabled = false;
-		await this.userRepository.save(user);
+		return await this.userRepository.save(user);
 	}
 
 	async getGroupChats(user: User): Promise<Array<GroupChat>> {

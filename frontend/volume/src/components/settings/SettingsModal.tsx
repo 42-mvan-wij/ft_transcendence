@@ -112,7 +112,10 @@ export default function SettingsModule(): JSX.Element {
 						placeholder="phonenumber or leave blank to disable"
 						onChange={handleChange}
 					/>
-
+					<label className="switch">
+						<input type="checkbox" />
+						<span className="slider round"></span>
+					</label>
 					<button className="submit_button" type="submit">
 						Save Profile
 					</button>

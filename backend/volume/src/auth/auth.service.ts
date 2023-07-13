@@ -119,11 +119,9 @@ export class AuthService {
 		if (reqCookie == undefined) return false;
 	}
 
-	async generateTwoFASecret(userInfo: UserInfo) {
+	async generateTwoFASecret() {
 		const secret = authenticator.generateSecret();
 		const otpAuthUrl = authenticator.keyuri('dummy', 'PONG', secret);
-
-		await this.userService.setTwoFA(secret, userInfo.userUid);
 		return {
 			secret,
 			otpAuthUrl,
