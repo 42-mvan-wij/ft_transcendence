@@ -16,4 +16,9 @@ export class CreateGroupChannelInput {
 		description: "id's of all the members in this channel",
 	})
 	member_ids: string[];
+
+	@Field(() => String,  {
+		description: 'password of the channel', nullable: true
+	})
+	password: String;
 }

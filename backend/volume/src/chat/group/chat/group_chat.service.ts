@@ -7,6 +7,7 @@ import { CreateGroupChannelInput } from './dto/create_group_chat.input';
 import { User } from 'src/user/entities/user.entity';
 import { GroupMessage } from '../message/entities/group_message.entity';
 import { Not, In } from 'typeorm';
+// import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class GroupChatService {
@@ -45,11 +46,24 @@ export class GroupChatService {
 				this.userService.getUserById(id),
 			),
 		);
-		const channel = this.channelRepository.create({
+		
+		let channel = this.channelRepository.create({
 			members,
 			name: createChannelInput.name,
 			logo: createChannelInput.logo,
 		});
+		if (createChannelInput.password) {
+			const bcrypt = require('bcrypt');
+			const salt_rounds = 10;
+
+			// TODO: no sleep plz
+			const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
+			await bcrypt.hash(createChannelInput.password, salt_rounds, await function(err, hash) {
+				channel.password = hash;
+			});
+			await sleep(2000);
+		}
 		return await this.channelRepository.save(channel);
 	}
 

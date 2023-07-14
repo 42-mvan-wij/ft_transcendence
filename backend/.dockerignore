@@ -1,0 +1,2 @@
+# exclude bcrypt since it needs to compile inside our containter (else we get OS mismatch macOs <-> linux)
+node_modules/bcrypt

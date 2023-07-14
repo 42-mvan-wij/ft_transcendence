@@ -38,6 +38,9 @@ export class GroupChat {
 	})
 	logo: string;
 
+	@Column( { nullable: true } )
+	password: string;
+
 	@Field(() => GroupMessage, { nullable: true })
 	lastMessage: GroupMessage;
 
