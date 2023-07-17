@@ -18,6 +18,9 @@ export default function SettingsModule({ user, showModal }): JSX.Element {
 	const [picture, setPicture] = useState<PictureForm>({ name: "", data: user.avatar.file });
 	const [usernameInput, setUsernameInput] = useState("");
 	const [isEmptyForm, setIsEmptyForm] = useState(false);
+	const [checked, setChecked] = useState(user.twoFAEnabled);
+
+	console.log(user);
 
 	const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
@@ -40,14 +43,12 @@ export default function SettingsModule({ user, showModal }): JSX.Element {
 			return;
 		}
 
-		console.log(formData);
 		setIsEmptyForm(false);
 		formMutation({
 			variables: {
 				input: formData,
 			},
 		});
-		showModal(false);
 	};
 	const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		setUsernameInput(event.currentTarget.value);
@@ -100,7 +101,7 @@ export default function SettingsModule({ user, showModal }): JSX.Element {
 					</label>
 					<h3>Enable 2FA</h3>
 					<label className="switch">
-						<input type="checkbox" />
+						<input type="checkbox" checked={checked} />
 						<span className="slider round"></span>
 					</label>
 					<button className="submit_button" type="submit">

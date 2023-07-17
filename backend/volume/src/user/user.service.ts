@@ -26,7 +26,7 @@ export class UserService {
 		});
 	}
 
-	async getUserById(id: string, relations = {}) {
+	async getUserById(id: string, relations = {}): Promise<User> {
 		return this.userRepository.findOne({
 			relations,
 			where: { id: id },

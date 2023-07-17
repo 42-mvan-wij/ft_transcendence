@@ -8,6 +8,7 @@ export const CURRENT_USER = gql`
 				file
 			}
 			id
+			twoFAEnabled
 		}
 	}
 `;

@@ -27,7 +27,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 	}
 
 	async validate(payload: any) {
-		console.log(payload);
 		if (
 			(Date.now() / 1000) >= payload.exp
 			|| payload.type == TokenType.PARTIAL
