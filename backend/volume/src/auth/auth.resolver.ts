@@ -1,5 +1,5 @@
 import { UseGuards } from '@nestjs/common';
-import { Resolver, Query, Mutation, GqlExecutionContext } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, GqlExecutionContext, Args } from '@nestjs/graphql';
 import { UserInfo } from './user-info.interface';
 import { UserService } from 'src/user/user.service';
 import { AuthService } from './auth.service';
@@ -14,17 +14,20 @@ export class AuthResolver {
 		private readonly userService: UserService,
 	) {}
 
-	@Query()
-	async QRCodeQuery() {
-
-	}
+	// @Query()
+	// async QRCodeQuery() {
+	//
+	// }
 
 	@UseGuards(JwtAuthGuard)
 	@Mutation(() => String)
-	async enableTwoFactorMutation(@AuthUser() userInfo: UserInfo) {
+	async setTwoFactorMutation(
+		@AuthUser() userInfo: UserInfo,
+		@Args({name: 'TwoFAState', type: () => Boolean}) TwoFAState: boolean
+	) {
 		const user = await this.userService.getUserById(userInfo.userUid);
 		if (user.twoFAEnabled == false) {
-			const { secret, otpAuthUrl } = await this.authService.generateTwoFASecret();
+			const { secret, otpAuthUrl } = await this.authService.generateTwoFASecret(userInfo.userUid);
 			await this.userService.setTwoFA(secret, user);
 			return QRCode.toDataURL(otpAuthUrl);
 		}

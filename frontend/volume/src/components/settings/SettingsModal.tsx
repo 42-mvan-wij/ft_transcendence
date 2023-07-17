@@ -15,12 +15,11 @@ export default function SettingsModule({ user, showModal }): JSX.Element {
 	const [formMutation, { loading, error, data }] = useMutation(FORM_MUTATION, {
 		refetchQueries: [{ query: CURRENT_USER }],
 	});
+
 	const [picture, setPicture] = useState<PictureForm>({ name: "", data: user.avatar.file });
 	const [usernameInput, setUsernameInput] = useState("");
 	const [isEmptyForm, setIsEmptyForm] = useState(false);
 	const [checked, setChecked] = useState(user.twoFAEnabled);
-
-	console.log(user);
 
 	const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
@@ -68,6 +67,10 @@ export default function SettingsModule({ user, showModal }): JSX.Element {
 		fileReader.readAsBinaryString(file);
 	};
 
+	const handleCheckChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+		setChecked(event.target.checked);
+	};
+
 	return (
 		<div className="modal_user_profile_settings">
 			<div className="wrapper">
@@ -99,14 +102,17 @@ export default function SettingsModule({ user, showModal }): JSX.Element {
 							onChange={handleChange}
 						/>
 					</label>
-					<h3>Enable 2FA</h3>
-					<label className="switch">
-						<input type="checkbox" checked={checked} />
-						<span className="slider round"></span>
-					</label>
 					<button className="submit_button" type="submit">
 						Save Profile
 					</button>
+				</form>
+				<form className="profile_form" method="post">
+					<h3>Enable 2FA</h3>
+					<label className="switch">
+						<input type="checkbox" onChange={handleCheckChange} checked={checked} />
+						<span className="slider round"></span>
+					</label>
+					<img src={} alt="error no code" />
 				</form>
 			</div>
 		</div>

@@ -119,13 +119,17 @@ export class AuthService {
 		if (reqCookie == undefined) return false;
 	}
 
-	async generateTwoFASecret() {
+	async generateTwoFASecret(userUid: string) {
 		const secret = authenticator.generateSecret();
-		const otpAuthUrl = authenticator.keyuri('dummy', 'PONG', secret);
+		const otpAuthUrl = authenticator.keyuri(userUid, 'PONG', secret);
 		return {
 			secret,
 			otpAuthUrl,
 		};
+	}
+
+	async getQRCode(userUid: string) {
+		return authenticator.keyuri()
 	}
 
 	async verify2FACode(twoFACode: string, userId: string) {
