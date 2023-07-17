@@ -49,6 +49,15 @@ export class GroupChatResolver {
 	) {
 		return this.group_chat_service.join(userInfo.userUid, channelId);
 	}
+	
+	@Mutation(() => GroupChat, { nullable: true })
+	@UseGuards(JwtAuthGuard)
+	async joinPrivateGroupChat(
+		@AuthUser() userInfo: UserInfo,
+		@Args('channelId') channelId: string, @Args('password') password: string
+	) {
+		return this.group_chat_service.joinPrivate(userInfo.userUid, channelId, password);
+	}
 
 	@ResolveField()
 	async members(@Parent() channel: GroupChat) {

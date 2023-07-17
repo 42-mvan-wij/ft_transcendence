@@ -20,5 +20,5 @@ export class CreateGroupChannelInput {
 	@Field(() => String,  {
 		description: 'password of the channel', nullable: true
 	})
-	password: String;
+	password: string;
 }

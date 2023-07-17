@@ -7,6 +7,7 @@ import { CreateGroupChannelInput } from './dto/create_group_chat.input';
 import { User } from 'src/user/entities/user.entity';
 import { GroupMessage } from '../message/entities/group_message.entity';
 import { Not, In } from 'typeorm';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class GroupChatService {
@@ -51,16 +52,15 @@ export class GroupChatService {
 			logo: createChannelInput.logo,
 		});
 		if (createChannelInput.password) {
-			const bcrypt = require('bcrypt');
 			const salt_rounds = 10;
-
-			// TODO: no sleep plz
-			const sleep = (ms) => new Promise(r => setTimeout(r, ms));
-
-			await bcrypt.hash(createChannelInput.password, salt_rounds, await function(err, hash) {
-				channel.password = hash;
+			const promise = new Promise<string>((resolve, reject) => {
+				bcrypt.hash(createChannelInput.password, salt_rounds, function(err, hash) {
+					if (err) reject(err);
+					resolve(hash);
+				});
 			});
-			await sleep(2000);
+			channel.isPublic = false;
+			channel.password = await promise;
 		}
 		return await this.channelRepository.save(channel);
 	}
@@ -73,6 +73,25 @@ export class GroupChatService {
 			throw new Error(`Channel with id ${channelId} does not exist`);
 		channel.members = await this.getMembers(channel);
 		channel.members.push(user);
+		return await this.channelRepository.save(channel);
+	}
+	
+	async joinPrivate(userId: string, channelId: string, password: string): Promise<GroupChat> {
+		const channel = await this.getChannelById(channelId);
+		const user = await this.userService.getUserById(userId);
+
+		if (!channel)
+			throw new Error(`Channel with id ${channelId} does not exist`);
+		const password_compare_promise = new Promise<boolean> ((resolve, reject) => {
+			bcrypt.compare(password, channel.password, function(err, result) {
+				if (err) reject(err);
+				resolve(result);
+			});
+		});
+		if (await password_compare_promise) {
+			channel.members = await this.getMembers(channel);
+			channel.members.push(user);
+		}
 		return await this.channelRepository.save(channel);
 	}
 
