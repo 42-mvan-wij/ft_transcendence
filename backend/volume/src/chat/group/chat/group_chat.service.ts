@@ -33,6 +33,19 @@ export class GroupChatService {
 		});
 		return availableChannels;
 	}
+	
+	async getAvailablePrivateChannels(id: string): Promise<Array<GroupChat>> {
+		const user = await this.userService.getUserById(id);
+		const userChannels = await this.userService.getGroupChats(user);
+		const userChannelIds = userChannels.map((channel) => channel.id);
+		const availableChannels = await this.channelRepository.find({
+			where: {
+				isPublic: false,
+				id: Not(In(userChannelIds)),
+			},
+		});
+		return availableChannels;
+	}
 
 	async getChannelById(id: string): Promise<GroupChat> {
 		return this.channelRepository.findOne({ where: { id: id } });
@@ -76,7 +89,7 @@ export class GroupChatService {
 		return await this.channelRepository.save(channel);
 	}
 	
-	async joinPrivate(userId: string, channelId: string, password: string): Promise<GroupChat> {
+	async joinPrivate(userId: string, channelId: string, password: string): Promise<Boolean> {
 		const channel = await this.getChannelById(channelId);
 		const user = await this.userService.getUserById(userId);
 
@@ -91,8 +104,10 @@ export class GroupChatService {
 		if (await password_compare_promise) {
 			channel.members = await this.getMembers(channel);
 			channel.members.push(user);
+			await this.channelRepository.save(channel);
+			return true;
 		}
-		return await this.channelRepository.save(channel);
+		return false;
 	}
 
 	async getMembers(channel: GroupChat): Promise<Array<User>> {
