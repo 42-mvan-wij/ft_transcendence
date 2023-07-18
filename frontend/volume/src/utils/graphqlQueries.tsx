@@ -12,3 +12,9 @@ export const CURRENT_USER = gql`
 		}
 	}
 `;
+
+export const QR_CODE_QUERY = gql`
+	query QRCodeQuery {
+		QRCodeQuery
+	}
+`;

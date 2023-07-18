@@ -14,10 +14,13 @@ export class AuthResolver {
 		private readonly userService: UserService,
 	) {}
 
-	// @Query()
-	// async QRCodeQuery() {
-	//
-	// }
+	@UseGuards(JwtAuthGuard)
+	@Query(returns => String, { nullable: true })
+	async QRCodeQuery(@AuthUser() userInfo: UserInfo) {
+		const user = await this.userService.getUserById(userInfo.userUid);
+		if (user.twoFAEnabled == false) return null;
+		return this.authService.getQRCode(user.id, user.twoFASecret);
+	}
 
 	@UseGuards(JwtAuthGuard)
 	@Mutation(() => String)
@@ -32,14 +35,5 @@ export class AuthResolver {
 			return QRCode.toDataURL(otpAuthUrl);
 		}
 		return null;
-	}
-
-	@UseGuards(JwtAuthGuard)
-	@Mutation()
-	async disableTwoFactorMutation(@AuthUser() userInfo: UserInfo) {	
-		const user = await this.userService.getUserById(userInfo.userUid);
-		if (user.twoFAEnabled == true) {
-			this.userService.unsetTwoFA(user);
-		}
 	}
 }

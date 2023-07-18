@@ -970,9 +970,6 @@ div.background {
   margin-top: 3em;
 }
 
-.modal_user_profile_settings {
-  /* Rounded sliders */
-}
 .modal_user_profile_settings .wrapper {
   display: flex;
   flex-direction: column;
@@ -1066,6 +1063,17 @@ div.background {
 }
 .modal_user_profile_settings .submit_button {
   margin-top: 2em;
+}
+.modal_user_profile_settings .qr_code_container {
+  display: flex;
+  position: center;
+  height: 10em;
+  margin-top: 2em;
+  width: 10em;
+}
+.modal_user_profile_settings qr_code_container img {
+  max-height: 100%;
+  max-width: 100%;
 }
 
 /*# sourceMappingURL=style.css.map */

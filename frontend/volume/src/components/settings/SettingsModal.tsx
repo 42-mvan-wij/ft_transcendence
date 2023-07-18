@@ -4,7 +4,7 @@ import { convertEncodedImage } from "src/utils/convertEncodedImage";
 import "src/styles/style.css";
 import Loading from "../authorization/Loading";
 import { FORM_MUTATION } from "src/utils/graphQLMutations";
-import { CURRENT_USER } from "src/utils/graphQLQueries";
+import { CURRENT_USER, QR_CODE_QUERY } from "src/utils/graphQLQueries";
 
 interface PictureForm {
 	name: string;
@@ -12,9 +12,11 @@ interface PictureForm {
 }
 
 export default function SettingsModule({ user, showModal }): JSX.Element {
-	const [formMutation, { loading, error, data }] = useMutation(FORM_MUTATION, {
+	const [formMutation, formMutationState] = useMutation(FORM_MUTATION, {
 		refetchQueries: [{ query: CURRENT_USER }],
 	});
+	const [TwoFAFormMutation, TwoFAMutationState] = useMutation()
+	const QRCodeState = useQuery(QR_CODE_QUERY);
 
 	const [picture, setPicture] = useState<PictureForm>({ name: "", data: user.avatar.file });
 	const [usernameInput, setUsernameInput] = useState("");
@@ -69,7 +71,14 @@ export default function SettingsModule({ user, showModal }): JSX.Element {
 
 	const handleCheckChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		setChecked(event.target.checked);
+
 	};
+
+	if (QRCodeState.loading) return <Loading />;
+	if (QRCodeState.error) {
+		console.log(QRCodeState.error);
+		return <>Error</>;
+	}
 
 	return (
 		<div className="modal_user_profile_settings">
@@ -112,7 +121,12 @@ export default function SettingsModule({ user, showModal }): JSX.Element {
 						<input type="checkbox" onChange={handleCheckChange} checked={checked} />
 						<span className="slider round"></span>
 					</label>
-					<img src={} alt="error no code" />
+					<div className="qr_code_container">
+						<img
+							src={convertEncodedImage(QRCodeState.data.QRCodeQuery)}
+							alt="error no code"
+						/>
+					</div>
 				</form>
 			</div>
 		</div>

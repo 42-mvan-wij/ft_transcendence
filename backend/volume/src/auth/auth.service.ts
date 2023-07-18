@@ -128,8 +128,8 @@ export class AuthService {
 		};
 	}
 
-	async getQRCode(userUid: string) {
-		return authenticator.keyuri()
+	async getQRCode(userUid: string, secret: string) {
+		return authenticator.keyuri(userUid, 'PONG', secret);
 	}
 
 	async verify2FACode(twoFACode: string, userId: string) {

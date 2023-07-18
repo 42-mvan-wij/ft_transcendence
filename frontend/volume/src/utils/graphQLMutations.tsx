@@ -11,3 +11,9 @@ export const FORM_MUTATION = gql`
 		}
 	}
 `;
+
+export const TWO_FA_MUTATION = gql`
+	mutation TwoFAMutation {
+		setTwoFactorMutation()
+	}
+`;
