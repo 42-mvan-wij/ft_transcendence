@@ -24,7 +24,10 @@ export default function JoinChannel(props: i.ModalProps & { refetchChannels: () 
 				</a>
 			</div>
 			{toggleChannel ? (
-				<PrivateChannel />
+				<PrivateChannel
+					setShowModal={props.setShowModal}
+					refetchChannels={props.refetchChannels}
+				/>
 			) : (
 				<PublicChannel
 					setShowModal={props.setShowModal}
