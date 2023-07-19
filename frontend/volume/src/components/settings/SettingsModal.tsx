@@ -3,7 +3,7 @@ import { useState } from "react";
 import { convertEncodedImage } from "src/utils/convertEncodedImage";
 import "src/styles/style.css";
 import Loading from "../authorization/Loading";
-import { FORM_MUTATION } from "src/utils/graphQLMutations";
+import { FORM_MUTATION, TWO_FA_MUTATION } from "src/utils/graphQLMutations";
 import { CURRENT_USER, QR_CODE_QUERY } from "src/utils/graphQLQueries";
 
 interface PictureForm {
@@ -15,7 +15,9 @@ export default function SettingsModule({ user, showModal }): JSX.Element {
 	const [formMutation, formMutationState] = useMutation(FORM_MUTATION, {
 		refetchQueries: [{ query: CURRENT_USER }],
 	});
-	const [TwoFAFormMutation, TwoFAMutationState] = useMutation()
+	const [TwoFAFormMutation, TwoFAMutationState] = useMutation(TWO_FA_MUTATION, {
+		refetchQueries: [{ query: CURRENT_USER }],
+	});
 	const QRCodeState = useQuery(QR_CODE_QUERY);
 
 	const [picture, setPicture] = useState<PictureForm>({ name: "", data: user.avatar.file });
@@ -51,6 +53,7 @@ export default function SettingsModule({ user, showModal }): JSX.Element {
 			},
 		});
 	};
+
 	const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		setUsernameInput(event.currentTarget.value);
 	};
@@ -71,7 +74,13 @@ export default function SettingsModule({ user, showModal }): JSX.Element {
 
 	const handleCheckChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		setChecked(event.target.checked);
-
+		console.log(event.target.checked);
+		console.log(checked);
+		TwoFAFormMutation({
+			variables: {
+				twoFaState: checked,
+			},
+		});
 	};
 
 	if (QRCodeState.loading) return <Loading />;
@@ -122,10 +131,7 @@ export default function SettingsModule({ user, showModal }): JSX.Element {
 						<span className="slider round"></span>
 					</label>
 					<div className="qr_code_container">
-						<img
-							src={convertEncodedImage(QRCodeState.data.QRCodeQuery)}
-							alt="error no code"
-						/>
+						<img src={QRCodeState.data.QRCodeQuery} alt="error no code" />
 					</div>
 				</form>
 			</div>

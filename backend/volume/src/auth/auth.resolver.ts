@@ -5,7 +5,7 @@ import { UserService } from 'src/user/user.service';
 import { AuthService } from './auth.service';
 import { AuthUser } from './decorators/auth-user.decorator';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
-const QRCode = require('qrcode');
+import { toDataURL } from 'qrcode';
 
 @Resolver()
 export class AuthResolver {
@@ -19,7 +19,8 @@ export class AuthResolver {
 	async QRCodeQuery(@AuthUser() userInfo: UserInfo) {
 		const user = await this.userService.getUserById(userInfo.userUid);
 		if (user.twoFAEnabled == false) return null;
-		return this.authService.getQRCode(user.id, user.twoFASecret);
+		const keyuri = await this.authService.getQRCode(user.id, user.twoFASecret);
+		return toDataURL(keyuri);
 	}
 
 	@UseGuards(JwtAuthGuard)
@@ -29,11 +30,15 @@ export class AuthResolver {
 		@Args({name: 'TwoFAState', type: () => Boolean}) TwoFAState: boolean
 	) {
 		const user = await this.userService.getUserById(userInfo.userUid);
-		if (user.twoFAEnabled == false) {
+		if (TwoFAState == true) {
 			const { secret, otpAuthUrl } = await this.authService.generateTwoFASecret(userInfo.userUid);
 			await this.userService.setTwoFA(secret, user);
-			return QRCode.toDataURL(otpAuthUrl);
+			return true;
 		}
-		return null;
+		else {
+			console.log("unsetting");
+			await this.userService.unsetTwoFA(user);
+			return false;
+		}
 	}
 }
