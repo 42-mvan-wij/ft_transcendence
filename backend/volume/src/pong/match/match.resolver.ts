@@ -22,14 +22,14 @@ export class MatchResolver {
 	}
 
 	@Subscription(() => [Match], {
-		filter: ({ matchHistoryHasBeenUpdated }, _, { user }) => {
-			if (!matchHistoryHasBeenUpdated) return false;
-			return matchHistoryHasBeenUpdated.id === user.id;
+		filter: (payload, variables) => {
+			if (!payload) return false;
+			return payload.user_id === variables.userId;
 		},
 	})
 	matchHistoryHasBeenUpdated(
 		@Args('userId', { type: () => String }) userId: string,
 	) {
-		return pubSub.asyncIterator(`matchHistoryHasBeenUpdated:${userId}`);
+		return pubSub.asyncIterator(`matchHistoryHasBeenUpdated`);
 	}
 }
