@@ -5,77 +5,18 @@ import "src/styles/style.css";
 import Loading from "../authorization/Loading";
 import { FORM_MUTATION, TWO_FA_MUTATION } from "src/utils/graphQLMutations";
 import { CURRENT_USER, QR_CODE_QUERY } from "src/utils/graphQLQueries";
-
-interface PictureForm {
-	name: string;
-	data: string;
-}
+import ProfileForm from "./ProfileForm";
 
 export default function SettingsModule({ user, showModal }): JSX.Element {
-	const [formMutation, formMutationState] = useMutation(FORM_MUTATION, {
-		refetchQueries: [{ query: CURRENT_USER }],
-	});
 	const [TwoFAFormMutation, TwoFAMutationState] = useMutation(TWO_FA_MUTATION, {
 		refetchQueries: [{ query: CURRENT_USER }],
 	});
 	const QRCodeState = useQuery(QR_CODE_QUERY);
 
-	const [picture, setPicture] = useState<PictureForm>({ name: "", data: user.avatar.file });
-	const [usernameInput, setUsernameInput] = useState("");
-	const [isEmptyForm, setIsEmptyForm] = useState(false);
 	const [checked, setChecked] = useState(user.twoFAEnabled);
-
-	const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-		event.preventDefault();
-		const username = event.currentTarget.username.value;
-		const formData = {};
-
-		if (usernameInput.trim() !== "") {
-			formData["username"] = usernameInput;
-		}
-
-		if (picture.data !== "" && picture.data !== user.avatar.file) {
-			formData["avatar"] = {
-				file: picture.data,
-				filename: picture.name,
-			};
-		}
-
-		if (Object.keys(formData).length === 0) {
-			setIsEmptyForm(true);
-			return;
-		}
-
-		setIsEmptyForm(false);
-		formMutation({
-			variables: {
-				input: formData,
-			},
-		});
-	};
-
-	const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-		setUsernameInput(event.currentTarget.value);
-	};
-
-	const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-		if (!event.target.files) throw new Error();
-		const fileReader = new FileReader();
-		const file = event.target.files[0];
-		const fileName = file.name;
-
-		fileReader.onloadend = (e: any) => {
-			const fileContent = e.currentTarget.result as string;
-			const imgData = window.btoa(fileContent);
-			setPicture({ name: fileName, data: imgData });
-		};
-		fileReader.readAsBinaryString(file);
-	};
 
 	const handleCheckChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		setChecked(event.target.checked);
-		console.log(event.target.checked);
-		console.log(checked);
 		TwoFAFormMutation({
 			variables: {
 				twoFaState: checked,
@@ -92,38 +33,7 @@ export default function SettingsModule({ user, showModal }): JSX.Element {
 	return (
 		<div className="modal_user_profile_settings">
 			<div className="wrapper">
-				<form className="profile_form" method="post" onSubmit={handleSubmit}>
-					{isEmptyForm && (
-						<p className="empty-form-message">Please fill in at least one field</p>
-					)}
-					<h3>Change profile picture </h3>
-					<div className="change_avatar">
-						<div className="avatar_container">
-							<img src={convertEncodedImage(picture.data)} alt="error no image" />
-						</div>
-						<label className="choose_file" htmlFor="changeAvatar">
-							<input
-								id="changeAvatar"
-								type="file"
-								name="profilePicture"
-								onChange={handleFileChange}
-							/>
-							<h3>Select a new image</h3>
-						</label>
-					</div>
-					<label htmlFor="name">
-						<h3>Change username</h3>
-						<input
-							type="text"
-							name="username"
-							placeholder={user.username}
-							onChange={handleChange}
-						/>
-					</label>
-					<button className="submit_button" type="submit">
-						Save Profile
-					</button>
-				</form>
+				<ProfileForm user={user} />
 				<form className="profile_form" method="post">
 					<h3>Enable 2FA</h3>
 					<label className="switch">
