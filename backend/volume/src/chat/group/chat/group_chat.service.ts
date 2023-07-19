@@ -85,7 +85,7 @@ export class GroupChatService {
 	}
 
 	async join(userId: string, channelId: string): Promise<GroupChat> {
-		const channel = await this.getChannelById(channelId, {banned_users: true});
+		const channel = await this.getChannelById(channelId, {banned_users: true, members: true});
 		const user = await this.userService.getUserById(userId);
 
 		if (!channel)
@@ -94,13 +94,12 @@ export class GroupChatService {
 			throw new Error(`User with id ${userId} does not exist`);
 		if (channel.banned_users.some((banned_user) => banned_user.id === userId))
 			throw new Error(`User with id ${userId} is banned from channel with id ${channelId}`);
-		channel.members = await this.getMembers(channel);
 		channel.members.push(user);
 		return await this.channelRepository.save(channel);
 	}
 	
 	async joinPrivate(userId: string, channelId: string, password: string): Promise<Boolean> {
-		const channel = await this.getChannelById(channelId);
+		const channel = await this.getChannelById(channelId, {banned_users: true, members: true});
 		const user = await this.userService.getUserById(userId);
 
 		if (!channel)
@@ -116,7 +115,6 @@ export class GroupChatService {
 			});
 		});
 		if (same_password) {
-			channel.members = await this.getMembers(channel);
 			channel.members.push(user);
 			await this.channelRepository.save(channel);
 			return true;
