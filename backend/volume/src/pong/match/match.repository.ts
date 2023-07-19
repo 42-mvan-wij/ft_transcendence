@@ -44,7 +44,7 @@ export class MatchRepository {
 		id: string,
 	): Promise<void> {
 		const user = await this.userService.getUserById(id);
-		let matchHistory: Match[] = await this.userService.getMatchHistory(user);
+		const matchHistory: Match[] = await this.userService.getMatchHistory(user);
 		pubSub.publish(`matchHistoryHasBeenUpdated`, {
 			matchHistoryHasBeenUpdated: matchHistory, user_id: id
 		});
