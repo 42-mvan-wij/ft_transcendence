@@ -10,12 +10,14 @@ const GET_WHOLE_QUEUE = gql`
 		getWholeQueue {
 			id
 			p1 {
+				id
 				username
 				avatar {
 					file
 				}
 			}
 			p2 {
+				id
 				username
 				avatar {
 					file
@@ -48,12 +50,14 @@ const QUEUE_CHANGED = gql`
 		queueChanged {
 			id
 			p1 {
+				id
 				username
 				avatar {
 					file
 				}
 			}
 			p2 {
+				id
 				username
 				avatar {
 					file
