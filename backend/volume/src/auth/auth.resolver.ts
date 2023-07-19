@@ -30,9 +30,12 @@ export class AuthResolver {
 		@Args({name: 'TwoFAState', type: () => Boolean}) TwoFAState: boolean
 	) {
 		const user = await this.userService.getUserById(userInfo.userUid);
-		if (TwoFAState == true) {
+		if (TwoFAState == true && user.twoFAEnabled != true) {
 			const { secret, otpAuthUrl } = await this.authService.generateTwoFASecret(userInfo.userUid);
 			await this.userService.setTwoFA(secret, user);
+			return true;
+		}
+		else if (TwoFAState == true) {
 			return true;
 		}
 		else {

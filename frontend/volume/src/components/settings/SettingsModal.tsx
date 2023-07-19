@@ -1,32 +1,32 @@
 import { useMutation, useQuery } from "@apollo/client";
-import { useState } from "react";
-import { convertEncodedImage } from "src/utils/convertEncodedImage";
+import { useState, useEffect } from "react";
 import "src/styles/style.css";
 import Loading from "../authorization/Loading";
-import { FORM_MUTATION, TWO_FA_MUTATION } from "src/utils/graphQLMutations";
+import { TWO_FA_MUTATION } from "src/utils/graphQLMutations";
 import { CURRENT_USER, QR_CODE_QUERY } from "src/utils/graphQLQueries";
 import ProfileForm from "./ProfileForm";
 
 export default function SettingsModule({ user, showModal }): JSX.Element {
 	const [TwoFAFormMutation, TwoFAMutationState] = useMutation(TWO_FA_MUTATION, {
-		refetchQueries: [{ query: CURRENT_USER }],
+		refetchQueries: [{ query: CURRENT_USER }, { query: QR_CODE_QUERY }],
 	});
 	const QRCodeState = useQuery(QR_CODE_QUERY);
-
 	const [checked, setChecked] = useState(user.twoFAEnabled);
 
 	const handleCheckChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		setChecked(event.target.checked);
+	};
+
+	useEffect(() => {
 		TwoFAFormMutation({
 			variables: {
 				twoFaState: checked,
 			},
 		});
-	};
+	}, [checked]);
 
 	if (QRCodeState.loading) return <Loading />;
 	if (QRCodeState.error) {
-		console.log(QRCodeState.error);
 		return <>Error</>;
 	}
 
