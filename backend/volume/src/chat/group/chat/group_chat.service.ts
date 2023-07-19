@@ -33,20 +33,26 @@ export class GroupChatService {
 		return availableChannels;
 	}
 
-	async getChannelById(id: string): Promise<GroupChat> {
-		return this.channelRepository.findOne({ where: { id: id } });
+	async getChannelById(id: string, relations: any = {}): Promise<GroupChat> {
+		return this.channelRepository.findOne({ where: { id: id }, relations });
 	}
 
 	async create(
 		createChannelInput: CreateGroupChannelInput,
+		owner_id: string,
 	): Promise<GroupChat> {
 		const members = await Promise.all(
 			createChannelInput.member_ids.map((id) =>
 				this.userService.getUserById(id),
 			),
 		);
+		const owner = await this.userService.getUserById(owner_id);
+		members.push(owner);
+
 		const channel = this.channelRepository.create({
 			members,
+			owner,
+			admins: [owner],
 			name: createChannelInput.name,
 			logo: createChannelInput.logo,
 		});
@@ -61,6 +67,34 @@ export class GroupChatService {
 			throw new Error(`Channel with id ${channelId} does not exist`);
 		channel.members = await this.getMembers(channel);
 		channel.members.push(user);
+		return await this.channelRepository.save(channel);
+	}
+
+	async promote(channel_id: string, supposed_owner_id: string, user_id: string) {
+		const channel = await this.getChannelById(channel_id, {owner: true, members: true, admins: true});
+		if (!channel)
+			throw new Error(`Channel with id ${channel_id} does not exist`);
+		if (channel.owner.id !== supposed_owner_id)
+			throw new Error(`User with id ${supposed_owner_id} is not the channel owner`);
+		const user = await this.userService.getUserById(user_id);
+		if (!user)
+			throw new Error(`User with id ${user_id} does not exist`);
+		if (channel.members.some((member) => member.id === user_id))
+			throw new Error(`User with id ${user_id} is not a member`);
+		channel.admins.push(user);
+		return await this.channelRepository.save(channel);
+	}
+
+	async demote(channel_id: string, supposed_owner_id: string, user_id: string) {
+		const channel = await this.getChannelById(channel_id, {owner: true, members: true});
+		if (!channel)
+			throw new Error(`Channel with id ${channel_id} does not exist`);
+		if (channel.owner.id !== supposed_owner_id)
+			throw new Error(`User with id ${supposed_owner_id} is not the channel owner`);
+		const index = channel.admins.findIndex((admin) => admin.id === user_id)
+		if (index < 0)
+			throw new Error(`User with id ${user_id} is not an admin`);
+		channel.admins.splice(index, 1);
 		return await this.channelRepository.save(channel);
 	}
 
