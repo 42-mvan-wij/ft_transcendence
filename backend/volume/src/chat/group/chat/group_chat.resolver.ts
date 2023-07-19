@@ -30,6 +30,14 @@ export class GroupChatResolver {
 			userInfo.userUid,
 		);
 	}
+	
+	@Query(() => [GroupChat])
+	@UseGuards(JwtAuthGuard)
+	async all_available_private_channels(@AuthUser() userInfo: UserInfo) {
+		return this.group_chat_service.getAvailablePrivateChannels(
+			userInfo.userUid,
+		);
+	}
 
 	@Query(() => GroupChat) // TODO: add guards, to check if the user is a member of the channel, else disallow (also do this in other places)
 	async group_chat(@Args('id') id: string) {
@@ -48,6 +56,15 @@ export class GroupChatResolver {
 		@Args('channelId') channelId: string,
 	) {
 		return this.group_chat_service.join(userInfo.userUid, channelId);
+	}
+	
+	@Mutation(() => Boolean, { nullable: true })
+	@UseGuards(JwtAuthGuard)
+	async joinPrivateGroupChat(
+		@AuthUser() userInfo: UserInfo,
+		@Args('channelId') channelId: string, @Args('password') password: string
+	) {
+		return this.group_chat_service.joinPrivate(userInfo.userUid, channelId, password);
 	}
 
 	@ResolveField()
