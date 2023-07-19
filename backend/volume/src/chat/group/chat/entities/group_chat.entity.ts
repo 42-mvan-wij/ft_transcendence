@@ -3,6 +3,7 @@ import {
 	Entity,
 	JoinTable,
 	ManyToMany,
+	ManyToOne,
 	OneToMany,
 	PrimaryGeneratedColumn,
 } from 'typeorm';
@@ -21,6 +22,20 @@ export class GroupChat {
 	@JoinTable()
 	@Field(() => [User], { nullable: true })
 	members: User[];
+
+	@ManyToOne(() => User)
+	@Field(() => User)
+	owner: User;
+
+	@ManyToMany(() => User)
+	@JoinTable()
+	@Field(() => [User])
+	admins: User[];
+
+	@ManyToMany(() => User)
+	@JoinTable()
+	@Field(() => [User], { nullable: true })
+	banned_users: User[];
 
 	@OneToMany(() => GroupMessage, (message) => message.channel)
 	@Field(() => [GroupMessage], { nullable: true })
