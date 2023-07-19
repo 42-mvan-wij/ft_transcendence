@@ -63,6 +63,24 @@ export class GroupChatResolver {
 		return await this.group_chat_service.demote(channel_id, user.userUid, user_id);
 	}
 
+	@UseGuards(JwtAuthGuard)
+	@Mutation(() => GroupChat)
+	async kick(@AuthUser() user: UserInfo, @Args('channel_id') channel_id: string, @Args('user_id') user_id: string) {
+		return await this.group_chat_service.kick(channel_id, user.userUid, user_id);
+	}
+
+	@UseGuards(JwtAuthGuard)
+	@Mutation(() => GroupChat)
+	async ban(@AuthUser() user: UserInfo, @Args('channel_id') channel_id: string, @Args('user_id') user_id: string) {
+		return await this.group_chat_service.ban(channel_id, user.userUid, user_id);
+	}
+
+	@UseGuards(JwtAuthGuard)
+	@Mutation(() => GroupChat)
+	async unban(@AuthUser() user: UserInfo, @Args('channel_id') channel_id: string, @Args('user_id') user_id: string) {
+		return await this.group_chat_service.unban(channel_id, user.userUid, user_id);
+	}
+
 	@ResolveField()
 	async members(@Parent() channel: GroupChat) {
 		return this.group_chat_service.getMembers(channel);
