@@ -69,6 +69,21 @@ export default function UserStats(modalProps: i.ModalProps & { selectedUser: any
 	if (unblock_error) return <>error unblocking user</>;
 	if (block_state_error) return <>error loading user's block status</>;
 
+	let status: string;
+	switch (challengeAvailabilityStatus.challengeStatus) {
+		case ChallengeStatus.ONLINE:
+			status = "(online)";
+			break;
+		case ChallengeStatus.IN_MATCH:
+			status = "(in game)";
+			break;
+		case ChallengeStatus.IN_QUEUE:
+			status = "(in queue)";
+			break;
+		default:
+			status = "(offline)";
+			break;
+	}
 	const renderUserActions = () => {
 		if (modalProps.selectedUser.id === modalProps.userId)
 			return (
@@ -78,7 +93,9 @@ export default function UserStats(modalProps: i.ModalProps & { selectedUser: any
 			);
 		return (
 			<div className="user_actions">
-				<h1>{modalProps.selectedUser.username}</h1>
+				<h1>
+					{modalProps.selectedUser.username} {status}
+				</h1>
 				{renderChallengeFriendActions(
 					modalProps,
 					challenge_friend,
@@ -157,7 +174,7 @@ function renderFriendRequestActions(
 }
 
 export enum ChallengeStatus {
-	CAN_CHALLENGE,
+	ONLINE,
 	IN_MATCH,
 	IN_QUEUE,
 	IS_CHALLENGER,

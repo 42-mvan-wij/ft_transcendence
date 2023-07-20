@@ -75,7 +75,7 @@ export class PongService {
 
 			const queueAvailability: Availability = new Availability;
 			queueAvailability.queueStatus = QueueStatus.CAN_JOIN;
-			queueAvailability.challengeStatus = ChallengeStatus.CAN_CHALLENGE;
+			queueAvailability.challengeStatus = ChallengeStatus.ONLINE;
 			pubSub.publish('queueAvailabilityChanged', { queueAvailabilityChanged: queueAvailability, userId: this.state.match.players[0].id } );
 			pubSub.publish('queueAvailabilityChanged', { queueAvailabilityChanged: queueAvailability, userId: this.state.match.players[1].id } );
 

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { pubSub } from 'src/app.module';
 import { QueuedMatch } from './queuedmatch.model';
-import { UserService } from 'src/user/user.service';
+import { UserService, g_online_users } from 'src/user/user.service';
 import { CreateUserInput } from 'src/user/dto/create-user.input';
 import { User } from 'src/user/entities/user.entity';
 import { UserAvatarService } from 'src/user/user-avatar.service';
@@ -22,6 +22,33 @@ export class QueueService {
 	current_match: QueuedMatch;
 	is_challenger: string[] = []; // TODO: as soon as challenge is sent, the challengers id should be in here so he cannot join queue anymore untill challenge is accepted or denied
 	challenges: Challenge[] = [];
+
+	async getStatus(user_id: string) {
+		const availability: Availability = new Availability;
+		
+		availability.challengeStatus = ChallengeStatus.OFFLINE;
+		for (let i in g_online_users) {
+			if (g_online_users[i][0] === user_id) 
+			{
+				availability.challengeStatus = ChallengeStatus.ONLINE;
+			}
+		}
+		for (let i in this.queued_matches) {
+			if (user_id === this.queued_matches[i].p1.id || 
+				user_id === this.queued_matches[i].p2.id ||
+				user_id === this.users_looking_for_match[0] ) 
+			{
+				availability.challengeStatus = ChallengeStatus.IN_QUEUE;
+				return availability;
+			}
+		}
+		if (user_id === this.current_match.p1.id || 
+			user_id === this.current_match.p2.id ) 
+		{
+			availability.challengeStatus = ChallengeStatus.IN_MATCH;
+		}
+		return (availability);
+	}
 
 	async addQueuedMatch(
 		player_one_id: string,
@@ -157,9 +184,15 @@ export class QueueService {
 	async getChallengeAvailability(playerId: string) : Promise<Availability> {
 		const challengeAvailability: Availability = new Availability;
 		const queueAvailability = await this.getQueueAvailability(playerId);
+		let online: boolean;
 
-		// TODO: write function that checks if player is online
-		if (playerId === "OFFLINE") {
+		for (let i in g_online_users) {
+			if (playerId === g_online_users[i][0]) {
+				online = true;
+				break ;
+			}
+		}
+		if (!online) {
 			challengeAvailability.challengeStatus = ChallengeStatus.OFFLINE;
 			return challengeAvailability;
 		}
@@ -174,7 +207,7 @@ export class QueueService {
 				challengeAvailability.challengeStatus = ChallengeStatus.IS_CHALLENGER;
 				break;
 			default:
-				challengeAvailability.challengeStatus = ChallengeStatus.CAN_CHALLENGE
+				challengeAvailability.challengeStatus = ChallengeStatus.ONLINE
 				break;
 		}
 		return challengeAvailability;
@@ -192,11 +225,11 @@ export class QueueService {
 
 	async challengeFriend(challenger_id: string, friend_id: string) {		
 		let challengeAvailable = await this.getChallengeAvailability(friend_id);
-		if (challengeAvailable.challengeStatus != ChallengeStatus.CAN_CHALLENGE) {
+		if (challengeAvailable.challengeStatus != ChallengeStatus.ONLINE) {
 			return false;
 		}
 		challengeAvailable = await this.getChallengeAvailability(challenger_id);
-		if (challengeAvailable.challengeStatus != ChallengeStatus.CAN_CHALLENGE) {
+		if (challengeAvailable.challengeStatus != ChallengeStatus.ONLINE) {
 			return false;
 		}
 		this.is_challenger.push(challenger_id);

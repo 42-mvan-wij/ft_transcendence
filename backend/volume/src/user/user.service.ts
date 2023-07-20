@@ -7,6 +7,7 @@ import { GroupChat } from 'src/chat/group/chat/entities/group_chat.entity';
 import { PersonalChat } from 'src/chat/personal/chat/entities/personal_chat.entity';
 import { Match } from 'src/pong/match/entities/match.entity';
 import { pubSub } from 'src/app.module';
+import { Availability, ChallengeStatus } from 'src/pong/queue/queuestatus.model';
 
 export const g_online_users: [ string, number ][] = [];
 
@@ -25,7 +26,9 @@ export class UserService {
 			}
 		}
 		g_online_users.push([ userId, Date.now() ]);
-		// console.log("user is online:", g_online_users[g_online_users.length - 1]);
+		const availability: Availability = new Availability;
+		availability.challengeStatus = ChallengeStatus.ONLINE;
+		pubSub.publish('challengeAvailabilityChanged', { challengeAvailabilityChanged: availability, userId: userId } );
 		return true;
 	}
 

@@ -8,7 +8,7 @@ export enum QueueStatus {
 }
 
 export enum ChallengeStatus {
-	CAN_CHALLENGE,
+	ONLINE,
 	IN_MATCH,
 	IN_QUEUE,
 	IS_CHALLENGER,

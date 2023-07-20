@@ -20,6 +20,11 @@ export class QueueResolver {
 		return await this.queueService.getQueueAvailability(user.userUid);
 	}
 	
+	@Query(() => Availability)
+	async getStatus(@Args('user_id') user_id: string) {
+		return this.queueService.getStatus(user_id);
+	}
+
 	@UseGuards(JwtAuthGuard)
 	@Query(() => Availability)
 	async getOwnChallengeAvailability(@AuthUser() user: UserInfo) {
