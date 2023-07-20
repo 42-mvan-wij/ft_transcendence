@@ -3,8 +3,13 @@ import * as i from "../../types/Interfaces";
 import { useState } from "react";
 
 const CREATE_CHANNEL = gql`
-	mutation CreateChannel($name: String!, $logo: String!, $member_ids: [String!]!) {
-		createGroupChat(name: $name, logo: $logo, member_ids: $member_ids) {
+	mutation CreateChannel(
+		$name: String!
+		$logo: String!
+		$member_ids: [String!]!
+		$password: String!
+	) {
+		createGroupChat(name: $name, logo: $logo, member_ids: $member_ids, password: $password) {
 			id
 			name
 		}
@@ -22,6 +27,7 @@ export default function CreateChannel(props: i.ModalProps & { refetchChannels: (
 		const name = form.elements[0].value;
 		const logo = form.elements[1].value;
 		const member_ids = [props.userId];
+		const password = form.elements[2].value;
 
 		if (!name || !logo || member_ids.length === 0) {
 			alert("All fields are required");
@@ -29,7 +35,7 @@ export default function CreateChannel(props: i.ModalProps & { refetchChannels: (
 		}
 
 		try {
-			await createChannel({ variables: { name, logo, member_ids } });
+			await createChannel({ variables: { name, logo, member_ids, password } });
 			props.refetchChannels();
 			props.setShowModal(false);
 		} catch (error) {
