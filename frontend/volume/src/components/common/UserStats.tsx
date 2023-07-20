@@ -187,15 +187,6 @@ const CHALLENGE_FRIEND = gql`
 	}
 `;
 
-// TODO: add timer voor timeout challenge
-//
-// const [counter, setCounter] = useState(CHALLENGE_TIME_OUT / 1000);
-
-// useEffect(() => {
-// 	counter > 0 && setTimeout(() => setCounter(counter - 1), 1000);
-// }, [counter]);
-
-// {counter}  <-- displays seconds
 function renderChallengeFriendActions(
 	modalProps: any,
 	challenge_friend: any,
@@ -215,7 +206,7 @@ function renderChallengeFriendActions(
 	if (challenge_availability_data === ChallengeStatus.IN_QUEUE)
 		return <div>cannot challenge {modalProps.selectedUser.username} (in queue)</div>;
 	if (challenge_availability_data === ChallengeStatus.IN_MATCH)
-		return <div>cannot challenge {modalProps.selectedUser.username} (in match)</div>;
+		return <div>cannot challenge {modalProps.selectedUser.username} (in game)</div>;
 	if (challenge_availability_data === ChallengeStatus.OFFLINE)
 		return <div>cannot challenge {modalProps.selectedUser.username} (offline)</div>;
 	if (challenge_availability_data === ChallengeStatus.IS_CHALLENGER)
