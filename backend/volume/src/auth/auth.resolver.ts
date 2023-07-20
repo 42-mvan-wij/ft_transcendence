@@ -1,11 +1,13 @@
 import { UseGuards } from '@nestjs/common';
-import { Resolver, Query, Mutation, GqlExecutionContext, Args } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, GqlExecutionContext, Args, Context } from '@nestjs/graphql';
 import { UserInfo } from './user-info.interface';
 import { UserService } from 'src/user/user.service';
 import { AuthService } from './auth.service';
 import { AuthUser } from './decorators/auth-user.decorator';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { toDataURL } from 'qrcode';
+import { JwtPartialGuard } from './guards/jwt-twofactor.guard';
+import { GraphQLContext } from 'src/utils/graphql-context';
 
 @Resolver()
 export class AuthResolver {
@@ -43,5 +45,15 @@ export class AuthResolver {
 			await this.userService.unsetTwoFA(user);
 			return false;
 		}
+	}
+
+	@UseGuards(JwtPartialGuard)
+	@Mutation(() => Boolean)
+	async loginWithTwoFA(
+		@Context() context: GraphQLContext,
+		@AuthUser() userInfo: UserInfo,
+		@Args({name: 'twoFACode', type: () => Boolean}) twoFACode: string
+	) {
+		
 	}
 }

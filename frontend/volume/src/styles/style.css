@@ -924,10 +924,11 @@ div.background {
   -webkit-transform: translateX(-50%) translateY(-50%);
   transform: translateX(-50%) translateY(-50%);
   margin: auto;
-  width: 60em;
-  height: 90%;
   background-color: white;
   border-radius: 1em;
+}
+.white_block .login_form {
+  margin: 2em;
 }
 
 .settings_content {

@@ -16,7 +16,7 @@ const USER_QUERY = gql`
 
 function TwoFactor(): JSX.Element {
 	const { loading, error, data } = useQuery(USER_QUERY);
-
+	// const input
 	if (error) {
 		console.log(error);
 		return <>error</>;
@@ -26,7 +26,13 @@ function TwoFactor(): JSX.Element {
 	return (
 		<div className="background">
 			<div className="white_block">
-				<div className="settings_content">hello world</div>
+				<form className="login_form" method="post">
+					<h3>Fill in your code</h3>
+					<input type="text" name="twoFactorCode" />
+					<button className="submit_button" type="submit">
+						Submit Code
+					</button>
+				</form>
 			</div>
 		</div>
 	);
