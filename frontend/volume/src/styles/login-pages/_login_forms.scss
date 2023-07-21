@@ -1,0 +1,19 @@
+
+.white_block {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	-moz-transform: translateX(-50%) translateY(-50%);
+	-webkit-transform: translateX(-50%) translateY(-50%);
+	transform: translateX(-50%) translateY(-50%);
+	margin: auto;
+	background-color: white;
+	border-radius: 1em;
+
+	.login_form {
+		margin: 2em;
+		.invalid_code_popup {
+			margin: auto;
+		}
+	}
+}
