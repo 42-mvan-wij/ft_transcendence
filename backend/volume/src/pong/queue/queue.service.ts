@@ -125,6 +125,16 @@ export class QueueService {
 		this.current_match = null;
 	}
 
+	removeFromQueue(user_id: string) {
+		for (let i = 0; i < this.queued_matches.length; i++) {
+			if (user_id === this.queued_matches[i].p1.id ||
+				user_id === this.queued_matches[i].p2.id) {
+				this.queued_matches.splice(i, 1);
+				pubSub.publish('queueChanged', { queueChanged: this.queued_matches });
+			}
+		}
+	}
+
 	getQueuedMatch(): QueuedMatch | null {
 		if (this.queued_matches.length == 0) return;
 		this.current_match = this.queued_matches.at(0);

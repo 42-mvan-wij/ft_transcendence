@@ -3,12 +3,13 @@ import { g_online_users } from "./user.service";
 import { Args, Mutation } from "@nestjs/graphql";
 import { Availability, ChallengeStatus } from "src/pong/queue/queuestatus.model";
 import { pubSub } from "src/app.module";
+import { QueueService } from "src/pong/queue/queue.service";
 
 const USER_TIME_OUT = 6000;
 
 @Injectable()
 export class UserActivityService {
-	constructor () {
+	constructor (private readonly queueService: QueueService ) {
 		this.startUserChecking();
 	}
 
@@ -22,6 +23,7 @@ export class UserActivityService {
 				const availability: Availability = new Availability;
 				availability.challengeStatus = ChallengeStatus.OFFLINE;
 				pubSub.publish('challengeAvailabilityChanged', { challengeAvailabilityChanged: availability, userId: g_online_users[i][0] } );
+				this.queueService.removeFromQueue(g_online_users[i][0]);
 				g_online_users.splice(i, 1);
 			}
 		}
