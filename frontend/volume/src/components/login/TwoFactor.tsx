@@ -1,14 +1,16 @@
 import { useMutation } from "@apollo/client";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "src/styles/style.css";
 import { LOGIN_WITH_TWO_FA } from "src/utils/graphQLMutations";
 
 function TwoFactor(): JSX.Element {
+	const [invalidCode, setInvalidCode] = useState(false);
 	const navigate = useNavigate();
 	const [twoFACodeMutation, { loading, error, data }] = useMutation(LOGIN_WITH_TWO_FA, {
 		onCompleted(data) {
 			if (data.loginWithTwoFA == true) navigate("/home");
+			else setInvalidCode(true);
 		},
 	});
 
@@ -27,6 +29,7 @@ function TwoFactor(): JSX.Element {
 				<form className="login_form" method="post" onSubmit={handleSubmit}>
 					<h3>Fill in your code</h3>
 					<input type="text" name="twoFactorCode" />
+					{invalidCode && <p className="invalid_code_popup">Code is invalid</p>}
 					<button className="submit_button" type="submit">
 						Submit Code
 					</button>

@@ -930,6 +930,9 @@ div.background {
 .white_block .login_form {
   margin: 2em;
 }
+.white_block .login_form .invalid_code_popup {
+  margin: auto;
+}
 
 .settings_content {
   margin: 3em 8em;
