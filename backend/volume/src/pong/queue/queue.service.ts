@@ -128,9 +128,17 @@ export class QueueService {
 	removeFromQueue(user_id: string) {
 		for (let i = 0; i < this.queued_matches.length; i++) {
 			if (user_id === this.queued_matches[i].p1.id ||
-				user_id === this.queued_matches[i].p2.id) {
+				user_id === this.queued_matches[i].p2.id) 
+			{
+				let opponent_id: string;
+				if (user_id === this.queued_matches[i].p1.id) {
+					opponent_id = this.queued_matches[i].p2.id;
+				} else {
+					opponent_id = this.queued_matches[i].p1.id;
+				}
 				this.queued_matches.splice(i, 1);
 				pubSub.publish('queueChanged', { queueChanged: this.queued_matches });
+				pubSub.publish('removedFromQueue', { removedFromQueue: true, userId: opponent_id});
 			}
 		}
 	}

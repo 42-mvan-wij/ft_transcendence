@@ -55,6 +55,20 @@ export class QueueResolver {
 	incomingChallenge() {
 		return pubSub.asyncIterator('incomingChallenge');
 	}
+	
+	@UseGuards(JwtSubscriptionGuard)
+	@Subscription(() => Boolean, {
+		async filter(payload, variables, context) {
+			const user = getSubscriptionUser(context);
+			return (
+				payload.userId === user.userUid
+			);
+		},
+		nullable: true
+	})
+	removedFromQueue() {
+		return pubSub.asyncIterator('removedFromQueue');
+	}
 
 	@UseGuards(JwtAuthGuard)
 	@Mutation(() => Boolean)
