@@ -1,12 +1,12 @@
 import { UseGuards } from '@nestjs/common';
 import { Resolver, Query, Mutation, GqlExecutionContext, Args, Context } from '@nestjs/graphql';
-import { UserInfo } from './user-info.interface';
+import { TokenType, UserInfo } from './user-info.interface';
 import { UserService } from 'src/user/user.service';
 import { AuthService } from './auth.service';
 import { AuthUser } from './decorators/auth-user.decorator';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { toDataURL } from 'qrcode';
-import { JwtPartialGuard } from './guards/jwt-twofactor.guard';
+import { JwtPartialGuard } from './guards/jwt-partial.guard';
 import { GraphQLContext } from 'src/utils/graphql-context';
 
 @Resolver()
@@ -52,8 +52,21 @@ export class AuthResolver {
 	async loginWithTwoFA(
 		@Context() context: GraphQLContext,
 		@AuthUser() userInfo: UserInfo,
-		@Args({name: 'twoFACode', type: () => Boolean}) twoFACode: string
+		@Args({name: 'twoFACode', type: () => String}) twoFACode: string
 	) {
-		
+		const isCodeValid = await this.authService.verify2FACode(twoFACode, userInfo.userUid);
+		if (!isCodeValid) return false;
+		const jwtCookie = await this.authService.getJwtCookie({
+			userUid: userInfo.userUid,
+			intraId: userInfo.intraId,
+			type: TokenType.FULL,
+		});
+		context.res.setHeader(
+			'Set-Cookie',
+			'session_cookie=' +
+				jwtCookie +
+			'; HttpOnly; Secure; SameSite=Strict',
+		);
+		return true;
 	}
 }

@@ -2,12 +2,12 @@ import { useMutation, useQuery } from "@apollo/client";
 import { useState, useEffect } from "react";
 import "src/styles/style.css";
 import Loading from "../authorization/Loading";
-import { TWO_FA_MUTATION } from "src/utils/graphQLMutations";
+import { SET_TWO_FA_MUTATION } from "src/utils/graphQLMutations";
 import { CURRENT_USER, QR_CODE_QUERY } from "src/utils/graphQLQueries";
 import ProfileForm from "./ProfileForm";
 
 export default function SettingsModule({ user, showModal }): JSX.Element {
-	const [TwoFAFormMutation, TwoFAMutationState] = useMutation(TWO_FA_MUTATION, {
+	const [TwoFAFormMutation, TwoFAMutationState] = useMutation(SET_TWO_FA_MUTATION, {
 		refetchQueries: [{ query: CURRENT_USER }, { query: QR_CODE_QUERY }],
 	});
 	const QRCodeState = useQuery(QR_CODE_QUERY);

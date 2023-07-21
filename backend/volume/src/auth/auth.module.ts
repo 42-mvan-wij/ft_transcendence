@@ -6,6 +6,7 @@ import { AuthService } from './auth.service';
 import { UserModule } from 'src/user/user.module';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { AuthResolver } from './auth.resolver';
+import { JwtPartialStrategy } from './strategies/jwt-partial.strategy';
 
 @Module({
 	imports: [
@@ -18,6 +19,6 @@ import { AuthResolver } from './auth.resolver';
 		forwardRef(() => UserModule),
 	],
 	controllers: [AuthController],
-	providers: [AuthResolver, AuthService, JwtStrategy],
+	providers: [AuthResolver, AuthService, JwtStrategy, JwtPartialStrategy],
 })
 export class AuthModule {}

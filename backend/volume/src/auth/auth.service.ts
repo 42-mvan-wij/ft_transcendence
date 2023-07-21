@@ -10,12 +10,6 @@ import { Request } from 'express';
 
 const axios = require('axios').default;
 
-// export enum AuthStates {
-// 	NONE = 'NONE',
-// 	PARTIAL = 'PARTIAL',
-// 	FULL = 'FULL'
-// }
-
 export interface IntraToken {
 	access_token: string;
 	token_type: string;
