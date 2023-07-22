@@ -4,6 +4,7 @@ import ProtectedRoute from "./components/authorization/ProtectedRoute";
 import Welcome from "./components/login/Welcome";
 import Auth from "src/components/login/Auth";
 import TwoFactor from "./components/login/TwoFactor";
+import NewUser from "./components/login/NewUser";
 import Home from "src/components/Home";
 import { AuthProvider } from "./utils/authLogic";
 
@@ -15,6 +16,7 @@ function App() {
 					<Route path="/" element={<Welcome />} />
 					<Route path="/login" element={<Auth />} />
 					<Route path="/2fa" element={<TwoFactor />} />
+					<Route path="/new-user" element={<NewUser />} />
 					<Route
 						path="/home"
 						element={

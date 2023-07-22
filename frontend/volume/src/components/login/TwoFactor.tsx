@@ -1,5 +1,5 @@
 import { useMutation } from "@apollo/client";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "src/styles/style.css";
 import { LOGIN_WITH_TWO_FA } from "src/utils/graphQLMutations";

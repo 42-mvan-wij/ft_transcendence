@@ -1079,5 +1079,12 @@ div.background {
 .white_block .login_form .invalid_code_popup {
   margin: auto;
 }
+.white_block .new_user_content {
+  margin: 2em;
+}
+.white_block .new_user_header {
+  text-align: center;
+  margin-bottom: 2em;
+}
 
 /*# sourceMappingURL=style.css.map */

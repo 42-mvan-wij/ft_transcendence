@@ -68,7 +68,7 @@ export default function ProfileForm({ user }): JSX.Element {
 	return (
 		<form className="profile_form" method="post" onSubmit={handleSubmit}>
 			{isEmptyForm && <p className="empty-form-message">Please fill in at least one field</p>}
-			<h3>Change profile picture </h3>
+			<h3>Profile Picture </h3>
 			<div className="change_avatar">
 				<div className="avatar_container">
 					<img src={convertEncodedImage(picture.data)} alt="error no image" />
@@ -84,7 +84,7 @@ export default function ProfileForm({ user }): JSX.Element {
 				</label>
 			</div>
 			<label htmlFor="name">
-				<h3>Change username</h3>
+				<h3>Username</h3>
 				<input
 					type="text"
 					name="username"
