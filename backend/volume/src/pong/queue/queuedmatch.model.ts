@@ -6,7 +6,7 @@ import { PrimaryGeneratedColumn } from 'typeorm';
 export class QueuedMatch {
 	@PrimaryGeneratedColumn('uuid')
 	@Field()
-	id: string;
+	id: String;
 
 	@Field()
 	p1: User;

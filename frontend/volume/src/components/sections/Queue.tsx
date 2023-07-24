@@ -206,10 +206,9 @@ const REMOVED_FROM_QUEUE = gql`
 function RemovedFromQueue() {
 	const { data: removed_from_queue } = useSubscription(REMOVED_FROM_QUEUE);
 
-	if (removed_from_queue) alert("Opponent gave up. You have been removed from the queue");
-	//FIXME: 1x een alert per keer dat je uit de queue wordt verwijderd
-	// useEffect(() => {
-	// 	if (removed_from_queue) alert("Opponent gave up. You have been removed from the queue");
-	// }, []);
+	useEffect(() => {
+		if (removed_from_queue) alert("Opponent gave up. You have been removed from the queue");
+	}, [removed_from_queue]);
+
 	return <></>;
 }

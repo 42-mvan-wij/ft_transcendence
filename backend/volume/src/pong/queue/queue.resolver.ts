@@ -57,7 +57,7 @@ export class QueueResolver {
 	}
 	
 	@UseGuards(JwtSubscriptionGuard)
-	@Subscription(() => Boolean, {
+	@Subscription(() => String, {
 		async filter(payload, variables, context) {
 			const user = getSubscriptionUser(context);
 			return (

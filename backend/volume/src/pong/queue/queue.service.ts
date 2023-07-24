@@ -139,9 +139,13 @@ export class QueueService {
 				} else {
 					opponent_id = this.queued_matches[i].p1.id;
 				}
+				const queueAvailability: Availability = new Availability;
+				queueAvailability.queueStatus = QueueStatus.CAN_JOIN;
+				pubSub.publish('queueAvailabilityChanged', { queueAvailabilityChanged: queueAvailability, userId: this.queued_matches[i].p1.id } );
+				pubSub.publish('queueAvailabilityChanged', { queueAvailabilityChanged: queueAvailability, userId: this.queued_matches[i].p2.id } );
+				pubSub.publish('removedFromQueue', { removedFromQueue: this.queued_matches[i].id, userId: opponent_id});
 				this.queued_matches.splice(i, 1);
 				pubSub.publish('queueChanged', { queueChanged: this.queued_matches });
-				pubSub.publish('removedFromQueue', { removedFromQueue: true, userId: opponent_id});
 			}
 		}
 	}
