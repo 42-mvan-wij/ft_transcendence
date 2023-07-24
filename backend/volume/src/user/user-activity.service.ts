@@ -1,5 +1,4 @@
-import { Injectable } from "@nestjs/common";
-import { g_online_users } from "./user.service";
+import { Inject, Injectable, forwardRef } from "@nestjs/common";
 import { Args, Mutation } from "@nestjs/graphql";
 import { Availability, ChallengeStatus } from "src/pong/queue/queuestatus.model";
 import { pubSub } from "src/app.module";
@@ -9,7 +8,11 @@ const USER_TIME_OUT = 8100;
 
 @Injectable()
 export class UserActivityService {
-	constructor (private readonly queueService: QueueService ) {
+	constructor (
+		@Inject(forwardRef(() => QueueService))
+		private readonly queueService: QueueService 
+	) 
+	{
 		this.startUserChecking();
 	}
 
@@ -17,14 +20,30 @@ export class UserActivityService {
 		setInterval(() => this.checkUserTimestamp(), 11000);
 	}
 
+	online_users: [ string, number ][] = [];
+
+	async userIsOnline(userId: string) {
+		for (let i in this.online_users) {
+			if (this.online_users[i][0] === userId) {
+				this.online_users[i][1] = Date.now();
+				return true;
+			}
+		}
+		this.online_users.push([ userId, Date.now() ]);
+		const availability: Availability = new Availability;
+		availability.challengeStatus = ChallengeStatus.ONLINE;
+		pubSub.publish('challengeAvailabilityChanged', { challengeAvailabilityChanged: availability, userId: userId } );
+		return true;
+	}
+
 	async checkUserTimestamp() {
-		for (let i = 0; i < g_online_users.length; i++) {
-			if (Date.now() - g_online_users[i][1] > USER_TIME_OUT) {
+		for (let i = 0; i < this.online_users.length; i++) {
+			if (Date.now() - this.online_users[i][1] > USER_TIME_OUT) {
 				const availability: Availability = new Availability;
 				availability.challengeStatus = ChallengeStatus.OFFLINE;
-				pubSub.publish('challengeAvailabilityChanged', { challengeAvailabilityChanged: availability, userId: g_online_users[i][0] } );
-				this.queueService.removeFromQueue(g_online_users[i][0]);
-				g_online_users.splice(i, 1);
+				pubSub.publish('challengeAvailabilityChanged', { challengeAvailabilityChanged: availability, userId: this.online_users[i][0] } );
+				this.queueService.removeFromQueue(this.online_users[i][0]);
+				this.online_users.splice(i, 1);
 			}
 		}
 	}
@@ -45,17 +64,17 @@ export class UserActivityService {
 	}
 
 	async userIsOnlineTEST(userId: string) {
-		for (let i in g_online_users) {
-			if (g_online_users[i][0] === userId) {
-				g_online_users[i][1] = Date.now();
+		for (let i in this.online_users) {
+			if (this.online_users[i][0] === userId) {
+				this.online_users[i][1] = Date.now();
 				return true;
 			}
 		}
-		g_online_users.push([ userId, Date.now() ]);
+		this.online_users.push([ userId, Date.now() ]);
 		const availability: Availability = new Availability;
 		availability.challengeStatus = ChallengeStatus.ONLINE;
 		pubSub.publish('challengeAvailabilityChanged', { challengeAvailabilityChanged: availability, userId: userId } );
-		console.log("user is online:", g_online_users[g_online_users.length - 1]);
+		console.log("user is online:", this.online_users[this.online_users.length - 1]);
 		return true;
 	}
 }

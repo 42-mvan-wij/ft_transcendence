@@ -7,9 +7,6 @@ import { GroupChat } from 'src/chat/group/chat/entities/group_chat.entity';
 import { PersonalChat } from 'src/chat/personal/chat/entities/personal_chat.entity';
 import { Match } from 'src/pong/match/entities/match.entity';
 import { pubSub } from 'src/app.module';
-import { Availability, ChallengeStatus } from 'src/pong/queue/queuestatus.model';
-
-export const g_online_users: [ string, number ][] = [];
 
 @Injectable()
 export class UserService {
@@ -17,20 +14,6 @@ export class UserService {
 		@InjectRepository(User)
 		private readonly userRepository: Repository<User>,
 	) {}
-
-	async userIsOnline(userId: string) {
-		for (let i in g_online_users) {
-			if (g_online_users[i][0] === userId) {
-				g_online_users[i][1] = Date.now();
-				return true;
-			}
-		}
-		g_online_users.push([ userId, Date.now() ]);
-		const availability: Availability = new Availability;
-		availability.challengeStatus = ChallengeStatus.ONLINE;
-		pubSub.publish('challengeAvailabilityChanged', { challengeAvailabilityChanged: availability, userId: userId } );
-		return true;
-	}
 
 	async getAllUsers(): Promise<Array<User>> {
 		return this.userRepository.find();

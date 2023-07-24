@@ -1,7 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import { pubSub } from 'src/app.module';
 import { QueuedMatch } from './queuedmatch.model';
-import { UserService, g_online_users } from 'src/user/user.service';
+import { UserService } from 'src/user/user.service';
 import { CreateUserInput } from 'src/user/dto/create-user.input';
 import { User } from 'src/user/entities/user.entity';
 import { UserAvatarService } from 'src/user/user-avatar.service';
@@ -10,12 +10,15 @@ import { Availability } from './queuestatus.model';
 import { QueueStatus, ChallengeStatus } from './queuestatus.model';
 import { Challenge } from './challenge.model';
 import { v4 as uuid } from 'uuid';
+import { UserActivityService } from 'src/user/user-activity.service';
 
 @Injectable()
 export class QueueService {
 	constructor(
 		private readonly userService: UserService,
 		private readonly userAvatarService: UserAvatarService,
+		@Inject(forwardRef(() => UserActivityService))
+		private readonly userActivityService: UserActivityService,
 	) {}
 	users_looking_for_match: string[] = [];
 	queued_matches: QueuedMatch[] = [];
@@ -27,8 +30,8 @@ export class QueueService {
 		const availability: Availability = new Availability;
 		
 		availability.challengeStatus = ChallengeStatus.OFFLINE;
-		for (let i in g_online_users) {
-			if (g_online_users[i][0] === user_id) 
+		for (let i in this.userActivityService.online_users) {
+			if (this.userActivityService.online_users[i][0] === user_id) 
 			{
 				availability.challengeStatus = ChallengeStatus.ONLINE;
 			}
@@ -204,8 +207,8 @@ export class QueueService {
 		const queueAvailability = await this.getQueueAvailability(playerId);
 		let online: boolean;
 
-		for (let i in g_online_users) {
-			if (playerId === g_online_users[i][0]) {
+		for (let i in this.userActivityService.online_users) {
+			if (playerId === this.userActivityService.online_users[i][0]) {
 				online = true;
 				break ;
 			}
