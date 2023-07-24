@@ -141,4 +141,15 @@ export class PongService {
 
 		return state;
 	}
+
+	removeMatch(offline_user_id: string) {
+		if (this.state.match.players[0].id === offline_user_id) {
+			this.state.match.p2Score = C.MAX_SCORE;
+			pubSub.publish('removedMatch', { removedMatch: this.state.match.id, userId: this.state.match.players[1].id } );
+		}
+		else {
+			this.state.match.p1Score = C.MAX_SCORE;
+			pubSub.publish('removedMatch', { removedMatch: this.state.match.id, userId: this.state.match.players[0].id } );
+		}
+	}
 }

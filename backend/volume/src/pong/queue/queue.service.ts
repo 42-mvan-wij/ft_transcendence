@@ -11,6 +11,7 @@ import { QueueStatus, ChallengeStatus } from './queuestatus.model';
 import { Challenge } from './challenge.model';
 import { v4 as uuid } from 'uuid';
 import { UserActivityService } from 'src/user/user-activity.service';
+import { PongService } from '../pong.service';
 
 @Injectable()
 export class QueueService {
@@ -19,6 +20,8 @@ export class QueueService {
 		private readonly userAvatarService: UserAvatarService,
 		@Inject(forwardRef(() => UserActivityService))
 		private readonly userActivityService: UserActivityService,
+		@Inject(forwardRef(() => PongService))
+		private readonly pongService: PongService,
 	) {}
 	users_looking_for_match: string[] = [];
 	queued_matches: QueuedMatch[] = [];
@@ -128,13 +131,19 @@ export class QueueService {
 		this.current_match = null;
 	}
 
-	removeFromQueue(user_id: string) {
+	removeFromQueueOrMatch(offline_user_id: string) {
+		for (let i = 0; i < this.users_looking_for_match.length; i++) {
+			if (offline_user_id === this.users_looking_for_match[i]) {
+				this.users_looking_for_match.splice(i, 1);
+				return;
+			}
+		}	
 		for (let i = 0; i < this.queued_matches.length; i++) {
-			if (user_id === this.queued_matches[i].p1.id ||
-				user_id === this.queued_matches[i].p2.id) 
+			if (offline_user_id === this.queued_matches[i].p1.id ||
+				offline_user_id === this.queued_matches[i].p2.id) 
 			{
 				let opponent_id: string;
-				if (user_id === this.queued_matches[i].p1.id) {
+				if (offline_user_id === this.queued_matches[i].p1.id) {
 					opponent_id = this.queued_matches[i].p2.id;
 				} else {
 					opponent_id = this.queued_matches[i].p1.id;
@@ -146,7 +155,18 @@ export class QueueService {
 				pubSub.publish('removedFromQueue', { removedFromQueue: this.queued_matches[i].id, userId: opponent_id});
 				this.queued_matches.splice(i, 1);
 				pubSub.publish('queueChanged', { queueChanged: this.queued_matches });
+				return;
 			}
+		}
+		if (offline_user_id === this.current_match?.p1.id ||
+			offline_user_id === this.current_match?.p2.id) 
+		{
+			this.pongService.removeMatch(offline_user_id);
+
+			const queueAvailability: Availability = new Availability;
+			queueAvailability.queueStatus = QueueStatus.CAN_JOIN;
+			pubSub.publish('queueAvailabilityChanged', { queueAvailabilityChanged: queueAvailability, userId: this.current_match.p1.id } );
+			pubSub.publish('queueAvailabilityChanged', { queueAvailabilityChanged: queueAvailability, userId: this.current_match.p2.id } );
 		}
 	}
 
@@ -336,7 +356,7 @@ export class QueueService {
 	}
 
 	/*
-	TESTING	
+	TESTING								// FIXME: REMOVE BEFORE TURNIN
 	*/
 	putInQueue(id: string): number {
 		this.users_looking_for_match.push(id);

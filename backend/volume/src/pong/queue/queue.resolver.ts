@@ -69,6 +69,20 @@ export class QueueResolver {
 	removedFromQueue() {
 		return pubSub.asyncIterator('removedFromQueue');
 	}
+	
+	@UseGuards(JwtSubscriptionGuard)
+	@Subscription(() => String, {
+		async filter(payload, variables, context) {
+			const user = getSubscriptionUser(context);
+			return (
+				payload.userId === user.userUid
+			);
+		},
+		nullable: true
+	})
+	removedMatch() {
+		return pubSub.asyncIterator('removedMatch');
+	}
 
 	@UseGuards(JwtAuthGuard)
 	@Mutation(() => Boolean)
@@ -154,7 +168,7 @@ export class QueueResolver {
 
 
 	/*
-	TESTING
+	TESTING 					// FIXME: REMOVE BEFORE TURNIN
 	*/
 	@Query(() => Number)
 	putInQueue(@Args('id') id: string) {

@@ -118,6 +118,7 @@ export default function Queue(props: i.ModalProps) {
 	return (
 		<>
 			<RemovedFromQueue />
+			<RemovedMatch />
 			<JoinQueueElement />
 			{queue_data.getWholeQueue.map(function (game: any) {
 				return (
@@ -209,6 +210,22 @@ function RemovedFromQueue() {
 	useEffect(() => {
 		if (removed_from_queue) alert("Opponent gave up. You have been removed from the queue");
 	}, [removed_from_queue]);
+
+	return <></>;
+}
+
+const REMOVED_FROM_MATCH = gql`
+	subscription removedMatch {
+		removedMatch
+	}
+`;
+
+function RemovedMatch() {
+	const { data: removed_from_match_data } = useSubscription(REMOVED_FROM_MATCH);
+
+	useEffect(() => {
+		if (removed_from_match_data) alert("Opponent gave up. You have won the match!");
+	}, [removed_from_match_data]);
 
 	return <></>;
 }

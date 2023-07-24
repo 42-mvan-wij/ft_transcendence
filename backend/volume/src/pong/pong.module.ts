@@ -30,5 +30,6 @@ import { RankingService } from './ranking/ranking.service';
 		JwtWsGuard,
 		RankingService,
 	],
+	exports: [PongService],
 })
 export class PongModule {}

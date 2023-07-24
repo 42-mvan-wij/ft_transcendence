@@ -42,7 +42,7 @@ export class UserActivityService {
 				const availability: Availability = new Availability;
 				availability.challengeStatus = ChallengeStatus.OFFLINE;
 				pubSub.publish('challengeAvailabilityChanged', { challengeAvailabilityChanged: availability, userId: this.online_users[i][0] } );
-				this.queueService.removeFromQueue(this.online_users[i][0]);
+				this.queueService.removeFromQueueOrMatch(this.online_users[i][0]);
 				this.online_users.splice(i, 1);
 			}
 		}
