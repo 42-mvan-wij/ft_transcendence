@@ -6,7 +6,9 @@ import Auth from "src/components/login/Auth";
 import TwoFactor from "./components/login/TwoFactor";
 import NewUser from "./components/login/NewUser";
 import Home from "src/components/Home";
+import Error from "./components/Error";
 import { AuthProvider } from "./utils/authLogic";
+import NotFound from "./components/NotFound";
 
 function App() {
 	return (
@@ -25,6 +27,7 @@ function App() {
 							</ProtectedRoute>
 						}
 					/>
+					<Route path="*" element={<NotFound />} />
 				</Routes>
 			</AuthProvider>
 		</>

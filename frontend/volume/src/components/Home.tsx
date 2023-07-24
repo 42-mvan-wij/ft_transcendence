@@ -1,6 +1,5 @@
 import { useEffect } from "react";
-import { Link } from "react-router-dom";
-import { gql, useQuery } from "@apollo/client";
+import { useQuery } from "@apollo/client";
 import "src/styles/style.css";
 import Chat from "src/components/chat/Chat";
 import Header from "src/components/sections/Header";
@@ -13,6 +12,7 @@ import * as i from "src/types/Interfaces";
 import { useAuth } from "src/utils/authLogic";
 import SettingsModal from "src/components/settings/SettingsModal";
 import Loading from "./authorization/Loading";
+import Error from "./Error";
 import { CURRENT_USER } from "src/utils/graphQLQueries";
 
 function Home(): JSX.Element {
@@ -28,7 +28,7 @@ function Home(): JSX.Element {
 
 	const currentUser = useQuery(CURRENT_USER);
 	if (currentUser.loading) return <Loading />;
-	else if (currentUser.error) return <>Error</>;
+	else if (currentUser.error) return <Error />;
 
 	return (
 		<div className="grid-container">
@@ -37,14 +37,10 @@ function Home(): JSX.Element {
 			<Header {...pongProps} />
 
 			<div id="right_top">
-				{/* <Link to="/settings">settings</Link> */}
 				<a
 					onClick={() =>
 						modalProps.toggleModal(
-							<SettingsModal
-								user={currentUser.data.currentUserQuery}
-								showModal={modalProps.setShowModal}
-							/>
+							<SettingsModal user={currentUser.data.currentUserQuery} />
 						)
 					}
 				>
