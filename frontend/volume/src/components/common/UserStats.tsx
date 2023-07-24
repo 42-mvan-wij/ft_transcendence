@@ -70,19 +70,21 @@ export default function UserStats(modalProps: i.ModalProps & { selectedUser: any
 	if (block_state_error) return <>error loading user's block status</>;
 
 	let status: string;
-	switch (challengeAvailabilityStatus.challengeStatus) {
-		case ChallengeStatus.ONLINE:
-			status = "(online)";
-			break;
-		case ChallengeStatus.IN_MATCH:
-			status = "(in game)";
-			break;
-		case ChallengeStatus.IN_QUEUE:
-			status = "(in queue)";
-			break;
-		default:
-			status = "(offline)";
-			break;
+	if (friends.find((friend: any) => friend.id === modalProps.selectedUser.id)) {
+		switch (challengeAvailabilityStatus.challengeStatus) {
+			case ChallengeStatus.ONLINE:
+				status = "(online)";
+				break;
+			case ChallengeStatus.IN_MATCH:
+				status = "(in game)";
+				break;
+			case ChallengeStatus.IN_QUEUE:
+				status = "(in queue)";
+				break;
+			default:
+				status = "(offline)";
+				break;
+		}
 	}
 	const renderUserActions = () => {
 		if (modalProps.selectedUser.id === modalProps.userId)
