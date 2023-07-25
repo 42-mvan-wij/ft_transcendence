@@ -1,7 +1,6 @@
 import { ApolloError } from "@apollo/client";
 
 export function gqlErrorCode(error: ApolloError): string {
-	if (error.graphQLErrors) return null;
 	return error.graphQLErrors.at(0).extensions.code;
 }
 

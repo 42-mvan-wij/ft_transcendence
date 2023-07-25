@@ -1,13 +1,15 @@
 import { ApolloError } from "@apollo/client";
+import { gqlErrorCode, gqlErrorMsg } from "src/utils/gqlErrorData";
 
 function Error({ gqlError }: { gqlError: ApolloError }): JSX.Element {
-	console.log(gqlError.networkError);
+	const statusCode = gqlErrorCode(gqlError);
+	const errorMsg = gqlErrorMsg(gqlError);
 	return (
 		<div className="div-1">
 			<div className="play-button">
-				<h1>{0}</h1>
+				<h1>{statusCode}</h1>
 				<br />
-				Unauthorized
+				{errorMsg}
 			</div>
 		</div>
 	);

@@ -20,6 +20,8 @@ export class AuthController {
 				JSON.stringify(request.query),
 			);
 		const user = await this.authService.linkTokenToUser(intraToken);
+
+		// if (user)
 		if (user.twoFAEnabled == true) {
 			redirectPage = '/2fa';
 			userInfo = {
