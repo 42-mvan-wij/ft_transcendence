@@ -97,6 +97,7 @@ export class AuthService {
 			intraAvatar.parentUserUid = user.id;
 			user.avatar = await this.userAvatarService.create(intraAvatar);
 			user = await this.userService.save(user);
+
 		}
 		return user;
 	}
