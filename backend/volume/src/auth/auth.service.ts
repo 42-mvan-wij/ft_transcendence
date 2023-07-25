@@ -70,9 +70,7 @@ export class AuthService {
 	}
 
 	async linkTokenToUser(intraToken: IntraToken): Promise<User> {
-		if (!intraToken) {
-			throw new Error('No token provided');
-		}
+		if (!intraToken) throw new Error('No token provided');
 		const axiosConfig = {
 			headers: {
 				Authorization:
@@ -83,6 +81,7 @@ export class AuthService {
 			'https://api.intra.42.fr/v2/me',
 			axiosConfig,
 		);
+
 		let user: User = await this.userService.getUserByIntraId(
 			response.data.id,
 		);
@@ -104,7 +103,8 @@ export class AuthService {
 
 	async getJwtCookie(userInfo: UserInfo): Promise<string> {
 		const token = await this.jwtService.signAsync(userInfo);
-		return JSON.stringify({ access_token: token });
+		const jsonWrapper = JSON.stringify({ access_token: token });
+		return ('session_cookie=' + jsonWrapper + '; HttpOnly; Secure; SameSite=Strict');
 	}
 
 	async isCookieValid(request: Request): Promise<Boolean> {

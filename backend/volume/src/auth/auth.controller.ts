@@ -21,29 +21,35 @@ export class AuthController {
 			);
 		const user = await this.authService.linkTokenToUser(intraToken);
 
-		// if (user)
-		if (user.twoFAEnabled == true) {
-			redirectPage = '/2fa';
-			userInfo = {
-				userUid: user.id,
-				intraId: user.intraId,
-				type: TokenType.PARTIAL,
-			};
-		} else {
-			redirectPage = '/home';
+		if (user)
+		{
+			if (user.twoFAEnabled == true) {
+				redirectPage = '/2fa';
+				userInfo = {
+					userUid: user.id,
+					intraId: user.intraId,
+					type: TokenType.PARTIAL,
+				};
+			} else {
+				redirectPage = '/home';
+				userInfo = {
+					userUid: user.id,
+					intraId: user.intraId,
+					type: TokenType.FULL,
+				};
+			}
+		}
+		else {
+			redirectPage = '/new-user';
 			userInfo = {
 				userUid: user.id,
 				intraId: user.intraId,
 				type: TokenType.FULL,
 			};
 		}
+
 		const jwtCookie = await this.authService.getJwtCookie(userInfo);
-		response.setHeader(
-			'Set-Cookie',
-			'session_cookie=' +
-				jwtCookie +
-				'; HttpOnly; Secure; SameSite=Strict',
-		);
+		response.setHeader('Set-Cookie', jwtCookie);
 		response
 			.status(200)
 			.redirect(`https://${process.env['DOMAIN']}` + redirectPage);

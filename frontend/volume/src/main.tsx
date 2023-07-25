@@ -23,7 +23,10 @@ const wsLink = new GraphQLWsLink(
 
 const errorLink = onError(({ graphqlErrors, networkError }) => {
 	if (graphqlErrors) {
-		console.log("error");
+		console.log("ERROR: cannot reach backend");
+	}
+	if (networkError) {
+		console.log("ERROR: network error");
 	}
 });
 

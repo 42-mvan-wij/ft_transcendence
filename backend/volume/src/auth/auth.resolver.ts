@@ -61,12 +61,7 @@ export class AuthResolver {
 			intraId: userInfo.intraId,
 			type: TokenType.FULL,
 		});
-		context.res.setHeader(
-			'Set-Cookie',
-			'session_cookie=' +
-				jwtCookie +
-			'; HttpOnly; Secure; SameSite=Strict',
-		);
+		context.res.setHeader('Set-Cookie', jwtCookie);
 		return true;
 	}
 }
