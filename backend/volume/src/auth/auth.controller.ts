@@ -19,9 +19,9 @@ export class AuthController {
 			await this.authService.exchangeCodeForToken(
 				JSON.stringify(request.query),
 			);
-		const user = await this.authService.linkTokenToUser(intraToken);
+		const { user, userIsNew } = await this.authService.linkTokenToUser(intraToken);
 
-		if (user)
+		if (!userIsNew)
 		{
 			if (user.twoFAEnabled == true) {
 				redirectPage = '/2fa';

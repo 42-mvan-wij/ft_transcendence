@@ -7,7 +7,7 @@ import { UploadAvatarInput } from 'src/user/dto/upload-avatar.input';
 import { authenticator } from 'otplib';
 import { UserInfo } from 'src/auth/user-info.interface';
 import { Request } from 'express';
-
+import { v4 as uuid } from 'uuid';
 const axios = require('axios').default;
 
 export interface IntraToken {
@@ -17,6 +17,11 @@ export interface IntraToken {
 	refresh_token: string;
 	scope: string;
 	created_at: number;
+}
+
+export interface UserLink {
+	user: User,
+	userIsNew: boolean,
 }
 
 async function postTemporaryCode(intraCode: string): Promise<string> {
@@ -69,7 +74,15 @@ export class AuthService {
 		return responseJSON;
 	}
 
-	async linkTokenToUser(intraToken: IntraToken): Promise<User> {
+	private async createUniqueUsername(): Promise<string> {
+		let username = uuid();
+		while (await this.userService.getUser(username) != null) {
+			username = uuid();
+		}
+		return username;
+	}
+
+	async linkTokenToUser(intraToken: IntraToken): Promise<UserLink> {
 		if (!intraToken) throw new Error('No token provided');
 		const axiosConfig = {
 			headers: {
@@ -82,24 +95,23 @@ export class AuthService {
 			axiosConfig,
 		);
 
-		let user: User = await this.userService.getUserByIntraId(
-			response.data.id,
-		);
+		let user: User = await this.userService.getUserByIntraId(response.data.id);
 		if (!user) {
 			const intraAvatar = await downloadIntraAvatar(
 				response.data.image.versions.small,
 				axiosConfig,
 			);
+			const uniqueUsername = await this.createUniqueUsername();
 			user = await this.userService.create({
 				intraId: response.data.id,
-				username: response.data.login,
+				username: uniqueUsername,
 			});
 			intraAvatar.parentUserUid = user.id;
 			user.avatar = await this.userAvatarService.create(intraAvatar);
 			user = await this.userService.save(user);
-
+			return { user: user, userIsNew: true };
 		}
-		return user;
+		return { user: user, userIsNew: false };
 	}
 
 	async getJwtCookie(userInfo: UserInfo): Promise<string> {
