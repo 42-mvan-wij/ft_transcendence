@@ -1,6 +1,7 @@
 import { gql, useMutation } from "@apollo/client";
 import { useEffect } from "react";
-import { USER_TIME_OUT } from "../../../../../backend/volume/src/user/user-activity.service";
+
+const USER_ONLINE_CHECK = 4000;
 
 const USER_IS_ONLINE = gql`
 	mutation Mutation {
@@ -14,7 +15,7 @@ export default function UserIsOnline() {
 	useEffect(() => {
 		const interval = setInterval(() => {
 			user_is_online();
-		}, USER_TIME_OUT / 2 - 100);
+		}, USER_ONLINE_CHECK);
 		return () => clearInterval(interval);
 	}, []);
 	return;

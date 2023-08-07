@@ -4,7 +4,7 @@ import { Availability, ChallengeStatus } from "src/pong/queue/queuestatus.model"
 import { pubSub } from "src/app.module";
 import { QueueService } from "src/pong/queue/queue.service";
 
-export const USER_TIME_OUT = 8100;
+const USER_TIME_OUT = 8100;
 
 @Injectable()
 export class UserActivityService {
