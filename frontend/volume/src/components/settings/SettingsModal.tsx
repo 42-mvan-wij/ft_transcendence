@@ -1,114 +1,48 @@
 import { useMutation, useQuery } from "@apollo/client";
-import { useState } from "react";
-import { convertEncodedImage } from "src/utils/convertEncodedImage";
+import { useState, useEffect } from "react";
 import "src/styles/style.css";
 import Loading from "../authorization/Loading";
-import { FORM_MUTATION } from "src/utils/graphQLMutations";
-import { CURRENT_USER } from "src/utils/graphQLQueries";
+import { SET_TWO_FA_MUTATION } from "src/utils/graphQLMutations";
+import { CURRENT_USER, QR_CODE_QUERY } from "src/utils/graphQLQueries";
+import ProfileForm from "./ProfileForm";
 
-interface PictureForm {
-	name: string;
-	data: string;
-}
-
-export default function SettingsModule({ user, showModal }): JSX.Element {
-	const [formMutation, { loading, error, data }] = useMutation(FORM_MUTATION, {
-		refetchQueries: [{ query: CURRENT_USER }],
+export default function SettingsModule({ user }): JSX.Element {
+	const [TwoFAFormMutation, TwoFAMutationState] = useMutation(SET_TWO_FA_MUTATION, {
+		refetchQueries: [{ query: CURRENT_USER }, { query: QR_CODE_QUERY }],
 	});
-	const [picture, setPicture] = useState<PictureForm>({ name: "", data: user.avatar.file });
-	const [usernameInput, setUsernameInput] = useState("");
-	const [isEmptyForm, setIsEmptyForm] = useState(false);
+	const QRCodeState = useQuery(QR_CODE_QUERY);
+	const [checked, setChecked] = useState(user.twoFAEnabled);
 
-	const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-		event.preventDefault();
-		const username = event.currentTarget.username.value;
-		const formData = {};
+	const handleCheckChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+		setChecked(event.target.checked);
+	};
 
-		if (usernameInput.trim() !== "") {
-			formData["username"] = usernameInput;
-		}
-
-		if (picture.data !== "" && picture.data !== user.avatar.file) {
-			formData["avatar"] = {
-				file: picture.data,
-				filename: picture.name,
-			};
-		}
-
-		if (Object.keys(formData).length === 0) {
-			setIsEmptyForm(true);
-			return;
-		}
-
-		console.log(formData);
-		setIsEmptyForm(false);
-		formMutation({
+	useEffect(() => {
+		TwoFAFormMutation({
 			variables: {
-				input: formData,
+				twoFaState: checked,
 			},
 		});
-		showModal(false);
-	};
-	const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-		setUsernameInput(event.currentTarget.value);
-	};
+	}, [checked]);
 
-	const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-		if (!event.target.files) throw new Error();
-		const fileReader = new FileReader();
-		const file = event.target.files[0];
-		const fileName = file.name;
-
-		fileReader.onloadend = (e: any) => {
-			const fileContent = e.currentTarget.result as string;
-			const imgData = window.btoa(fileContent);
-			setPicture({ name: fileName, data: imgData });
-		};
-		fileReader.readAsBinaryString(file);
-	};
+	if (QRCodeState.loading) return <Loading />;
+	if (QRCodeState.error) {
+		return <>Error</>;
+	}
 
 	return (
 		<div className="modal_user_profile_settings">
 			<div className="wrapper">
-				<form className="profile_form" method="post" onSubmit={handleSubmit}>
-					{isEmptyForm && (
-						<p className="empty-form-message">Please fill in at least one field</p>
-					)}
-					<h3>Change profile picture </h3>
-					<div className="change_avatar">
-						<div className="avatar_container">
-							<img src={convertEncodedImage(picture.data)} alt="error no image" />
-						</div>
-						<label className="choose_file" htmlFor="changeAvatar">
-							<input
-								id="changeAvatar"
-								type="file"
-								name="profilePicture"
-								onChange={handleFileChange}
-							/>
-							<h3>Select a new image</h3>
-						</label>
-					</div>
-					<label htmlFor="name">
-						<h3>Change username</h3>
-						<input
-							type="text"
-							name="username"
-							placeholder={user.username}
-							onChange={handleChange}
-						/>
+				<ProfileForm user={user} />
+				<form className="profile_form" method="post">
+					<h3>Enable 2FA</h3>
+					<label className="switch">
+						<input type="checkbox" onChange={handleCheckChange} checked={checked} />
+						<span className="slider round"></span>
 					</label>
-					<h3>2FA</h3>
-					<input
-						type="text"
-						name="2FA"
-						placeholder="phonenumber or leave blank to disable"
-						onChange={handleChange}
-					/>
-
-					<button className="submit_button" type="submit">
-						Save Profile
-					</button>
+					<div className="qr_code_container">
+						<img src={QRCodeState.data.QRCodeQuery} alt="error no code" />
+					</div>
 				</form>
 			</div>
 		</div>

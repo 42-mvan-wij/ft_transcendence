@@ -8,6 +8,13 @@ export const CURRENT_USER = gql`
 				file
 			}
 			id
+			twoFAEnabled
 		}
+	}
+`;
+
+export const QR_CODE_QUERY = gql`
+	query QRCodeQuery {
+		QRCodeQuery
 	}
 `;

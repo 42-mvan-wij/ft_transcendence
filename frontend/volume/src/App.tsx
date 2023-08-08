@@ -3,11 +3,13 @@ import "src/styles/style.css";
 import ProtectedRoute from "./components/authorization/ProtectedRoute";
 import Welcome from "./components/login/Welcome";
 import Auth from "src/components/login/Auth";
-import Home from "src/components/Home";
-import Settings from "./components/settings/Settings";
-import { AuthProvider } from "./utils/authLogic";
 import TwoFactor from "./components/login/TwoFactor";
+import NewUser from "./components/login/NewUser";
+import Home from "src/components/Home";
+import Error from "./components/Error";
+import { AuthProvider } from "./utils/authLogic";
 import UserIsOnline from "./components/common/UserIsOnline";
+import NotFound from "./components/NotFound";
 
 function App() {
 	UserIsOnline();
@@ -18,6 +20,7 @@ function App() {
 					<Route path="/" element={<Welcome />} />
 					<Route path="/login" element={<Auth />} />
 					<Route path="/2fa" element={<TwoFactor />} />
+					<Route path="/new-user" element={<NewUser />} />
 					<Route
 						path="/home"
 						element={
@@ -26,14 +29,7 @@ function App() {
 							</ProtectedRoute>
 						}
 					/>
-					<Route
-						path="/settings"
-						element={
-							<ProtectedRoute>
-								<Settings />
-							</ProtectedRoute>
-						}
-					/>
+					<Route path="*" element={<NotFound />} />
 				</Routes>
 			</AuthProvider>
 		</>

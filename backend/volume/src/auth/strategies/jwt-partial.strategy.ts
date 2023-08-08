@@ -1,13 +1,12 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { PassportStrategy } from '@nestjs/passport';
-import { ExtractJwt, Strategy } from 'passport-jwt';
-import { TokenType } from '../user-info.interface';
+import { Injectable, UnauthorizedException } from "@nestjs/common";
+import { PassportStrategy } from "@nestjs/passport";
+import { ExtractJwt, Strategy } from "passport-jwt";
 
 @Injectable()
-export class JwtStrategy extends PassportStrategy(Strategy) {
+export class JwtPartialStrategy extends PassportStrategy(Strategy, 'jwt-partial') {
 	constructor() {
 		super({
-			jwtFromRequest: ExtractJwt.fromExtractors([JwtStrategy.extractJWT]),
+			jwtFromRequest: ExtractJwt.fromExtractors([JwtPartialStrategy.extractJWT]),
 			ignoreExpiration: false,
 			secretOrKey: process.env.JWT_SECRET,
 		});
@@ -29,9 +28,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 	async validate(payload: any) {
 		if ((Date.now() / 1000) >= payload.exp) {
 			throw new UnauthorizedException("Expired token");
-		}
-		else if (payload.type != TokenType.FULL) {
-			throw new UnauthorizedException("Invalid token type");
 		}
 		return payload;
 	}

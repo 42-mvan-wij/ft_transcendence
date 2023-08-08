@@ -916,20 +916,6 @@ div.background {
   animation: AnimateBG 10s ease infinite;
 }
 
-.white_block {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  -moz-transform: translateX(-50%) translateY(-50%);
-  -webkit-transform: translateX(-50%) translateY(-50%);
-  transform: translateX(-50%) translateY(-50%);
-  margin: auto;
-  width: 60em;
-  height: 90%;
-  background-color: white;
-  border-radius: 1em;
-}
-
 .settings_content {
   margin: 3em 8em;
 }
@@ -1011,8 +997,94 @@ div.background {
   color: #0fa2a9;
   cursor: pointer;
 }
+.modal_user_profile_settings .switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+.modal_user_profile_settings .switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.modal_user_profile_settings .slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: 0.4s;
+  transition: 0.4s;
+}
+.modal_user_profile_settings .slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  -webkit-transition: 0.4s;
+  transition: 0.4s;
+}
+.modal_user_profile_settings input:checked + .slider {
+  background-color: #2196F3;
+}
+.modal_user_profile_settings input:focus + .slider {
+  box-shadow: 0 0 1px #2196F3;
+}
+.modal_user_profile_settings input:checked + .slider:before {
+  -webkit-transform: translateX(26px);
+  -ms-transform: translateX(26px);
+  transform: translateX(26px);
+}
+.modal_user_profile_settings .slider.round {
+  border-radius: 34px;
+}
+.modal_user_profile_settings .slider.round:before {
+  border-radius: 50%;
+}
 .modal_user_profile_settings .submit_button {
   margin-top: 2em;
+}
+.modal_user_profile_settings .qr_code_container {
+  display: flex;
+  position: center;
+  height: 10em;
+  margin-top: 2em;
+  width: 10em;
+}
+.modal_user_profile_settings qr_code_container img {
+  max-height: 100%;
+  max-width: 100%;
+}
+
+.white_block {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  -moz-transform: translateX(-50%) translateY(-50%);
+  -webkit-transform: translateX(-50%) translateY(-50%);
+  transform: translateX(-50%) translateY(-50%);
+  margin: auto;
+  background-color: white;
+  border-radius: 1em;
+}
+.white_block .login_form {
+  margin: 2em;
+}
+.white_block .login_form .invalid_code_popup {
+  margin: auto;
+}
+.white_block .new_user_content {
+  margin: 2em;
+}
+.white_block .new_user_header {
+  text-align: center;
+  margin-bottom: 2em;
 }
 
 /*# sourceMappingURL=style.css.map */

@@ -1,4 +1,4 @@
-import { Column, Entity, PrimaryGeneratedColumn, ManyToMany } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn, ManyToMany, CreateDateColumn } from 'typeorm';
 import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { User } from 'src/user/entities/user.entity';
 
@@ -8,6 +8,10 @@ export class Match {
 	@PrimaryGeneratedColumn('uuid')
 	@Field()
 	id: string;
+
+	@CreateDateColumn()
+	@Field()
+	matchDate: Date;
 
 	@ManyToMany(() => User, (user) => user.match_history)
 	@Field(() => [User])
