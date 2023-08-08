@@ -7,8 +7,29 @@ import "src/styles/style.css";
 import { useNavigate } from "react-router-dom";
 
 interface PictureForm {
-	name: string;
-	data: string;
+	filename: string;
+	file: string;
+}
+
+class FormData {
+	constructor(usernameArg: string, imageArg: PictureForm) {
+		this.username = usernameArg;
+		this.avatar = imageArg;
+	}
+	username: string;
+	avatar: PictureForm;
+
+	isIncomplete(): boolean {
+		if (
+			this.username == "" ||
+			this.avatar == null ||
+			this.avatar.filename == "" ||
+			this.avatar.file == ""
+		) {
+			return true;
+		}
+		return false;
+	}
 }
 
 export default function NewUserForm({ user }): JSX.Element {
@@ -17,27 +38,21 @@ export default function NewUserForm({ user }): JSX.Element {
 		refetchQueries: [{ query: CURRENT_USER }],
 	});
 
-	const [picture, setPicture] = useState<PictureForm>({ name: "", data: "" });
+	const [picture, setPicture] = useState<PictureForm>({ filename: "", file: "" });
 	const [usernameInput, setUsernameInput] = useState("");
 	const [isEmptyForm, setIsEmptyForm] = useState(false);
 
 	const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
-		const formData = {};
+		const formData = new FormData(usernameInput, picture);
 
-		formData["username"] = usernameInput;
-		formData["avatar"] = {
-			file: picture.data,
-			filename: picture.name,
-		};
-		console.log(formData["username"]);
-		if (formData["username"] == "" || formData["avatar"] == { file: "", filename: "" }) {
+		if (formData.isIncomplete()) {
 			setIsEmptyForm(true);
 			return;
 		} else {
 			setIsEmptyForm(false);
 		}
-
+		console.log(formData);
 		formMutation({
 			variables: {
 				input: formData,
@@ -59,7 +74,7 @@ export default function NewUserForm({ user }): JSX.Element {
 		fileReader.onloadend = (e: any) => {
 			const fileContent = e.currentTarget.result as string;
 			const imgData = window.btoa(fileContent);
-			setPicture({ name: fileName, data: imgData });
+			setPicture({ filename: fileName, file: imgData });
 		};
 		fileReader.readAsBinaryString(file);
 	};
