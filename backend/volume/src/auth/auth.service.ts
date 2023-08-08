@@ -6,7 +6,8 @@ import { UserAvatarService } from 'src/user/user-avatar.service';
 import { UploadAvatarInput } from 'src/user/dto/upload-avatar.input';
 import { authenticator } from 'otplib';
 import { UserInfo } from 'src/auth/user-info.interface';
-
+import { Request } from 'express';
+import { v4 as uuid } from 'uuid';
 const axios = require('axios').default;
 
 export interface IntraToken {
@@ -16,6 +17,11 @@ export interface IntraToken {
 	refresh_token: string;
 	scope: string;
 	created_at: number;
+}
+
+export interface UserLink {
+	user: User,
+	userIsNew: boolean,
 }
 
 async function postTemporaryCode(intraCode: string): Promise<string> {
@@ -68,10 +74,16 @@ export class AuthService {
 		return responseJSON;
 	}
 
-	async linkTokenToUser(intraToken: IntraToken): Promise<User> {
-		if (!intraToken) {
-			throw new Error('No token provided');
+	private async createUniqueUsername(): Promise<string> {
+		let username = uuid();
+		while (await this.userService.getUser(username) != null) {
+			username = uuid();
 		}
+		return username;
+	}
+
+	async linkTokenToUser(intraToken: IntraToken): Promise<UserLink> {
+		if (!intraToken) throw new Error('No token provided');
 		const axiosConfig = {
 			headers: {
 				Authorization:
@@ -82,39 +94,49 @@ export class AuthService {
 			'https://api.intra.42.fr/v2/me',
 			axiosConfig,
 		);
-		let user: User = await this.userService.getUserByIntraId(
-			response.data.id,
-		);
+
+		let user: User = await this.userService.getUserByIntraId(response.data.id);
 		if (!user) {
 			const intraAvatar = await downloadIntraAvatar(
 				response.data.image.versions.small,
 				axiosConfig,
 			);
+			const uniqueUsername = await this.createUniqueUsername();
 			user = await this.userService.create({
 				intraId: response.data.id,
-				username: response.data.login,
+				username: uniqueUsername,
 			});
 			intraAvatar.parentUserUid = user.id;
 			user.avatar = await this.userAvatarService.create(intraAvatar);
 			user = await this.userService.save(user);
+			return { user: user, userIsNew: true };
 		}
-		return user;
+		return { user: user, userIsNew: false };
 	}
 
 	async getJwtCookie(userInfo: UserInfo): Promise<string> {
 		const token = await this.jwtService.signAsync(userInfo);
-		return JSON.stringify({ access_token: token });
+		const jsonWrapper = JSON.stringify({ access_token: token });
+		return ('session_cookie=' + jsonWrapper + '; HttpOnly; Secure; SameSite=Strict');
 	}
 
-	async generateTwoFASecret(userInfo: UserInfo) {
-		const secret = authenticator.generateSecret();
-		const otpAuthUrl = authenticator.keyuri('dummy', 'PONG', secret);
+	async isCookieValid(request: Request): Promise<Boolean> {
+		const reqCookie = request.cookies['session_cookie'];
+	
+		if (reqCookie == undefined) return false;
+	}
 
-		await this.userService.setTwoFA(secret, userInfo.userUid);
+	async generateTwoFASecret(userUid: string) {
+		const secret = authenticator.generateSecret();
+		const otpAuthUrl = authenticator.keyuri(userUid, 'PONG', secret);
 		return {
 			secret,
 			otpAuthUrl,
 		};
+	}
+
+	async getQRCode(userUid: string, secret: string) {
+		return authenticator.keyuri(userUid, 'PONG', secret);
 	}
 
 	async verify2FACode(twoFACode: string, userId: string) {

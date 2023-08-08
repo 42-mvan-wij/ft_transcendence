@@ -9,21 +9,6 @@ div.background {
 	animation: AnimateBG 10s ease infinite;
 }
 
-.white_block {
-	position: absolute;
-	top: 50%;
-	left: 50%;
-	-moz-transform: translateX(-50%) translateY(-50%);
-	-webkit-transform: translateX(-50%) translateY(-50%);
-	transform: translateX(-50%) translateY(-50%);
-	margin: auto;
-	width: 60em;
-	height: 90%;
-	background-color: white;
-	border-radius: 1em;
-
-}
-
 .settings_content {
 	margin: 3em 8em;
 

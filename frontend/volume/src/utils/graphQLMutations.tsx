@@ -11,3 +11,15 @@ export const FORM_MUTATION = gql`
 		}
 	}
 `;
+
+export const SET_TWO_FA_MUTATION = gql`
+	mutation setTwoFAMutation($twoFaState: Boolean!) {
+		setTwoFactorMutation(TwoFAState: $twoFaState)
+	}
+`;
+
+export const LOGIN_WITH_TWO_FA = gql`
+	mutation Mutation($twoFaCode: String!) {
+		loginWithTwoFA(twoFACode: $twoFaCode)
+	}
+`;

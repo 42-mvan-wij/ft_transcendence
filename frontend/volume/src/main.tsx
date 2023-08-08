@@ -1,6 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { ApolloClient, ApolloProvider, HttpLink, InMemoryCache, split } from "@apollo/client";
+import { ApolloClient, ApolloProvider, HttpLink, InMemoryCache, split, from } from "@apollo/client";
+import { onError } from "@apollo/client/link/error";
 import { GraphQLWsLink } from "@apollo/client/link/subscriptions";
 import { createClient } from "graphql-ws";
 import { BrowserRouter } from "react-router-dom";
@@ -20,6 +21,15 @@ const wsLink = new GraphQLWsLink(
 	createClient({ url: `wss://${import.meta.env["VITE_DOMAIN"]}/api/graphql` })
 );
 
+const errorLink = onError(({ graphqlErrors, networkError }) => {
+	if (graphqlErrors) {
+		console.log("ERROR: cannot reach backend");
+	}
+	if (networkError) {
+		console.log("ERROR: network error");
+	}
+});
+
 const splitLink = split(
 	({ query }) => {
 		const definition = getMainDefinition(query);
@@ -30,7 +40,7 @@ const splitLink = split(
 );
 
 const client = new ApolloClient({
-	link: splitLink,
+	link: from([errorLink, splitLink]),
 	cache: new InMemoryCache(),
 });
 

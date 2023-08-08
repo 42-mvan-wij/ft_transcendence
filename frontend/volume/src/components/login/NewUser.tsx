@@ -1,79 +1,31 @@
-import { gql, useMutation } from "@apollo/client";
-import { useState } from "react";
+import { useQuery } from "@apollo/client";
 import "src/styles/login-pages/new-user.css";
-
-const FORM_MUTATION = gql`
-	mutation changeUserData($input: ChangeUserDataInput!) {
-		changeUserData(changeUserData: $input) {
-			username
-			avatar {
-				file
-				filename
-			}
-		}
-	}
-`;
-
-interface PictureForm {
-	name: string;
-	data: string;
-}
+import { CURRENT_USER } from "src/utils/graphQLQueries";
+import Loading from "../authorization/Loading";
+import NewUserForm from "./NewUserForm";
 
 function NewUser(): JSX.Element {
-	const [formMutation, { loading, error, data }] = useMutation(FORM_MUTATION);
-	const [picture, setPicture] = useState<PictureForm>({ name: "", data: "" });
-	const [usernameInput, setUsernameInput] = useState("");
+	const { loading, error, data } = useQuery(CURRENT_USER);
 
-	const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-		event.preventDefault();
-		const username = event.currentTarget.username.value;
-		const formData = {
-			username: usernameInput,
-			avatar: {
-				file: picture.data,
-				filename: picture.name,
-			},
-		};
-		formMutation({
-			variables: {
-				input: formData,
-			},
-		});
-	};
-
-	const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-		setUsernameInput(event.currentTarget.value);
-	};
-
-	const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-		if (!event.target.files) throw new Error();
-		const fileReader = new FileReader();
-		const file = event.target.files[0];
-		const fileName = file.name;
-
-		fileReader.onloadend = (e: any) => {
-			const fileContent = e.currentTarget.result as string;
-			console.log(fileContent);
-			const imgData = window.btoa(fileContent);
-			setPicture({ name: fileName, data: imgData });
-		};
-		fileReader.readAsBinaryString(file);
-	};
+	if (loading) return <Loading />;
+	if (error) {
+		if (gqlErrorCode(error) == "UNAUTHENTICATED") {
+			return <Navigate to="/login" />;
+		} else {
+			return <Error gqlError={error} />;
+		}
+	}
 
 	return (
-		<div className="main-wrap">
-			<div className="user-form">
-				<form method="post" onSubmit={handleSubmit}>
-					<label htmlFor="name">
-						Username
-						<input type="text" name="username" onChange={handleChange} />
-					</label>
-					<label htmlFor="Profile Picture">
-						Profile Picture
-						<input type="file" name="profilePicture" onChange={handleFileChange} />
-					</label>
-					<button type="submit">Confirm Profile</button>
-				</form>
+		<div className="background">
+			<div className="white_block">
+				<div className="new_user_content">
+					<div className="new_user_header">
+						<h1>Welcome to PONG</h1>
+						please fill create a username and select a profile picture
+					</div>
+					<NewUserForm user={data.currentUserQuery} />
+				</div>
 			</div>
 		</div>
 	);

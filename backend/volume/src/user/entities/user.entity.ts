@@ -37,6 +37,7 @@ export class User {
 	twoFASecret: string;
 
 	@Column('boolean', { default: false })
+	@Field()
 	twoFAEnabled: boolean = false;
 
 	@OneToOne(() => Avatar, {
