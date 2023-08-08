@@ -29,7 +29,7 @@ function Stats({ userId }: { userId: string }) {
 	}, [data]);
 
 	if (loading) return <div> Loading </div>;
-	if (!stats) return <div> No stats available </div>;
+	if (!stats) return <></>;
 	if (error) return <div> Error </div>;
 	return (
 		<div className="stat_block">

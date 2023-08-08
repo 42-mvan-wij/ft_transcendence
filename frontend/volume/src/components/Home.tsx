@@ -14,6 +14,7 @@ import SettingsModal from "src/components/settings/SettingsModal";
 import Loading from "./authorization/Loading";
 import Error from "./Error";
 import { CURRENT_USER } from "src/utils/graphQLQueries";
+import Manuel from "./Manual";
 
 function Home(): JSX.Element {
 	const modalProps: i.ModalProps = createModalProps();
@@ -28,7 +29,7 @@ function Home(): JSX.Element {
 
 	const currentUser = useQuery(CURRENT_USER);
 	if (currentUser.loading) return <Loading />;
-	else if (currentUser.error) return <Error />;
+	else if (currentUser.error) return <Error gqlError={currentUser.error} />;
 
 	return (
 		<div className="grid-container">
@@ -37,6 +38,7 @@ function Home(): JSX.Element {
 			<Header {...pongProps} />
 
 			<div id="right_top">
+				<a onClick={() => modalProps.toggleModal(<Manuel />)}>help</a>
 				<a
 					onClick={() =>
 						modalProps.toggleModal(

@@ -110,7 +110,7 @@ export default function Queue(props: i.ModalProps) {
 		});
 	}, []);
 
-	if (queue_loading) return <div> Loading queue </div>;
+	if (queue_loading) return <h3 className="queueMessage"> Loading queue </h3>;
 	if (queue_error) {
 		console.log(queue_error);
 		return <div> Queue error </div>;
@@ -172,14 +172,14 @@ function JoinQueueElement() {
 		});
 	}, [user_data]);
 
-	if (user_loading) return <>Loading user</>;
+	if (user_loading) return <h3 className="queueMessage">Loading user</h3>;
 
 	const handleClick = (event: any) => {
 		event.preventDefault();
 		joinQueue();
 	};
 
-	if (queue_loading) return <>Loading queue...</>;
+	if (queue_loading) return <h3 className="queueMessage">Loading queue...</h3>;
 	if (queue_error) return <>error joining queue</>;
 	if (queue_availability?.getQueueAvailability.queueStatus === QueueStatus.CAN_JOIN) {
 		return (
@@ -189,11 +189,7 @@ function JoinQueueElement() {
 		);
 	}
 	if (queue_availability?.getQueueAvailability.queueStatus === QueueStatus.IN_QUEUE) {
-		return (
-			<div>
-				<h3>You've joined the queue </h3>
-			</div>
-		);
+		return <h3 className="queueMessage">You've joined the queue </h3>;
 	}
 	return <></>;
 }

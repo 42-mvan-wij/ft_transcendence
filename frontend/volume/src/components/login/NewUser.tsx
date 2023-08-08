@@ -21,8 +21,7 @@ function NewUser(): JSX.Element {
 			<div className="white_block">
 				<div className="new_user_content">
 					<div className="new_user_header">
-						<h1>Welcome to PONG</h1>
-						please fill create a username and select a profile picture
+						<h2>Create your profile and get started</h2>
 					</div>
 					<NewUserForm user={data.currentUserQuery} />
 				</div>

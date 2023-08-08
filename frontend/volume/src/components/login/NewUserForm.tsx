@@ -94,7 +94,7 @@ export default function NewUserForm({ user }): JSX.Element {
 						name="profilePicture"
 						onChange={handleFileChange}
 					/>
-					<h3>Select a new image</h3>
+					<h3>Select a profile picture</h3>
 				</label>
 			</div>
 			<label htmlFor="name">

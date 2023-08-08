@@ -783,11 +783,15 @@ section#profile .settings {
 section#queue {
   grid-area: queue;
 }
+section#queue .queueMessage {
+  line-height: 2em;
+  padding-top: 1em;
+}
 section#queue .flex_row_spacebetween:first-child {
   transition: 5s;
 }
 section#queue .section_content {
-  padding: 1em;
+  padding: 1em 1em 1em 3em;
   box-sizing: border-box;
 }
 section#queue .player {
@@ -1080,11 +1084,52 @@ div.background {
   margin: auto;
 }
 .white_block .new_user_content {
-  margin: 2em;
+  margin: 3em;
 }
 .white_block .new_user_header {
-  text-align: center;
   margin-bottom: 2em;
+}
+.white_block .avatar_container {
+  width: 15em;
+  height: 15em;
+}
+.white_block .change_avatar {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  gap: 3em;
+  margin-bottom: 2em;
+}
+.white_block .avatar_container {
+  width: 7em;
+  height: 7em;
+}
+.white_block h3 {
+  margin: 1em 0;
+}
+.white_block input {
+  margin-top: 0;
+  margin-bottom: 2em;
+}
+.white_block input[type=file] {
+  display: none;
+  margin: 0;
+}
+.white_block .choose_file {
+  font-weight: 500;
+  color: #309a9f;
+  text-decoration: inherit;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.white_block .choose_file:hover {
+  color: #0fa2a9;
+  cursor: pointer;
+}
+.white_block .submit_button {
+  margin-top: 2em;
 }
 
 /*# sourceMappingURL=style.css.map */
