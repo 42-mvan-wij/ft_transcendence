@@ -59,20 +59,26 @@ export default function PrivateChannel({
 
 	return (
 		<div className="new_chat">
-			<input
-				type="text"
-				value={password}
-				onChange={(e) => setPassword(e.target.value)}
-				placeholder="Enter password"
-			/>
 			{data.all_available_private_channels.map(function (chat: any) {
 				return (
-					<div key={chat.id} className="selectUser">
-						<img className="avatar" src={chat.logo} />
+					<details>
+						<summary>
+							<div key={chat.id} className="selectUser">
+								<img className="avatar" src={chat.logo} />
+								<label>join {chat.name}</label>
+							</div>
+						</summary>
+						<input
+							type="password"
+							value={password}
+							onChange={(e) => setPassword(e.target.value)}
+							placeholder="Enter password"
+						/>
+
 						<label>
 							<button onClick={() => Join(chat.id)}>Join {chat.name}</button>
 						</label>
-					</div>
+					</details>
 				);
 			})}
 		</div>

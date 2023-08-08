@@ -28,9 +28,9 @@ section#chat {
 			justify-content: center;
 			flex-direction: column;
 			margin: 1em 1em;
-			width:60%;
+			width: 60%;
 		}
-		
+
 		.avatar_container {
 			width: 60px;
 			height: 60px;
@@ -119,12 +119,12 @@ section#chat {
 		}
 
 		.pm_avatar {
-			margin-top:0.5em;
+			margin-top: 0.5em;
 			width: 60px;
 			height: 60px;
 			border-radius: 100%;
 			overflow: hidden;
-		
+
 			img {
 				width: 100%;
 				height: 100%;
@@ -328,3 +328,22 @@ input[type="file"] {
 	color: $color-hover;
 	cursor: pointer;
 }
+
+details {}
+
+summary {
+	font-weight: bold;
+	width: 100%;
+}
+
+details>summary {
+	list-style: none;
+}
+
+details>summary::-webkit-details-marker {
+	display: none;
+}
+
+details[open] {}
+
+details[open] summary {}

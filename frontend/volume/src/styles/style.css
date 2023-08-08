@@ -575,6 +575,19 @@ input[type=file] {
   cursor: pointer;
 }
 
+summary {
+  font-weight: bold;
+  width: 100%;
+}
+
+details > summary {
+  list-style: none;
+}
+
+details > summary::-webkit-details-marker {
+  display: none;
+}
+
 #game {
   grid-area: game;
   background-color: #eff4f6;

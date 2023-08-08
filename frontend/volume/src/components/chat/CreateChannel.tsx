@@ -56,7 +56,7 @@ export default function CreateChannel(props: i.ModalProps & { refetchChannels: (
 					</label>
 				</div>
 				<h3>Password</h3>
-				<input type="text" placeholder="leave blank to create public channel"></input>
+				<input type="password" placeholder="leave blank to create public channel"></input>
 				<button type="submit">Create channel</button>
 			</form>
 		</div>
