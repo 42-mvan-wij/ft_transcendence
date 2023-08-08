@@ -31,7 +31,7 @@ export default function NewUserForm({ user }): JSX.Element {
 			filename: picture.name,
 		};
 		console.log(formData["username"]);
-		if (formData["username"] == "") {
+		if (formData["username"] == "" || formData["avatar"] == { file: "", filename: "" }) {
 			setIsEmptyForm(true);
 			return;
 		} else {
@@ -84,12 +84,7 @@ export default function NewUserForm({ user }): JSX.Element {
 			</div>
 			<label htmlFor="name">
 				<h3>Username</h3>
-				<input
-					type="text"
-					name="username"
-					placeholder={user.username}
-					onChange={handleChange}
-				/>
+				<input type="text" name="username" onChange={handleChange} />
 			</label>
 			<button className="submit_button" type="submit">
 				Save Profile
