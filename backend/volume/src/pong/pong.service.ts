@@ -75,7 +75,7 @@ export class PongService {
 
 			const queueAvailability: Availability = new Availability;
 			queueAvailability.queueStatus = QueueStatus.CAN_JOIN;
-			queueAvailability.challengeStatus = ChallengeStatus.CAN_CHALLENGE;
+			queueAvailability.challengeStatus = ChallengeStatus.ONLINE;
 			pubSub.publish('queueAvailabilityChanged', { queueAvailabilityChanged: queueAvailability, userId: this.state.match.players[0].id } );
 			pubSub.publish('queueAvailabilityChanged', { queueAvailabilityChanged: queueAvailability, userId: this.state.match.players[1].id } );
 
@@ -140,5 +140,16 @@ export class PongService {
 		};
 
 		return state;
+	}
+
+	removeMatch(offline_user_id: string) {
+		if (this.state.match.players[0].id === offline_user_id) {
+			this.state.match.p2Score = C.MAX_SCORE;
+			pubSub.publish('removedMatch', { removedMatch: this.state.match.id, userId: this.state.match.players[1].id } );
+		}
+		else {
+			this.state.match.p1Score = C.MAX_SCORE;
+			pubSub.publish('removedMatch', { removedMatch: this.state.match.id, userId: this.state.match.players[0].id } );
+		}
 	}
 }

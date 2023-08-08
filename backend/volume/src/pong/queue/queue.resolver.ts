@@ -20,6 +20,11 @@ export class QueueResolver {
 		return await this.queueService.getQueueAvailability(user.userUid);
 	}
 	
+	@Query(() => Availability)
+	async getStatus(@Args('user_id') user_id: string) {
+		return this.queueService.getStatus(user_id);
+	}
+
 	@UseGuards(JwtAuthGuard)
 	@Query(() => Availability)
 	async getOwnChallengeAvailability(@AuthUser() user: UserInfo) {
@@ -49,6 +54,34 @@ export class QueueResolver {
 	})
 	incomingChallenge() {
 		return pubSub.asyncIterator('incomingChallenge');
+	}
+	
+	@UseGuards(JwtSubscriptionGuard)
+	@Subscription(() => String, {
+		async filter(payload, variables, context) {
+			const user = getSubscriptionUser(context);
+			return (
+				payload.userId === user.userUid
+			);
+		},
+		nullable: true
+	})
+	removedFromQueue() {
+		return pubSub.asyncIterator('removedFromQueue');
+	}
+	
+	@UseGuards(JwtSubscriptionGuard)
+	@Subscription(() => String, {
+		async filter(payload, variables, context) {
+			const user = getSubscriptionUser(context);
+			return (
+				payload.userId === user.userUid
+			);
+		},
+		nullable: true
+	})
+	removedMatch() {
+		return pubSub.asyncIterator('removedMatch');
 	}
 
 	@UseGuards(JwtAuthGuard)
@@ -135,7 +168,7 @@ export class QueueResolver {
 
 
 	/*
-	TESTING
+	TESTING 					// FIXME: REMOVE BEFORE TURNIN
 	*/
 	@Query(() => Number)
 	putInQueue(@Args('id') id: string) {

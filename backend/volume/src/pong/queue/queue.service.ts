@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import { pubSub } from 'src/app.module';
 import { QueuedMatch } from './queuedmatch.model';
 import { UserService } from 'src/user/user.service';
@@ -10,18 +10,51 @@ import { Availability } from './queuestatus.model';
 import { QueueStatus, ChallengeStatus } from './queuestatus.model';
 import { Challenge } from './challenge.model';
 import { v4 as uuid } from 'uuid';
+import { UserActivityService } from 'src/user/user-activity.service';
+import { PongService } from '../pong.service';
 
 @Injectable()
 export class QueueService {
 	constructor(
 		private readonly userService: UserService,
 		private readonly userAvatarService: UserAvatarService,
+		@Inject(forwardRef(() => UserActivityService))
+		private readonly userActivityService: UserActivityService,
+		@Inject(forwardRef(() => PongService))
+		private readonly pongService: PongService,
 	) {}
 	users_looking_for_match: string[] = [];
 	queued_matches: QueuedMatch[] = [];
 	current_match: QueuedMatch;
 	is_challenger: string[] = []; // TODO: as soon as challenge is sent, the challengers id should be in here so he cannot join queue anymore untill challenge is accepted or denied
 	challenges: Challenge[] = [];
+
+	async getStatus(user_id: string) {
+		const availability: Availability = new Availability;
+		
+		availability.challengeStatus = ChallengeStatus.OFFLINE;
+		for (let i in this.userActivityService.online_users) {
+			if (this.userActivityService.online_users[i][0] === user_id) 
+			{
+				availability.challengeStatus = ChallengeStatus.ONLINE;
+			}
+		}
+		for (let i in this.queued_matches) {
+			if (user_id === this.queued_matches[i].p1.id || 
+				user_id === this.queued_matches[i].p2.id ||
+				user_id === this.users_looking_for_match[0] ) 
+			{
+				availability.challengeStatus = ChallengeStatus.IN_QUEUE;
+				return availability;
+			}
+		}
+		if (user_id === this.current_match.p1.id || 
+			user_id === this.current_match.p2.id ) 
+		{
+			availability.challengeStatus = ChallengeStatus.IN_MATCH;
+		}
+		return (availability);
+	}
 
 	async addQueuedMatch(
 		player_one_id: string,
@@ -98,6 +131,45 @@ export class QueueService {
 		this.current_match = null;
 	}
 
+	removeFromQueueOrMatch(offline_user_id: string) {
+		for (let i = 0; i < this.users_looking_for_match.length; i++) {
+			if (offline_user_id === this.users_looking_for_match[i]) {
+				this.users_looking_for_match.splice(i, 1);
+				return;
+			}
+		}	
+		for (let i = 0; i < this.queued_matches.length; i++) {
+			if (offline_user_id === this.queued_matches[i].p1.id ||
+				offline_user_id === this.queued_matches[i].p2.id) 
+			{
+				let opponent_id: string;
+				if (offline_user_id === this.queued_matches[i].p1.id) {
+					opponent_id = this.queued_matches[i].p2.id;
+				} else {
+					opponent_id = this.queued_matches[i].p1.id;
+				}
+				const queueAvailability: Availability = new Availability;
+				queueAvailability.queueStatus = QueueStatus.CAN_JOIN;
+				pubSub.publish('queueAvailabilityChanged', { queueAvailabilityChanged: queueAvailability, userId: this.queued_matches[i].p1.id } );
+				pubSub.publish('queueAvailabilityChanged', { queueAvailabilityChanged: queueAvailability, userId: this.queued_matches[i].p2.id } );
+				pubSub.publish('removedFromQueue', { removedFromQueue: this.queued_matches[i].id, userId: opponent_id});
+				this.queued_matches.splice(i, 1);
+				pubSub.publish('queueChanged', { queueChanged: this.queued_matches });
+				return;
+			}
+		}
+		if (offline_user_id === this.current_match?.p1.id ||
+			offline_user_id === this.current_match?.p2.id) 
+		{
+			this.pongService.removeMatch(offline_user_id);
+
+			const queueAvailability: Availability = new Availability;
+			queueAvailability.queueStatus = QueueStatus.CAN_JOIN;
+			pubSub.publish('queueAvailabilityChanged', { queueAvailabilityChanged: queueAvailability, userId: this.current_match.p1.id } );
+			pubSub.publish('queueAvailabilityChanged', { queueAvailabilityChanged: queueAvailability, userId: this.current_match.p2.id } );
+		}
+	}
+
 	getQueuedMatch(): QueuedMatch | null {
 		if (this.queued_matches.length == 0) return;
 		this.current_match = this.queued_matches.at(0);
@@ -157,9 +229,15 @@ export class QueueService {
 	async getChallengeAvailability(playerId: string) : Promise<Availability> {
 		const challengeAvailability: Availability = new Availability;
 		const queueAvailability = await this.getQueueAvailability(playerId);
+		let online: boolean;
 
-		// TODO: write function that checks if player is online
-		if (playerId === "OFFLINE") {
+		for (let i in this.userActivityService.online_users) {
+			if (playerId === this.userActivityService.online_users[i][0]) {
+				online = true;
+				break ;
+			}
+		}
+		if (!online) {
 			challengeAvailability.challengeStatus = ChallengeStatus.OFFLINE;
 			return challengeAvailability;
 		}
@@ -174,7 +252,7 @@ export class QueueService {
 				challengeAvailability.challengeStatus = ChallengeStatus.IS_CHALLENGER;
 				break;
 			default:
-				challengeAvailability.challengeStatus = ChallengeStatus.CAN_CHALLENGE
+				challengeAvailability.challengeStatus = ChallengeStatus.ONLINE
 				break;
 		}
 		return challengeAvailability;
@@ -192,11 +270,11 @@ export class QueueService {
 
 	async challengeFriend(challenger_id: string, friend_id: string) {		
 		let challengeAvailable = await this.getChallengeAvailability(friend_id);
-		if (challengeAvailable.challengeStatus != ChallengeStatus.CAN_CHALLENGE) {
+		if (challengeAvailable.challengeStatus != ChallengeStatus.ONLINE) {
 			return false;
 		}
 		challengeAvailable = await this.getChallengeAvailability(challenger_id);
-		if (challengeAvailable.challengeStatus != ChallengeStatus.CAN_CHALLENGE) {
+		if (challengeAvailable.challengeStatus != ChallengeStatus.ONLINE) {
 			return false;
 		}
 		this.is_challenger.push(challenger_id);
@@ -278,7 +356,7 @@ export class QueueService {
 	}
 
 	/*
-	TESTING	
+	TESTING								// FIXME: REMOVE BEFORE TURNIN
 	*/
 	putInQueue(id: string): number {
 		this.users_looking_for_match.push(id);

@@ -69,6 +69,23 @@ export default function UserStats(modalProps: i.ModalProps & { selectedUser: any
 	if (unblock_error) return <>error unblocking user</>;
 	if (block_state_error) return <>error loading user's block status</>;
 
+	let status: string;
+	if (friends.find((friend: any) => friend.id === modalProps.selectedUser.id)) {
+		switch (challengeAvailabilityStatus.challengeStatus) {
+			case ChallengeStatus.ONLINE:
+				status = "(online)";
+				break;
+			case ChallengeStatus.IN_MATCH:
+				status = "(in game)";
+				break;
+			case ChallengeStatus.IN_QUEUE:
+				status = "(in queue)";
+				break;
+			default:
+				status = "(offline)";
+				break;
+		}
+	}
 	const renderUserActions = () => {
 		if (modalProps.selectedUser.id === modalProps.userId)
 			return (
@@ -78,7 +95,9 @@ export default function UserStats(modalProps: i.ModalProps & { selectedUser: any
 			);
 		return (
 			<div className="user_actions">
-				<h1>{modalProps.selectedUser.username}</h1>
+				<h1>
+					{modalProps.selectedUser.username} {status}
+				</h1>
 				{renderChallengeFriendActions(
 					modalProps,
 					challenge_friend,
@@ -157,7 +176,7 @@ function renderFriendRequestActions(
 }
 
 export enum ChallengeStatus {
-	CAN_CHALLENGE,
+	ONLINE,
 	IN_MATCH,
 	IN_QUEUE,
 	IS_CHALLENGER,
@@ -170,15 +189,6 @@ const CHALLENGE_FRIEND = gql`
 	}
 `;
 
-// TODO: add timer voor timeout challenge
-//
-// const [counter, setCounter] = useState(CHALLENGE_TIME_OUT / 1000);
-
-// useEffect(() => {
-// 	counter > 0 && setTimeout(() => setCounter(counter - 1), 1000);
-// }, [counter]);
-
-// {counter}  <-- displays seconds
 function renderChallengeFriendActions(
 	modalProps: any,
 	challenge_friend: any,
@@ -198,7 +208,7 @@ function renderChallengeFriendActions(
 	if (challenge_availability_data === ChallengeStatus.IN_QUEUE)
 		return <div>cannot challenge {modalProps.selectedUser.username} (in queue)</div>;
 	if (challenge_availability_data === ChallengeStatus.IN_MATCH)
-		return <div>cannot challenge {modalProps.selectedUser.username} (in match)</div>;
+		return <div>cannot challenge {modalProps.selectedUser.username} (in game)</div>;
 	if (challenge_availability_data === ChallengeStatus.OFFLINE)
 		return <div>cannot challenge {modalProps.selectedUser.username} (offline)</div>;
 	if (challenge_availability_data === ChallengeStatus.IS_CHALLENGER)
