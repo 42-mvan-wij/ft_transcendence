@@ -23,3 +23,9 @@ export const LOGIN_WITH_TWO_FA = gql`
 		loginWithTwoFA(twoFACode: $twoFaCode)
 	}
 `;
+
+export const CHALLENGE_FRIEND = gql`
+	mutation ChallengeFriend($friendId: String!) {
+		challengeFriend(friendId: $friendId)
+	}
+`;
