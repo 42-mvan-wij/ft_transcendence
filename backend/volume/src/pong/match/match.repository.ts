@@ -33,23 +33,20 @@ export class MatchRepository {
 		if (!match) throw new Error('No score received');
 		const players: User[] = await this.checkPlayers(match.players);
 		if (!players || !players[0] || !players[1]) return;
-		await this.addMatchToPlayerHistory(match, players[0].id);
-		await this.addMatchToPlayerHistory(match, players[1].id);
-		return this.matchRepo.save(match);
+		await this.matchRepo.save(match);
+		await this.publishMatchHistory(match, players[0].id);
+		await this.publishMatchHistory(match, players[1].id);
+		return match;
 	}
 
-	private async addMatchToPlayerHistory(
+	private async publishMatchHistory(
 		match: Match,
 		id: string,
 	): Promise<void> {
 		const user = await this.userService.getUserById(id);
-		let matchHistory = await this.userService.getMatchHistory(user);
-		if (matchHistory) matchHistory.push(match);
-		else matchHistory = [match];
-		user.match_history = matchHistory;
-		await this.userService.save(user);
-		pubSub.publish(`matchHistoryHasBeenUpdated:${user.id}`, {
-			[`matchHistoryHasBeenUpdated:${user.id}`]: user.match_history,
+		const matchHistory: Match[] = await this.userService.getMatchHistory(user);
+		pubSub.publish(`matchHistoryHasBeenUpdated`, {
+			matchHistoryHasBeenUpdated: matchHistory, user_id: id
 		});
 	}
 

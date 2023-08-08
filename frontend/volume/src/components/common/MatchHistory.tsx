@@ -17,6 +17,7 @@ const GET_INITIAL_MATCH_HISTORY = gql`
 			p1Score
 			p2Score
 			isFinished
+			matchDate
 		}
 	}
 `;
@@ -35,6 +36,7 @@ const MATCH_HISTORY_CHANGED = gql`
 			p1Score
 			p2Score
 			isFinished
+			matchDate
 		}
 	}
 `;
@@ -63,13 +65,17 @@ function MatchHistory({ userId }: { userId: string }) {
 		console.log(queryError);
 		return <div> Error </div>;
 	}
+	const m = matches.slice();
+	m.sort(function (a: any, b: any) {
+		return Date.parse(b.matchDate) - Date.parse(a.matchDate);
+	});
 	return (
 		<div className="stat_block">
 			<h2>Match history</h2>
 			<div className="limit_heigth">
 				<table className="match_history">
 					<tbody>
-						{matches.map((match: any) => (
+						{m.map((match: any) => (
 							<tr key={match.id}>
 								<td className="td_ava">
 									<div className="friends_avatar_container">
