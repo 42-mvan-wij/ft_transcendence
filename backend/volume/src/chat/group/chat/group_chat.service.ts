@@ -122,8 +122,8 @@ export class GroupChatService {
 		return false;
 	}
 
-	async kick(supposed_admin_id: string, userId: string, channelId: string) {
-		const channel = await this.getChannelById(channelId, {admins: true, members: true});
+	async kick(channelId: string, supposed_admin_id: string, userId: string) {
+		const channel = await this.getChannelById(channelId, {owner: true, admins: true, members: true});
 		if (!channel)
 			throw new Error(`Channel with id ${channelId} does not exist`);
 		if (!channel.admins.some((admin) => admin.id === supposed_admin_id))
@@ -137,8 +137,8 @@ export class GroupChatService {
 		await this.channelRepository.save(channel);
 	}
 
-	async ban(supposed_admin_id: string, userId: string, channelId: string) {
-		const channel = await this.getChannelById(channelId, {admins: true, members: true});
+	async ban(channelId: string, supposed_admin_id: string, userId: string) {
+		const channel = await this.getChannelById(channelId, {owner: true, admins: true, members: true});
 		if (!channel)
 			throw new Error(`Channel with id ${channelId} does not exist`);
 		if (!channel.admins.some((admin) => admin.id === supposed_admin_id))
@@ -153,8 +153,8 @@ export class GroupChatService {
 		await this.channelRepository.save(channel);
 	}
 
-	async unban(supposed_admin_id: string, userId: string, channelId: string) {
-		const channel = await this.getChannelById(channelId, {admins: true, members: true});
+	async unban(channelId: string, supposed_admin_id: string, userId: string) {
+		const channel = await this.getChannelById(channelId, {owner: true, admins: true, members: true});
 		if (!channel)
 			throw new Error(`Channel with id ${channelId} does not exist`);
 		if (!channel.admins.some((admin) => admin.id === supposed_admin_id))
@@ -175,14 +175,14 @@ export class GroupChatService {
 		const user = await this.userService.getUserById(user_id);
 		if (!user)
 			throw new Error(`User with id ${user_id} does not exist`);
-		if (channel.members.some((member) => member.id === user_id))
+		if (!channel.members.some((member) => member.id === user_id))
 			throw new Error(`User with id ${user_id} is not a member`);
 		channel.admins.push(user);
 		return await this.channelRepository.save(channel);
 	}
 
 	async demote(channel_id: string, supposed_owner_id: string, user_id: string) {
-		const channel = await this.getChannelById(channel_id, {owner: true, members: true});
+		const channel = await this.getChannelById(channel_id, {owner: true, members: true, admins: true});
 		if (!channel)
 			throw new Error(`Channel with id ${channel_id} does not exist`);
 		if (channel.owner.id !== supposed_owner_id)
@@ -200,6 +200,30 @@ export class GroupChatService {
 			where: { id: channel.id },
 		});
 		return channel_with_members.members;
+	}
+
+	async getOwner(channel: GroupChat): Promise<User> {
+		const channel_with_owner = await this.channelRepository.findOne({
+			relations: { owner: true },
+			where: { id: channel.id },
+		});
+		return channel_with_owner.owner;
+	}
+
+	async getAdmins(channel: GroupChat): Promise<Array<User>> {
+		const channel_with_admins = await this.channelRepository.findOne({
+			relations: { admins: true },
+			where: { id: channel.id },
+		});
+		return channel_with_admins.admins;
+	}
+
+	async getBannedUsers(channel: GroupChat): Promise<Array<User>> {
+		const channel_with_banned_users = await this.channelRepository.findOne({
+			relations: { banned_users: true },
+			where: { id: channel.id },
+		});
+		return channel_with_banned_users.banned_users;
 	}
 
 	async getMessages(channel: GroupChat): Promise<Array<GroupMessage>> {

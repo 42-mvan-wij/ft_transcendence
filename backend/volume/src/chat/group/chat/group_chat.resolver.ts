@@ -104,6 +104,21 @@ export class GroupChatResolver {
 	}
 
 	@ResolveField()
+	async owner(@Parent() channel: GroupChat) {
+		return this.group_chat_service.getOwner(channel);
+	}
+
+	@ResolveField()
+	async admins(@Parent() channel: GroupChat) {
+		return this.group_chat_service.getAdmins(channel);
+	}
+
+	@ResolveField()
+	async banned_users(@Parent() channel: GroupChat) {
+		return this.group_chat_service.getBannedUsers(channel);
+	}
+
+	@ResolveField()
 	async messages(@Parent() channel: GroupChat) {
 		return this.group_chat_service.getMessages(channel);
 	}
