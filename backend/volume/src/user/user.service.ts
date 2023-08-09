@@ -330,12 +330,20 @@ export class UserService {
 		const friend = await this.userRepository.findOne({
 			where: { username: friend_name },
 		});
-		
 		this.inviteFriend(user.id, friend.id);
-
 		return 3;
 	}
 
+	async acceptFriend1(user_name: string, friend_name: string): Promise<number> {
+		const user = await this.userRepository.findOne({
+			where: { username: user_name },
+		});
+		const friend = await this.userRepository.findOne({
+			where: { username: friend_name },
+		});
+		this.acceptFriend(user.id, friend.id);
+		return 3;
+	}
 
 	async createFriends(user_name: string): Promise<number> {
 		const user = await this.userRepository.findOne({
