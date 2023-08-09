@@ -5,32 +5,8 @@ import { FORM_MUTATION } from "src/utils/graphQLMutations";
 import { convertEncodedImage } from "src/utils/convertEncodedImage";
 import "src/styles/style.css";
 import { useNavigate } from "react-router-dom";
-
-interface PictureForm {
-	filename: string;
-	file: string;
-}
-
-class FormData {
-	constructor(usernameArg: string, imageArg: PictureForm) {
-		this.username = usernameArg;
-		this.avatar = imageArg;
-	}
-	username: string;
-	avatar: PictureForm;
-
-	isIncomplete(): boolean {
-		if (
-			this.username == "" ||
-			this.avatar == null ||
-			this.avatar.filename == "" ||
-			this.avatar.file == ""
-		) {
-			return true;
-		}
-		return false;
-	}
-}
+import { PictureForm, FormData } from "./FormData";
+import { gqlErrorCode } from "src/utils/gqlErrorData";
 
 export default function NewUserForm({ user }): JSX.Element {
 	const navigate = useNavigate();
@@ -42,6 +18,7 @@ export default function NewUserForm({ user }): JSX.Element {
 	const [usernameInput, setUsernameInput] = useState("");
 	const [isEmptyForm, setIsEmptyForm] = useState(false);
 	const [fileTooBig, setFileTooBig] = useState(false);
+	const [preexistingUsername, setPreexistingUsername] = useState(false);
 
 	const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
@@ -62,9 +39,11 @@ export default function NewUserForm({ user }): JSX.Element {
 			(data) => {
 				navigate("/home");
 			},
-			(error) => {
-				console.log(error.networkError);
-				setFileTooBig(true);
+			(error: ApolloError) => {
+				if (error.networkError) setFileTooBig(true);
+				if (gqlErrorCode(error)) {
+					setPreexistingUsername(true);
+				}
 			}
 		);
 	};
@@ -109,6 +88,9 @@ export default function NewUserForm({ user }): JSX.Element {
 			<label htmlFor="name">
 				<h3>Username</h3>
 				<input type="text" name="username" onChange={handleChange} />
+				{preexistingUsername && (
+					<p className="empty-form-message">Username already in use</p>
+				)}
 			</label>
 			<button className="submit_button" type="submit">
 				Save Profile

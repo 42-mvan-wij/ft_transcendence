@@ -78,7 +78,7 @@ export class UserResolver {
 		}
 		if (changeUserData.username) {
 			const otherUser = await this.userService.getUser(changeUserData.username);
-			if (otherUser && otherUser != user) {
+			if (otherUser && otherUser.id != user.id) {
 				throw new GraphQLError(
 					'A user already has this name', {
 						extensions: {

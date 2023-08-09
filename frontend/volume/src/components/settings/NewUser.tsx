@@ -1,8 +1,11 @@
 import { useQuery } from "@apollo/client";
+import { Navigate } from "react-router-dom";
 import "src/styles/login-pages/new-user.css";
 import { CURRENT_USER } from "src/utils/graphQLQueries";
 import Loading from "../authorization/Loading";
 import NewUserForm from "./NewUserForm";
+import Error from "../Error";
+import { gqlErrorCode } from "src/utils/gqlErrorData";
 
 function NewUser(): JSX.Element {
 	const { loading, error, data } = useQuery(CURRENT_USER);
