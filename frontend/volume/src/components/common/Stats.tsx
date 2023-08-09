@@ -13,6 +13,17 @@ const GET_STATS = gql`
 	}
 `;
 
+const UPDATE_STATS = gql`
+	subscription StatsHaveBeenUpdated {
+		statsHaveBeenUpdated {
+			rank
+			wins
+			losses
+			score
+		}
+	}
+`;
+
 interface Rank {
 	rank: number;
 	wins: number;
@@ -22,7 +33,19 @@ interface Rank {
 
 function Stats({ userId }: { userId: string }) {
 	const [stats, setStats] = useState<Rank | undefined>();
-	const { data, loading, error } = useQuery(GET_STATS, { variables: { userId } });
+	const { data, loading, error, subscribeToMore } = useQuery(GET_STATS, {
+		variables: { userId },
+	});
+
+	useEffect(() => {
+		return subscribeToMore({
+			document: UPDATE_STATS,
+			updateQuery: (prev, { subscriptionData }) => {
+				if (!subscriptionData.data) return prev;
+				return { getStats: subscriptionData.data.statsHaveBeenUpdated };
+			},
+		});
+	});
 
 	useEffect(() => {
 		if (data) setStats(data.getStats);
