@@ -41,7 +41,7 @@ export default function NewUserForm({ user }): JSX.Element {
 			},
 			(error: ApolloError) => {
 				if (error.networkError) setFileTooBig(true);
-				if (gqlErrorCode(error)) {
+				if (gqlErrorCode(error) == "PREEXISTING_USERNAME") {
 					setPreexistingUsername(true);
 				}
 			}
@@ -53,7 +53,11 @@ export default function NewUserForm({ user }): JSX.Element {
 	};
 
 	const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-		if (!event.target.files) throw new Error();
+		if (!event.target.files) return;
+		if (!event.target.files[0]) {
+			setPicture({ filename: "", file: "" });
+			return;
+		}
 		const fileReader = new FileReader();
 		const file = event.target.files[0];
 		const fileName = file.name;
@@ -87,7 +91,13 @@ export default function NewUserForm({ user }): JSX.Element {
 			</div>
 			<label htmlFor="name">
 				<h3>Username</h3>
-				<input type="text" name="username" onChange={handleChange} />
+				<input
+					type="text"
+					name="username"
+					minLength={2}
+					maxLength={15}
+					onChange={handleChange}
+				/>
 				{preexistingUsername && (
 					<p className="empty-form-message">Username already in use</p>
 				)}

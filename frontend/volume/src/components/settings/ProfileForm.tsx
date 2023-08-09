@@ -54,7 +54,12 @@ export default function ProfileForm({ user }): JSX.Element {
 	};
 
 	const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-		if (!event.target.files) throw new Error();
+		if (!event.target.files) return;
+		if (!event.target.files[0]) {
+			setPicture({ filename: "", file: user.avatar.file });
+			return;
+		}
+
 		const fileReader = new FileReader();
 		const file = event.target.files[0];
 		const fileName = file.name;
@@ -93,6 +98,8 @@ export default function ProfileForm({ user }): JSX.Element {
 					type="text"
 					name="username"
 					placeholder={user.username}
+					minLength={2}
+					maxLength={15}
 					onChange={handleChange}
 				/>
 				{preexistingUsername && (
