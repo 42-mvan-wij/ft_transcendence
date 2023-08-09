@@ -17,7 +17,6 @@ const CREATE_CHANNEL = gql`
 `;
 
 // TO DO: add checks for existing channel
-// TO DO: let user upload image for channel logo
 export default function CreateChannel(props: i.ModalProps & { refetchChannels: () => void }) {
 	const [createChannel, { data }] = useMutation(CREATE_CHANNEL);
 
@@ -25,9 +24,9 @@ export default function CreateChannel(props: i.ModalProps & { refetchChannels: (
 		event.preventDefault();
 		const form = event.currentTarget;
 		const name = form.elements[0].value;
-		const logo = form.elements[1].value;
 		const member_ids = [props.userId];
-		const password = form.elements[2].value;
+		const password = form.elements[1].value;
+		const logo = "none";
 
 		if (!name || !logo || member_ids.length === 0) {
 			alert("All fields are required");
@@ -48,13 +47,8 @@ export default function CreateChannel(props: i.ModalProps & { refetchChannels: (
 			<form onSubmit={onSubmit}>
 				<h3>Name</h3>
 				<input type="text" placeholder="Channel Name"></input>
-				<h3>Chat picture</h3>
-				<div className="flex_row_spacebetween">
-					<label className="choose_file" htmlFor="channelPicture">
-						<input id="channelPicture" type="file" name="channelPicture" />
-						<h3>Upload an image</h3>
-					</label>
-				</div>
+				<br />
+				<br />
 				<h3>Password</h3>
 				<input type="password" placeholder="leave blank to create public channel"></input>
 				<button type="submit">Create channel</button>
