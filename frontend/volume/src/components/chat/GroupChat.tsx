@@ -6,11 +6,70 @@ import { gql, useMutation, useQuery } from "@apollo/client";
 import { convertEncodedImage } from "src/utils/convertEncodedImage";
 import { renderSendContainer } from "./Chat";
 
+// const GET_CHANNEL = gql`
+// 	query Group_chat($groupChatId: String!) {
+// 		group_chat(id: $groupChatId) {
+// 			admins {
+// 				id
+// 			}
+// 			banned_users {
+// 				id
+// 			}
+// 			id
+// 			isPublic
+// 			members {
+// 				id
+// 				username
+// 				avatar {
+// 					file
+// 				}
+// 			}
+// 			owner {
+// 				id
+// 			}
+// 			logo
+// 			messages {
+// 				id
+// 				content
+// 				author {
+// 					id
+// 					username
+// 					blocked_by_me
+// 					avatar {
+// 						file
+// 					}
+// 				}
+// 			}
+// 		}
+// 		currentUserQuery {
+// 			id
+// 		}
+// 	}
+// `;
+
 const GET_CHANNEL = gql`
 	query group_chat($channel_id: String!) {
 		group_chat(id: $channel_id) {
+			admins {
+				id
+			}
+			banned_users {
+				id
+				username
+				avatar {
+					file
+				}
+			}
+			id
 			name
 			logo
+			isPublic
+			owner {
+				id
+			}
+			admins {
+				id
+			}
 			messages {
 				id
 				content
@@ -80,10 +139,14 @@ export default function GroupChat({
 	channel_id: string;
 	renderOverview: () => void;
 }) {
-	const { loading, data, error, subscribeToMore } = useQuery(GET_CHANNEL, {
+	const { loading, data, error, subscribeToMore, refetch } = useQuery(GET_CHANNEL, {
 		variables: { channel_id: channel_id },
 	}); // FIXME: If a user is in the channel overview and a new message is sent, the user will not see the new message until he reloads the page
 	const [sendMessageMutation] = useMutation(SEND_MESSAGE);
+
+	const refetchChannel = () => {
+		refetch();
+	};
 
 	useEffect(() => {
 		return subscribeToMore({
@@ -157,14 +220,19 @@ export default function GroupChat({
 
 	return (
 		<div className="personalMessage">
-			{renderHeader(data, renderOverview, props)}
+			{renderHeader(data, renderOverview, props, refetchChannel)}
 			<Messages data={data} current_user={current_user} />
 			{renderSendContainer(message, handleMessageInput, sendMessage)}
 		</div>
 	);
 }
 
-function renderHeader(data: any, renderOverview: () => void, props: any) {
+function renderHeader(
+	data: any,
+	renderOverview: () => void,
+	props: any,
+	refetchChannel: () => void
+) {
 	return (
 		<div className="chat_pm_header">
 			<div className="go_back">
@@ -178,7 +246,13 @@ function renderHeader(data: any, renderOverview: () => void, props: any) {
 				<a
 					className="link"
 					onClick={() =>
-						props.toggleModal(<GroupStats {...props} selectedGroup={data.group_chat} />)
+						props.toggleModal(
+							<GroupStats
+								{...props}
+								selectedGroup={data.group_chat}
+								refetch={refetchChannel}
+							/>
+						)
 					}
 				>
 					group stats

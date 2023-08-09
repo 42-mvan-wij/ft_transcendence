@@ -1,55 +1,73 @@
 import "../../styles/style.css";
-import * as i from "../../types/Interfaces";
 import UserStats from "../common/UserStats";
 import { convertEncodedImage } from "../../utils/convertEncodedImage";
+import ChangePrivileges from "./ChangePrivileges";
 
-function GroupStats(props: i.ModalProps & { selectedGroup: any }) {
+function GroupStats(props: any) {
+	console.log(props.selectedGroup);
+	console.log(props.selectedGroup.banned_users);
 	return (
 		<div className="userStats">
-			<div className="user">
-				<div className="avatar_container">
-					<img src={convertEncodedImage(props.selectedGroup.logo)} />
-				</div>
-				{renderActions(props.selectedGroup.name)}
-			</div>
+			<h1>{props.selectedGroup.name}</h1>
+			<RenderActions {...props} group={props.selectedGroup} />
+			<br />
 			<h2>Group members</h2>
-			<div className="friend_list">
-				{props.selectedGroup.members &&
-					props.selectedGroup.members.map(function (member: any) {
-						return (
-							<div className="friends_avatar_container" key={member.id}>
-								<img
-									onClick={() =>
-										props.toggleModal(
-											<UserStats {...props} selectedUser={member} />
-										)
-									}
-									src={convertEncodedImage(member.avatar.file)}
-								/>
-							</div>
-						);
-					})}
-			</div>
+			<RenderFriendsList {...props} />
 		</div>
 	);
 }
 
-function renderActions(groupname: string) {
-	// TO DO: check if user is admin
-	const userIsAdmin = true;
-	if (userIsAdmin) {
-		return (
-			<div className="user_actions">
-				<h1>{groupname}</h1>
-				<a className="link">change user priviliges</a>
-				<a className="link">change password</a>
-				<a className="link">leave group</a>
-			</div>
+function RenderActions(props: any) {
+	const userIsAdmin = props.selectedGroup.admins.some((admin: any) => admin.id === props.userId);
+	const isPrivateChannel = !props.selectedGroup.isPublic;
+	const actions = [];
+
+	if (isPrivateChannel || userIsAdmin)
+		actions.push(
+			<a
+				className="link"
+				onClick={() =>
+					props.toggleModal(
+						<ChangePrivileges
+							{...props}
+							group={props.group}
+							refetchChannel={props.refetchChannel}
+						/>
+					)
+				}
+			>
+				change user privileges
+			</a>
 		);
-	}
+
+	if (isPrivateChannel && userIsAdmin) actions.push(<a className="link">change password</a>);
+
+	actions.push(<a className="link">leave group</a>);
+
 	return (
 		<div className="user_actions">
-			<a className="link">leave group</a>
+			<h1>{props.group.groupname}</h1>
+			{actions}
+		</div>
+	);
+}
+
+function RenderFriendsList(props: any) {
+	const members = props.selectedGroup.members;
+	return (
+		<div className="friend_list">
+			{members.map(function (member: any) {
+				return (
+					<div className="friends_avatar_container" key={member.id}>
+						<img
+							onClick={() =>
+								props.toggleModal(<UserStats {...props} selectedUser={member} />)
+							}
+							src={convertEncodedImage(member.avatar.file)}
+						/>
+					</div>
+				);
+			})}
 		</div>
 	);
 }
