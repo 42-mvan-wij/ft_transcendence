@@ -116,19 +116,32 @@ export default function UserStats(modalProps: i.ModalProps & { selectedUser: any
 		);
 	};
 
-	return (
-		<div className="userStats">
-			<div className="user">
-				<div className="avatar_container">
-					<img src={convertEncodedImage(modalProps.selectedUser.avatar.file)} />
+	if (friends.find((friend: any) => friend.id === modalProps.selectedUser.id)) {
+		return (
+			<div className="userStats">
+				<div className="user">
+					<div className="avatar_container">
+						<img src={convertEncodedImage(modalProps.selectedUser.avatar.file)} />
+					</div>
+					{renderUserActions()}
 				</div>
-				{renderUserActions()}
+				<Stats userId={modalProps.selectedUser.id} />
+				<MatchHistory userId={modalProps.selectedUser.id} />
+				<Friends {...modalProps} selectedUser={modalProps.selectedUser} />
 			</div>
-			<Stats userId={modalProps.selectedUser.id} />
-			<MatchHistory userId={modalProps.selectedUser.id} />
-			<Friends {...modalProps} selectedUser={modalProps.selectedUser} />
-		</div>
-	);
+		);
+	} else {
+		return (
+			<div className="userStats">
+				<div className="user">
+					<div className="avatar_container">
+						<img src={convertEncodedImage(modalProps.selectedUser.avatar.file)} />
+					</div>
+					{renderUserActions()}
+				</div>
+			</div>
+		);
+	}
 }
 
 const INVITE_FRIEND = gql`
