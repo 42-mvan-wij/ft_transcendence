@@ -28,7 +28,7 @@ function TwoFactor(): JSX.Element {
 			<div className="white_block">
 				<form className="login_form" method="post" onSubmit={handleSubmit}>
 					<h3>Fill in your code</h3>
-					<input type="text" name="twoFactorCode" />
+					<input type="text" name="twoFactorCode" minLength={1} maxLength={20} />
 					{invalidCode && <p className="invalid_code_popup">Code is invalid</p>}
 					<button className="submit_button" type="submit">
 						Submit Code
