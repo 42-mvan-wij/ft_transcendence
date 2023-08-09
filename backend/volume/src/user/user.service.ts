@@ -161,6 +161,10 @@ export class UserService {
 			friendsChanged: user.friends,
 			id: user.id,
 		});
+		pubSub.publish('friendsChanged', {
+			friendsChanged: friend.friends,
+			id: friend_id,
+		});
 		return user;
 	}
 
