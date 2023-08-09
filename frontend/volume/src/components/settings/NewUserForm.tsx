@@ -72,7 +72,7 @@ export default function NewUserForm({ user }): JSX.Element {
 			<h3>Profile Picture </h3>
 			<div className="change_avatar">
 				<div className="avatar_container">
-					<img src={convertEncodedImage(picture.data)} alt="error no image" />
+					<img src={convertEncodedImage(picture.file)} alt="error no image" />
 				</div>
 				<label className="choose_file" htmlFor="changeAvatar">
 					<input
