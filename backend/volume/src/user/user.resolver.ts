@@ -20,6 +20,7 @@ import { ChangeUserDataInput } from './dto/change-user-data-input';
 import { pubSub } from 'src/app.module';
 import { getSubscriptionUser } from 'src/utils/getSubscriptionUser';
 import { MultiBlockStateChange, MultiBlockStateChangeInput } from './dto/multi-block-state-change.dto';
+import { GraphQLError } from 'graphql';
 
 @Resolver(() => User)
 export class UserResolver {
@@ -71,11 +72,23 @@ export class UserResolver {
 		const user = await this.userService.getUserById(userInfo.userUid);
 		if (changeUserData.avatar) {
 			changeUserData.avatar.parentUserUid = userInfo.userUid;
-			user.avatar = await this.userAvatarService.createOrUpdate(
+			 user.avatar = await this.userAvatarService.createOrUpdate(
 				changeUserData.avatar,
 			);
 		}
-		user.username = changeUserData.username;
+		if (changeUserData.username) {
+			const otherUser = await this.userService.getUser(changeUserData.username);
+			if (otherUser && otherUser != user) {
+				throw new GraphQLError(
+					'A user already has this name', {
+						extensions: {
+							code: 'PREEXISTING_USERNAME'
+						},
+					},
+				);
+			}
+			user.username = changeUserData.username;
+		}
 		await this.userService.save(user);
 		return await this.userService.getUserById(userInfo.userUid);
 	}

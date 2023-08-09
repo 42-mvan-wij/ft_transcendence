@@ -63,6 +63,7 @@ export default function NewUserForm({ user }): JSX.Element {
 				navigate("/home");
 			},
 			(error) => {
+				console.log(error.networkError);
 				setFileTooBig(true);
 			}
 		);
