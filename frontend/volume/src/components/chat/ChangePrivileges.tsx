@@ -1,5 +1,6 @@
 import { convertEncodedImage } from "../../utils/convertEncodedImage";
 import { gql, useMutation } from "@apollo/client";
+import { useEffect } from "react";
 
 const createMutation = (operation: any) => gql`
   mutation ${operation}($channelId: String!, $userId: String!) {
@@ -21,7 +22,6 @@ export default function ChangePrivileges(props: any) {
 	const members = props.group.members.filter(
 		(member: any) => member.id != props.userId && member.id != props.group.owner
 	);
-	console.log("ChangePrivileges", typeof props.refetchChannel);
 
 	if (members.length === 0)
 		return (
@@ -40,7 +40,11 @@ export default function ChangePrivileges(props: any) {
 								<img src={convertEncodedImage(member.avatar.file)} />
 							</div>
 							<div className="name">{member.username}</div>
-							{adminPrivileges(props.group, member, props.refetchChannel)}
+							<AdminPrivileges
+								{...props}
+								member={member}
+								refetchChannel={props.refetchChannel}
+							/>
 							{kickUser(props.group, member, props.refetchChannel)}
 							{banUser(props.group, member, props.refetchChannel)}
 							{muteUser(props.group, member, props.refetchChannel)}
@@ -66,26 +70,29 @@ export default function ChangePrivileges(props: any) {
 	);
 }
 
-function adminPrivileges(group: any, member: any, refetchChannel: () => void) {
-	const memberIsAdmin = group.admins.some((admin: any) => admin.id === member.id);
+function AdminPrivileges(props: any) {
+	console.log(props.group.admins);
+
+	let memberIsAdmin = props.group.admins.some((admin: any) => admin.id === props.member.id);
+	let linkText = memberIsAdmin ? "remove admin" : "make admin";
+	useEffect(() => {
+		memberIsAdmin = props.group.admins.some((admin: any) => admin.id === props.member.id);
+		linkText = memberIsAdmin ? "remove admin" : "make admin";
+	}, [props.group.admins]);
 
 	const [promoteAdminMutation] = useMutation(PROMOTE_ADMIN);
 	const [demoteAdminMutation] = useMutation(DEMOTE_ADMIN);
-	console.log(typeof refetchChannel);
 
 	function handleAdminAction(): void {
 		const mutation = memberIsAdmin ? demoteAdminMutation : promoteAdminMutation;
 		mutation({
 			variables: {
-				channelId: group.id,
-				userId: member.id,
+				channelId: props.group.id,
+				userId: props.member.id,
 			},
 		});
-		console.log(typeof refetchChannel);
-
-		refetchChannel();
+		props.refetchChannel();
 	}
-	const linkText = memberIsAdmin ? "remove admin" : "make admin";
 	return (
 		<div className="link admin" onClick={handleAdminAction}>
 			{linkText}

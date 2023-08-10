@@ -4,8 +4,6 @@ import { convertEncodedImage } from "../../utils/convertEncodedImage";
 import ChangePrivileges from "./ChangePrivileges";
 
 function GroupStats(props: any) {
-	console.log(props.selectedGroup);
-	console.log(props.selectedGroup.banned_users);
 	return (
 		<div className="userStats">
 			<h1>{props.selectedGroup.name}</h1>
@@ -25,7 +23,6 @@ function RenderActions(props: any) {
 	const userIsAdmin = props.selectedGroup.admins.some((admin: any) => admin.id === props.userId);
 	const isPrivateChannel = !props.selectedGroup.isPublic;
 	const actions = [];
-	console.log("RenderActions", typeof props.refetchChannel);
 
 	if (isPrivateChannel || userIsAdmin)
 		actions.push(
