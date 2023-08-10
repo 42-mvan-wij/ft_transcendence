@@ -12,6 +12,7 @@ import {
 	useOwnChallengeAvailability,
 } from "src/utils/useChallengeAvailability";
 import { useBlockState } from "src/utils/useBlockState";
+import { CHALLENGE_FRIEND } from "src/utils/graphQLMutations";
 
 export default function UserStats(modalProps: i.ModalProps & { selectedUser: any }) {
 	const { friends, loading, error } = useFriendsData(modalProps.userId);
@@ -195,12 +196,6 @@ export enum ChallengeStatus {
 	IS_CHALLENGER,
 	OFFLINE,
 }
-
-const CHALLENGE_FRIEND = gql`
-	mutation ChallengeFriend($friendId: String!) {
-		challengeFriend(friendId: $friendId)
-	}
-`;
 
 function renderChallengeFriendActions(
 	modalProps: any,
