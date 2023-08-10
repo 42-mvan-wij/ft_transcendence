@@ -205,6 +205,10 @@ table {
   text-align: right;
 }
 
+.unclickable_link {
+  color: #9db6c1;
+}
+
 :root {
   font-family: Poppins;
   line-height: 1.5;
@@ -595,9 +599,6 @@ details > summary::-webkit-details-marker {
   display: flex;
   justify-content: space-between;
   height: 40px;
-}
-.change_privileges .unclickable_link {
-  color: #9db6c1;
 }
 .change_privileges .name {
   max-width: 20%;

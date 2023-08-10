@@ -21,6 +21,13 @@ export default function ChangePrivileges(props: any) {
 	const members = props.group.members.filter(
 		(member: any) => member.id != props.userId && member.id != props.group.owner
 	);
+
+	if (members.length === 0)
+		return (
+			<div className="userStats">
+				<h1>{props.group.name}</h1>No actions available
+			</div>
+		);
 	return (
 		<div className="userStats">
 			<h1>{props.group.name}</h1>
