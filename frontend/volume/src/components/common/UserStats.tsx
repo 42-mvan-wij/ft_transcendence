@@ -203,23 +203,21 @@ function renderChallengeFriendActions(
 	own_challenge_availability_data: ChallengeStatus,
 	challenge_availability_data: ChallengeStatus
 ) {
-	if (
+	const isChallengeAvailable: boolean =
 		own_challenge_availability_data === ChallengeStatus.ONLINE &&
-		challenge_availability_data === ChallengeStatus.ONLINE
-	) {
-		return (
-			<a
-				className="link"
-				onClick={() => {
+		challenge_availability_data === ChallengeStatus.ONLINE;
+
+	return (
+		<a
+			className={`link ${isChallengeAvailable ? "" : "grayed-out"}`}
+			onClick={() => {
+				if (isChallengeAvailable)
 					challenge_friend({ variables: { friendId: modalProps.selectedUser.id } });
-				}}
-			>
-				challenge
-			</a>
-		);
-	} else {
-		return <div>User not available for challenge</div>;
-	}
+			}}
+		>
+			challenge
+		</a>
+	);
 }
 
 const BLOCK_USER = gql`

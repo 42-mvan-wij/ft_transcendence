@@ -205,6 +205,12 @@ table {
   text-align: right;
 }
 
+.grayed-out {
+	color: gray;
+	pointer-events: none;
+	cursor: default;
+}
+
 :root {
   font-family: Poppins;
   line-height: 1.5;

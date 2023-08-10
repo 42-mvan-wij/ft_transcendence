@@ -261,25 +261,15 @@ function ChallengeFriend(friend: any) {
 	if (challenge_loading) return <></>;
 	if (challenge_error) return <></>;
 
-	if (ownChallengeAvailabilityStatus.challengeStatus === ChallengeStatus.IN_QUEUE)
-		return <div>You cannot challenge other players, because you are in queue</div>;
-	if (ownChallengeAvailabilityStatus.challengeStatus === ChallengeStatus.IN_MATCH)
-		return <div>You cannot challenge other players, because you are in a match</div>;
-	if (ownChallengeAvailabilityStatus.challengeStatus === ChallengeStatus.IS_CHALLENGER)
-		return <div>You already challenged someone</div>;
-	if (challengeAvailabilityStatus.challengeStatus === ChallengeStatus.IN_QUEUE)
-		return <div>cannot challenge {friend.username} (in queue)</div>;
-	if (challengeAvailabilityStatus.challengeStatus === ChallengeStatus.IN_MATCH)
-		return <div>cannot challenge {friend.username} (in game)</div>;
-	if (challengeAvailabilityStatus.challengeStatus === ChallengeStatus.OFFLINE)
-		return <div>cannot challenge {friend.username} (offline)</div>;
-	if (challengeAvailabilityStatus.challengeStatus === ChallengeStatus.IS_CHALLENGER)
-		return <div>cannot challenge {friend.username} </div>;
+	const isChallengeAvailable: boolean =
+		ownChallengeAvailabilityStatus.challengeStatus === ChallengeStatus.ONLINE &&
+		challengeAvailabilityStatus.challengeStatus === ChallengeStatus.ONLINE;
+
 	return (
 		<a
-			className="link"
+			className={`link ${isChallengeAvailable ? "" : "grayed-out"}`}
 			onClick={() => {
-				challenge_friend({ variables: { friendId: friend.id } });
+				if (isChallengeAvailable) challenge_friend({ variables: { friendId: friend.id } });
 			}}
 		>
 			challenge
