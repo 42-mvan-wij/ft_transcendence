@@ -41,7 +41,7 @@ export default function SettingsModule({ user }): JSX.Element {
 						<span className="slider round"></span>
 					</label>
 					<div className="qr_code_container">
-						<img src={QRCodeState.data.QRCodeQuery} alt="error no code" />
+						{checked && <img src={QRCodeState.data.QRCodeQuery} alt="error no code" />}
 					</div>
 				</form>
 			</div>
