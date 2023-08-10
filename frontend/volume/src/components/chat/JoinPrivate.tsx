@@ -79,7 +79,7 @@ function Channel({
 	Join,
 }: any) {
 	return (
-		<div className="chooseChannel">
+		<div className="chooseChannel" key={chat.id}>
 			<div className="selectUser" onClick={() => setSelectedChannel(chat.id)}>
 				<div className="link">{chat.name}</div>
 				<div className="unclickable_link">{chat.members.length} members</div>

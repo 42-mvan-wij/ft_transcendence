@@ -280,6 +280,7 @@ section#chat {
 		justify-content: space-between;
 		align-items: center;
 		padding: 1em 0;
+		margin-top:1em;
 		box-sizing: border-box;
 
 		button {
@@ -390,6 +391,19 @@ details[open] summary {}
 			height: 100%;
 			object-fit: cover;
 			object-position: center;
+		}
+	}
+}
+
+.chooseChannel{
+	margin-top:1em;
+
+	.inputField{
+		margin-top:-0.5em;
+		margin-bottom:2em;
+
+		button{
+			margin-top:0em;
 		}
 	}
 }

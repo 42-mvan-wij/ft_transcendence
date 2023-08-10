@@ -63,7 +63,6 @@ export default function PublicChannel({
 			{data.all_available_public_channels.map(function (chat: any) {
 				return (
 					<div key={chat.id} className="selectUser">
-						<img className="avatar" src={chat.logo} />
 						<button onClick={() => Join(chat.id)}>Join {chat.name}</button>
 					</div>
 				);
