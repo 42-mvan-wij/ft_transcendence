@@ -21,6 +21,7 @@ export default function ChangePrivileges(props: any) {
 	const members = props.group.members.filter(
 		(member: any) => member.id != props.userId && member.id != props.group.owner
 	);
+	console.log("ChangePrivileges", typeof props.refetchChannel);
 
 	if (members.length === 0)
 		return (
@@ -34,7 +35,7 @@ export default function ChangePrivileges(props: any) {
 			<div className="change_privileges">
 				{members.map(function (member: any) {
 					return (
-						<div className="privileges_row" key={member.id}>
+						<div className="privileges_row" key={"users" + member.id}>
 							<div className="friends_avatar_container">
 								<img src={convertEncodedImage(member.avatar.file)} />
 							</div>
@@ -48,7 +49,7 @@ export default function ChangePrivileges(props: any) {
 				})}
 				{props.group.banned_users.map(function (member: any) {
 					return (
-						<div className="privileges_row" key={member.id}>
+						<div className="privileges_row" key={"banned" + member.id}>
 							<div className="friends_avatar_container">
 								<img src={convertEncodedImage(member.avatar.file)} />
 							</div>
@@ -70,6 +71,7 @@ function adminPrivileges(group: any, member: any, refetchChannel: () => void) {
 
 	const [promoteAdminMutation] = useMutation(PROMOTE_ADMIN);
 	const [demoteAdminMutation] = useMutation(DEMOTE_ADMIN);
+	console.log(typeof refetchChannel);
 
 	function handleAdminAction(): void {
 		const mutation = memberIsAdmin ? demoteAdminMutation : promoteAdminMutation;
@@ -79,6 +81,8 @@ function adminPrivileges(group: any, member: any, refetchChannel: () => void) {
 				userId: member.id,
 			},
 		});
+		console.log(typeof refetchChannel);
+
 		refetchChannel();
 	}
 	const linkText = memberIsAdmin ? "remove admin" : "make admin";
@@ -120,7 +124,7 @@ function banUser(group: any, member: any, refetchChannel: () => void) {
 				userId: member.id,
 			},
 		});
-		// refetchChannel();
+		refetchChannel();
 	}
 	const linkText = memberIsBanned ? "unban" : "ban";
 	return (
@@ -144,7 +148,7 @@ function muteUser(group: any, member: any, refetchChannel: () => void) {
 				userId: member.id,
 			},
 		});
-		// refetchChannel();
+		refetchChannel();
 	}
 	const linkText = memberIsBanned ? "unmute" : "mute";
 	return (

@@ -9,7 +9,11 @@ function GroupStats(props: any) {
 	return (
 		<div className="userStats">
 			<h1>{props.selectedGroup.name}</h1>
-			<RenderActions {...props} group={props.selectedGroup} />
+			<RenderActions
+				{...props}
+				group={props.selectedGroup}
+				refetchChannel={props.refetchChannel}
+			/>
 			<br />
 			<h2>Group members</h2>
 			<RenderFriendsList {...props} />
@@ -21,11 +25,13 @@ function RenderActions(props: any) {
 	const userIsAdmin = props.selectedGroup.admins.some((admin: any) => admin.id === props.userId);
 	const isPrivateChannel = !props.selectedGroup.isPublic;
 	const actions = [];
+	console.log("RenderActions", typeof props.refetchChannel);
 
 	if (isPrivateChannel || userIsAdmin)
 		actions.push(
 			<a
 				className="link"
+				key="change_privileges"
 				onClick={() =>
 					props.toggleModal(
 						<ChangePrivileges
@@ -40,9 +46,18 @@ function RenderActions(props: any) {
 			</a>
 		);
 
-	if (isPrivateChannel && userIsAdmin) actions.push(<a className="link">change password</a>);
+	if (isPrivateChannel && userIsAdmin)
+		actions.push(
+			<a className="link" key="pw">
+				change password
+			</a>
+		);
 
-	actions.push(<a className="link">leave group</a>);
+	actions.push(
+		<a className="link" key="leave">
+			leave group
+		</a>
+	);
 
 	return (
 		<div className="user_actions">

@@ -6,47 +6,6 @@ import { gql, useMutation, useQuery } from "@apollo/client";
 import { convertEncodedImage } from "src/utils/convertEncodedImage";
 import { renderSendContainer } from "./Chat";
 
-// const GET_CHANNEL = gql`
-// 	query Group_chat($groupChatId: String!) {
-// 		group_chat(id: $groupChatId) {
-// 			admins {
-// 				id
-// 			}
-// 			banned_users {
-// 				id
-// 			}
-// 			id
-// 			isPublic
-// 			members {
-// 				id
-// 				username
-// 				avatar {
-// 					file
-// 				}
-// 			}
-// 			owner {
-// 				id
-// 			}
-// 			logo
-// 			messages {
-// 				id
-// 				content
-// 				author {
-// 					id
-// 					username
-// 					blocked_by_me
-// 					avatar {
-// 						file
-// 					}
-// 				}
-// 			}
-// 		}
-// 		currentUserQuery {
-// 			id
-// 		}
-// 	}
-// `;
-
 const GET_CHANNEL = gql`
 	query group_chat($channel_id: String!) {
 		group_chat(id: $channel_id) {
@@ -220,27 +179,31 @@ export default function GroupChat({
 
 	return (
 		<div className="personalMessage">
-			{renderHeader(data, renderOverview, props, refetchChannel)}
+			<RenderHeader
+				{...props}
+				data={data}
+				renderOverview={renderOverview}
+				refetchChannel={refetchChannel}
+			/>
 			<Messages data={data} current_user={current_user} />
 			{renderSendContainer(message, handleMessageInput, sendMessage)}
 		</div>
 	);
 }
 
-function renderHeader(
-	data: any,
-	renderOverview: () => void,
-	props: any,
-	refetchChannel: () => void
-) {
+function RenderHeader(props: any) {
 	return (
 		<div className="chat_pm_header">
 			<div className="go_back">
-				<img className="arrow_back" src="/img/arrow_back.png" onClick={renderOverview} />
+				<img
+					className="arrow_back"
+					src="/img/arrow_back.png"
+					onClick={props.renderOverview}
+				/>
 			</div>
 			<div className="pm_user">
-				<img className="pm_avatar" src={convertEncodedImage(data.group_chat.logo)} />
-				<h3>{data.group_chat.name}</h3>
+				<img className="pm_avatar" src={convertEncodedImage(props.data.group_chat.logo)} />
+				<h3>{props.data.group_chat.name}</h3>
 			</div>
 			<div className="groupchat_info">
 				<a
@@ -249,8 +212,8 @@ function renderHeader(
 						props.toggleModal(
 							<GroupStats
 								{...props}
-								selectedGroup={data.group_chat}
-								refetch={refetchChannel}
+								selectedGroup={props.data.group_chat}
+								refetchChannel={props.refetchChannel}
 							/>
 						)
 					}
