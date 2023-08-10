@@ -116,19 +116,32 @@ export default function UserStats(modalProps: i.ModalProps & { selectedUser: any
 		);
 	};
 
-	return (
-		<div className="userStats">
-			<div className="user">
-				<div className="avatar_container">
-					<img src={convertEncodedImage(modalProps.selectedUser.avatar.file)} />
+	if (friends.find((friend: any) => friend.id === modalProps.selectedUser.id)) {
+		return (
+			<div className="userStats">
+				<div className="user">
+					<div className="avatar_container">
+						<img src={convertEncodedImage(modalProps.selectedUser.avatar.file)} />
+					</div>
+					{renderUserActions()}
 				</div>
-				{renderUserActions()}
+				<Stats userId={modalProps.selectedUser.id} />
+				<MatchHistory userId={modalProps.selectedUser.id} />
+				<Friends {...modalProps} selectedUser={modalProps.selectedUser} />
 			</div>
-			<Stats userId={modalProps.selectedUser.id} />
-			<MatchHistory userId={modalProps.selectedUser.id} />
-			<Friends {...modalProps} selectedUser={modalProps.selectedUser} />
-		</div>
-	);
+		);
+	} else {
+		return (
+			<div className="userStats">
+				<div className="user">
+					<div className="avatar_container">
+						<img src={convertEncodedImage(modalProps.selectedUser.avatar.file)} />
+					</div>
+					{renderUserActions()}
+				</div>
+			</div>
+		);
+	}
 }
 
 const INVITE_FRIEND = gql`
@@ -195,34 +208,23 @@ function renderChallengeFriendActions(
 	own_challenge_availability_data: ChallengeStatus,
 	challenge_availability_data: ChallengeStatus
 ) {
-	if (own_challenge_availability_data === ChallengeStatus.IN_QUEUE)
-		return <div>You cannot challenge other players, because you are in queue</div>;
-	if (own_challenge_availability_data === ChallengeStatus.IN_MATCH)
-		return <div>You cannot challenge other players, because you are in a match</div>;
-	if (own_challenge_availability_data === ChallengeStatus.IS_CHALLENGER)
+	if (
+		own_challenge_availability_data === ChallengeStatus.ONLINE &&
+		challenge_availability_data === ChallengeStatus.ONLINE
+	) {
 		return (
-			<div>
-				You cannot challenge other players, because you already challenged another player
-			</div>
+			<a
+				className="link"
+				onClick={() => {
+					challenge_friend({ variables: { friendId: modalProps.selectedUser.id } });
+				}}
+			>
+				challenge
+			</a>
 		);
-	if (challenge_availability_data === ChallengeStatus.IN_QUEUE)
-		return <div>cannot challenge {modalProps.selectedUser.username} (in queue)</div>;
-	if (challenge_availability_data === ChallengeStatus.IN_MATCH)
-		return <div>cannot challenge {modalProps.selectedUser.username} (in game)</div>;
-	if (challenge_availability_data === ChallengeStatus.OFFLINE)
-		return <div>cannot challenge {modalProps.selectedUser.username} (offline)</div>;
-	if (challenge_availability_data === ChallengeStatus.IS_CHALLENGER)
-		return <div>cannot challenge {modalProps.selectedUser.username} </div>;
-	return (
-		<a
-			className="link"
-			onClick={() => {
-				challenge_friend({ variables: { friendId: modalProps.selectedUser.id } });
-			}}
-		>
-			challenge
-		</a>
-	);
+	} else {
+		return <div>User not available for challenge</div>;
+	}
 }
 
 const BLOCK_USER = gql`

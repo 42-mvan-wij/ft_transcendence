@@ -275,18 +275,18 @@ export class UserResolver {
 
 	@Mutation(() => Boolean)
 	async inviteFriend1(
-		@Args('user_id') user_id: string,
-		@Args('friend_id') friend_id: string,
+		@Args('user_name') user_name: string,
+		@Args('friend_name') friend_name: string,
 	) {
-		return this.userService.inviteFriend(user_id, friend_id);
+		return this.userService.inviteFriend1(user_name, friend_name);
 	}
 
 	@Mutation(() => Boolean)
 	async acceptFriend1(
-		@Args('user_id') user_id: string,
-		@Args('friend_id') friend_id: string,
+		@Args('user_name') user_name: string,
+		@Args('friend_name') friend_name: string,
 	) {
-		return this.userService.acceptFriend(user_id, friend_id);
+		return this.userService.acceptFriend1(user_name, friend_name);
 	}
 
 	@Mutation(() => Boolean)
