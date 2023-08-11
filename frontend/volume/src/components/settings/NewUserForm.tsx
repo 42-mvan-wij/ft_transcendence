@@ -1,36 +1,12 @@
 import { useState } from "react";
-import { useMutation } from "@apollo/client";
+import { ApolloError, useMutation } from "@apollo/client";
 import { CURRENT_USER } from "src/utils/graphQLQueries";
 import { FORM_MUTATION } from "src/utils/graphQLMutations";
 import { convertEncodedImage } from "src/utils/convertEncodedImage";
 import "src/styles/style.css";
 import { useNavigate } from "react-router-dom";
-
-interface PictureForm {
-	filename: string;
-	file: string;
-}
-
-class FormData {
-	constructor(usernameArg: string, imageArg: PictureForm) {
-		this.username = usernameArg;
-		this.avatar = imageArg;
-	}
-	username: string;
-	avatar: PictureForm;
-
-	isIncomplete(): boolean {
-		if (
-			this.username == "" ||
-			this.avatar == null ||
-			this.avatar.filename == "" ||
-			this.avatar.file == ""
-		) {
-			return true;
-		}
-		return false;
-	}
-}
+import { PictureForm, FormData } from "./FormData";
+import { gqlErrorCode } from "src/utils/gqlErrorData";
 
 export default function NewUserForm({ user }): JSX.Element {
 	const navigate = useNavigate();
@@ -41,6 +17,8 @@ export default function NewUserForm({ user }): JSX.Element {
 	const [picture, setPicture] = useState<PictureForm>({ filename: "", file: "" });
 	const [usernameInput, setUsernameInput] = useState("");
 	const [isEmptyForm, setIsEmptyForm] = useState(false);
+	const [fileTooBig, setFileTooBig] = useState(false);
+	const [preexistingUsername, setPreexistingUsername] = useState(false);
 
 	const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
@@ -52,13 +30,22 @@ export default function NewUserForm({ user }): JSX.Element {
 		} else {
 			setIsEmptyForm(false);
 		}
-		console.log(formData);
-		formMutation({
+		const result = formMutation({
 			variables: {
 				input: formData,
 			},
 		});
-		navigate("/home");
+		result.then(
+			(data) => {
+				navigate("/home");
+			},
+			(error: ApolloError) => {
+				if (error.networkError) setFileTooBig(true);
+				if (gqlErrorCode(error) == "PREEXISTING_USERNAME") {
+					setPreexistingUsername(true);
+				}
+			}
+		);
 	};
 
 	const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -66,7 +53,11 @@ export default function NewUserForm({ user }): JSX.Element {
 	};
 
 	const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-		if (!event.target.files) throw new Error();
+		if (!event.target.files) return;
+		if (!event.target.files[0]) {
+			setPicture({ filename: "", file: "" });
+			return;
+		}
 		const fileReader = new FileReader();
 		const file = event.target.files[0];
 		const fileName = file.name;
@@ -85,7 +76,7 @@ export default function NewUserForm({ user }): JSX.Element {
 			<h3>Profile Picture </h3>
 			<div className="change_avatar">
 				<div className="avatar_container">
-					<img src={convertEncodedImage(picture.data)} alt="error no image" />
+					<img src={convertEncodedImage(picture.file)} alt="error no image" />
 				</div>
 				<label className="choose_file" htmlFor="changeAvatar">
 					<input
@@ -96,10 +87,20 @@ export default function NewUserForm({ user }): JSX.Element {
 					/>
 					<h3>Select a profile picture</h3>
 				</label>
+				{fileTooBig && <p className="empty-form-message">The selected image is too big</p>}
 			</div>
 			<label htmlFor="name">
 				<h3>Username</h3>
-				<input type="text" name="username" onChange={handleChange} />
+				<input
+					type="text"
+					name="username"
+					minLength={2}
+					maxLength={15}
+					onChange={handleChange}
+				/>
+				{preexistingUsername && (
+					<p className="empty-form-message">Username already in use</p>
+				)}
 			</label>
 			<button className="submit_button" type="submit">
 				Save Profile

@@ -12,6 +12,7 @@ import {
 	useOwnChallengeAvailability,
 } from "src/utils/useChallengeAvailability";
 import { useBlockState } from "src/utils/useBlockState";
+import { CHALLENGE_FRIEND } from "src/utils/graphQLMutations";
 
 export default function UserStats(modalProps: i.ModalProps & { selectedUser: any }) {
 	const { friends, loading, error } = useFriendsData(modalProps.userId);
@@ -116,19 +117,32 @@ export default function UserStats(modalProps: i.ModalProps & { selectedUser: any
 		);
 	};
 
-	return (
-		<div className="userStats">
-			<div className="user">
-				<div className="avatar_container">
-					<img src={convertEncodedImage(modalProps.selectedUser.avatar.file)} />
+	if (friends.find((friend: any) => friend.id === modalProps.selectedUser.id)) {
+		return (
+			<div className="userStats">
+				<div className="user">
+					<div className="avatar_container">
+						<img src={convertEncodedImage(modalProps.selectedUser.avatar.file)} />
+					</div>
+					{renderUserActions()}
 				</div>
-				{renderUserActions()}
+				<Stats userId={modalProps.selectedUser.id} />
+				<MatchHistory userId={modalProps.selectedUser.id} />
+				<Friends {...modalProps} selectedUser={modalProps.selectedUser} />
 			</div>
-			<Stats userId={modalProps.selectedUser.id} />
-			<MatchHistory userId={modalProps.selectedUser.id} />
-			<Friends {...modalProps} selectedUser={modalProps.selectedUser} />
-		</div>
-	);
+		);
+	} else {
+		return (
+			<div className="userStats">
+				<div className="user">
+					<div className="avatar_container">
+						<img src={convertEncodedImage(modalProps.selectedUser.avatar.file)} />
+					</div>
+					{renderUserActions()}
+				</div>
+			</div>
+		);
+	}
 }
 
 const INVITE_FRIEND = gql`
@@ -183,41 +197,22 @@ export enum ChallengeStatus {
 	OFFLINE,
 }
 
-const CHALLENGE_FRIEND = gql`
-	mutation ChallengeFriend($friendId: String!) {
-		challengeFriend(friendId: $friendId)
-	}
-`;
-
 function renderChallengeFriendActions(
 	modalProps: any,
 	challenge_friend: any,
 	own_challenge_availability_data: ChallengeStatus,
 	challenge_availability_data: ChallengeStatus
 ) {
-	if (own_challenge_availability_data === ChallengeStatus.IN_QUEUE)
-		return <div>You cannot challenge other players, because you are in queue</div>;
-	if (own_challenge_availability_data === ChallengeStatus.IN_MATCH)
-		return <div>You cannot challenge other players, because you are in a match</div>;
-	if (own_challenge_availability_data === ChallengeStatus.IS_CHALLENGER)
-		return (
-			<div>
-				You cannot challenge other players, because you already challenged another player
-			</div>
-		);
-	if (challenge_availability_data === ChallengeStatus.IN_QUEUE)
-		return <div>cannot challenge {modalProps.selectedUser.username} (in queue)</div>;
-	if (challenge_availability_data === ChallengeStatus.IN_MATCH)
-		return <div>cannot challenge {modalProps.selectedUser.username} (in game)</div>;
-	if (challenge_availability_data === ChallengeStatus.OFFLINE)
-		return <div>cannot challenge {modalProps.selectedUser.username} (offline)</div>;
-	if (challenge_availability_data === ChallengeStatus.IS_CHALLENGER)
-		return <div>cannot challenge {modalProps.selectedUser.username} </div>;
+	const isChallengeAvailable: boolean =
+		own_challenge_availability_data === ChallengeStatus.ONLINE &&
+		challenge_availability_data === ChallengeStatus.ONLINE;
+
 	return (
 		<a
-			className="link"
+			className={`link ${isChallengeAvailable ? "" : "grayed-out"}`}
 			onClick={() => {
-				challenge_friend({ variables: { friendId: modalProps.selectedUser.id } });
+				if (isChallengeAvailable)
+					challenge_friend({ variables: { friendId: modalProps.selectedUser.id } });
 			}}
 		>
 			challenge

@@ -21,18 +21,12 @@ export class GroupMessageService {
 		createMessageInput: CreateGroupMessageInput,
 		author_id: string,
 	): Promise<GroupMessage> {
+		if (this.channelService.isMuted(author_id, createMessageInput.channel_id)) {
+			throw new Error(`Cannot send message, because author is muted`);
+		}
 		const author = await this.userService.getUserById(author_id);
 		const channel = await this.channelService.getChannelById(
 			createMessageInput.channel_id,
-		);
-
-		console.log(
-			'received message: ',
-			createMessageInput.content,
-			' from ',
-			author.username,
-			' in channel ',
-			channel.id,
 		);
 
 		const message = this.messageRepository.create({

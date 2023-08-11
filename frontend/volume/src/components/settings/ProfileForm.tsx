@@ -1,51 +1,52 @@
 import { useState } from "react";
-import { useMutation } from "@apollo/client";
+import { ApolloError, useMutation } from "@apollo/client";
 import { CURRENT_USER } from "src/utils/graphQLQueries";
 import { FORM_MUTATION } from "src/utils/graphQLMutations";
 import { convertEncodedImage } from "src/utils/convertEncodedImage";
+import { PictureForm, FormData } from "./FormData";
 import "src/styles/style.css";
-
-interface PictureForm {
-	name: string;
-	data: string;
-}
+import { gqlErrorCode } from "src/utils/gqlErrorData";
 
 export default function ProfileForm({ user }): JSX.Element {
 	const [formMutation, formMutationState] = useMutation(FORM_MUTATION, {
 		refetchQueries: [{ query: CURRENT_USER }],
 	});
 
-	const [picture, setPicture] = useState<PictureForm>({ name: "", data: user.avatar.file });
+	const [picture, setPicture] = useState<PictureForm>({ filename: "", file: user.avatar.file });
 	const [usernameInput, setUsernameInput] = useState("");
 	const [isEmptyForm, setIsEmptyForm] = useState(false);
+	const [fileTooBig, setFileTooBig] = useState(false);
+	const [preexistingUsername, setPreexistingUsername] = useState(false);
 
 	const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
-		const username = event.currentTarget.username.value;
-		const formData = {};
+		const formData = new FormData(usernameInput, picture);
 
-		if (usernameInput.trim() !== "") {
-			formData["username"] = usernameInput;
-		}
-
-		if (picture.data !== "" && picture.data !== user.avatar.file) {
-			formData["avatar"] = {
-				file: picture.data,
-				filename: picture.name,
-			};
-		}
-
-		if (Object.keys(formData).length === 0) {
+		if (formData.isEmpty()) {
 			setIsEmptyForm(true);
 			return;
+		} else {
+			setIsEmptyForm(false);
 		}
 
-		setIsEmptyForm(false);
-		formMutation({
+		const result = formMutation({
 			variables: {
 				input: formData,
 			},
 		});
+		result.then(
+			(data) => {
+				setPreexistingUsername(false);
+				setFileTooBig(false);
+				return;
+			},
+			(error: ApolloError) => {
+				if (error.networkError) setFileTooBig(true);
+				if (gqlErrorCode(error) == "PREEXISTING_USERNAME") {
+					setPreexistingUsername(true);
+				}
+			}
+		);
 	};
 
 	const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -53,7 +54,12 @@ export default function ProfileForm({ user }): JSX.Element {
 	};
 
 	const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-		if (!event.target.files) throw new Error();
+		if (!event.target.files) return;
+		if (!event.target.files[0]) {
+			setPicture({ filename: "", file: user.avatar.file });
+			return;
+		}
+
 		const fileReader = new FileReader();
 		const file = event.target.files[0];
 		const fileName = file.name;
@@ -61,7 +67,7 @@ export default function ProfileForm({ user }): JSX.Element {
 		fileReader.onloadend = (e: any) => {
 			const fileContent = e.currentTarget.result as string;
 			const imgData = window.btoa(fileContent);
-			setPicture({ name: fileName, data: imgData });
+			setPicture({ filename: fileName, file: imgData });
 		};
 		fileReader.readAsBinaryString(file);
 	};
@@ -71,7 +77,7 @@ export default function ProfileForm({ user }): JSX.Element {
 			<h3>Profile Picture </h3>
 			<div className="change_avatar">
 				<div className="avatar_container">
-					<img src={convertEncodedImage(picture.data)} alt="error no image" />
+					<img src={convertEncodedImage(picture.file)} alt="error no image" />
 				</div>
 				<label className="choose_file" htmlFor="changeAvatar">
 					<input
@@ -81,6 +87,9 @@ export default function ProfileForm({ user }): JSX.Element {
 						onChange={handleFileChange}
 					/>
 					<h3>Select a new image</h3>
+					{fileTooBig && (
+						<p className="empty-form-message">The selected image is too big</p>
+					)}
 				</label>
 			</div>
 			<label htmlFor="name">
@@ -89,8 +98,13 @@ export default function ProfileForm({ user }): JSX.Element {
 					type="text"
 					name="username"
 					placeholder={user.username}
+					minLength={2}
+					maxLength={15}
 					onChange={handleChange}
 				/>
+				{preexistingUsername && (
+					<p className="empty-form-message">Username already in use</p>
+				)}
 			</label>
 			<button className="submit_button" type="submit">
 				Save Profile

@@ -3,8 +3,13 @@ import "../../styles/style.css";
 import * as i from "../../types/Interfaces";
 import { gql, useMutation, useQuery } from "@apollo/client";
 import { convertEncodedImage } from "../../utils/convertEncodedImage";
-import UserStats from "../common/UserStats";
+import UserStats, { ChallengeStatus } from "../common/UserStats";
 import { renderSendContainer } from "./Chat";
+import {
+	useChallengeAvailability,
+	useOwnChallengeAvailability,
+} from "src/utils/useChallengeAvailability";
+import { CHALLENGE_FRIEND } from "src/utils/graphQLMutations";
 
 const GET_CHANNEL = gql`
 	query personal_chat($channel_id: String!) {
@@ -180,7 +185,7 @@ function renderHeader(props: i.ModalProps, friend: i.User, data: any, renderOver
 				<h3>{friend.username}</h3>
 			</div>
 			<div className="groupchat_info">
-				<a className="link">challenge</a>
+				<ChallengeFriend {...friend} />
 				<a
 					className="link"
 					onClick={() =>
@@ -231,5 +236,43 @@ function Message({ message, current_user }: { message: any; current_user: any })
 				</div>
 			</div>
 		</div>
+	);
+}
+
+function ChallengeFriend(friend: any) {
+	const {
+		challengeAvailabilityStatus,
+		loading: challenge_available_loading,
+		error: challenge_available_error,
+	} = useChallengeAvailability(friend.id);
+	const {
+		ownChallengeAvailabilityStatus,
+		loading: own_challenge_available_loading,
+		error: own_challenge_available_error,
+	} = useOwnChallengeAvailability();
+
+	const [challenge_friend, { loading: challenge_loading, error: challenge_error }] =
+		useMutation(CHALLENGE_FRIEND);
+
+	if (challenge_available_loading) return <></>;
+	if (challenge_available_error) return <></>;
+	if (own_challenge_available_loading) return <></>;
+	if (own_challenge_available_error) return <></>;
+	if (challenge_loading) return <></>;
+	if (challenge_error) return <></>;
+
+	const isChallengeAvailable: boolean =
+		ownChallengeAvailabilityStatus.challengeStatus === ChallengeStatus.ONLINE &&
+		challengeAvailabilityStatus.challengeStatus === ChallengeStatus.ONLINE;
+
+	return (
+		<a
+			className={`link ${isChallengeAvailable ? "" : "grayed-out"}`}
+			onClick={() => {
+				if (isChallengeAvailable) challenge_friend({ variables: { friendId: friend.id } });
+			}}
+		>
+			challenge
+		</a>
 	);
 }

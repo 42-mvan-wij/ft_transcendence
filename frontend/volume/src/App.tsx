@@ -4,7 +4,7 @@ import ProtectedRoute from "./components/authorization/ProtectedRoute";
 import Welcome from "./components/login/Welcome";
 import Auth from "src/components/login/Auth";
 import TwoFactor from "./components/login/TwoFactor";
-import NewUser from "./components/login/NewUser";
+import NewUser from "./components/settings/NewUser";
 import Home from "src/components/Home";
 import { AuthProvider } from "./utils/authLogic";
 import UserIsOnline from "./components/common/UserIsOnline";
