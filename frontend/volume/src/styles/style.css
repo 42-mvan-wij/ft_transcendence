@@ -99,6 +99,12 @@ input:focus {
   outline: none;
 }
 
+.grayed-out {
+  color: #9db6c1;
+  pointer-events: none;
+  cursor: default;
+}
+
 .avatar_container {
   border-radius: 100%;
   overflow: hidden;
@@ -203,12 +209,6 @@ table {
 
 .align_right {
   text-align: right;
-}
-
-.grayed-out {
-	color: gray;
-	pointer-events: none;
-	cursor: default;
 }
 
 :root {
