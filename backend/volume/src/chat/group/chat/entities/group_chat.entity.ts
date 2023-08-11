@@ -32,6 +32,9 @@ export class GroupChat {
 	@Field(() => [User])
 	admins: User[];
 
+	@Field(() => [User], { nullable: true })
+	muted_members: User[];
+
 	@ManyToMany(() => User)
 	@JoinTable()
 	@Field(() => [User], { nullable: true })
