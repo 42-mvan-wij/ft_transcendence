@@ -1,4 +1,4 @@
-import { gql, useMutation } from "@apollo/client";
+import { gql, useMutation, useQuery } from "@apollo/client";
 import * as i from "../../types/Interfaces";
 import { useState } from "react";
 
@@ -20,6 +20,9 @@ const CREATE_CHANNEL = gql`
 export default function CreateChannel(props: i.ModalProps & { refetchChannels: () => void }) {
 	const [createChannel, { data }] = useMutation(CREATE_CHANNEL);
 
+	const allChannels = getAllChannels();
+	console.log(allChannels);
+
 	const onSubmit = async (event: any) => {
 		event.preventDefault();
 		const form = event.currentTarget;
@@ -30,6 +33,11 @@ export default function CreateChannel(props: i.ModalProps & { refetchChannels: (
 
 		if (!name || !logo || member_ids.length === 0) {
 			alert("All fields are required");
+			return;
+		}
+
+		if (allChannels.some((channel: any) => channel.name === name)) {
+			alert("There already exists a channel with this name");
 			return;
 		}
 
@@ -55,4 +63,51 @@ export default function CreateChannel(props: i.ModalProps & { refetchChannels: (
 			</form>
 		</div>
 	);
+}
+
+const GET_ALL_PRIVATE_CHANNELS = gql`
+	query All_available_private_channels {
+		all_available_private_channels {
+			name
+		}
+	}
+`;
+
+const GET_ALL_PUBLIC_CHANNELS = gql`
+	query All_available_public_channels {
+		all_available_public_channels {
+			name
+		}
+	}
+`;
+
+function getAllChannels() {
+	const {
+		loading: loadingPrivate,
+		data: dataPrivate,
+		error: errorPrivate,
+	} = useQuery(GET_ALL_PRIVATE_CHANNELS);
+	const {
+		loading: loadingPublic,
+		data: dataPublic,
+		error: errorPublic,
+	} = useQuery(GET_ALL_PUBLIC_CHANNELS);
+
+	if (errorPrivate || errorPublic) {
+		console.error("Error loading channels:", { errorPrivate, errorPublic });
+		return {};
+	}
+
+	if (loadingPrivate || loadingPublic) return <p>Loading...</p>;
+
+	if (dataPrivate && dataPublic) {
+		console.log("dataPrivate:", dataPrivate);
+		console.log("dataPublic:", dataPublic);
+		return dataPrivate.all_available_private_channels.concat(
+			dataPublic.all_available_public_channels
+		);
+	} else {
+		console.error("Unexpected data format:", { dataPrivate, dataPublic });
+		return {};
+	}
 }

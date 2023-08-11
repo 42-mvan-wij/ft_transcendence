@@ -15,15 +15,23 @@ const DEMOTE_ADMIN = createMutation("Demote");
 const KICK_MEMBER = createMutation("Kick");
 const BAN_MEMBER = createMutation("Ban");
 const UNBAN_MEMBER = createMutation("Unban");
-const MUTE_MEMBER = createMutation("Mute");
-const UNMUTE_MEMBER = createMutation("Unmute");
+
+const MUTE_MEMBER = gql`
+	mutation Mute($channelId: String!, $userId: String!, $timeout: Float!) {
+		mute(channel_id: $channelId, user_id: $userId, timeout: $timeout) {
+			id
+		}
+	}
+`;
+
+// const UNMUTE_MEMBER = createMutation("Unmute");
 
 export default function ChangePrivileges(props: any) {
 	const members = props.group.members.filter(
 		(member: any) => member.id != props.userId && member.id != props.group.owner
 	);
 
-	if (members.length === 0)
+	if (members.length === 0 && props.group.banned_users.length === 0)
 		return (
 			<div className="userStats">
 				<h1>{props.group.name}</h1>No actions available
@@ -45,9 +53,21 @@ export default function ChangePrivileges(props: any) {
 								member={member}
 								refetchChannel={props.refetchChannel}
 							/>
-							{kickUser(props.group, member, props.refetchChannel)}
-							{banUser(props.group, member, props.refetchChannel)}
-							{muteUser(props.group, member, props.refetchChannel)}
+							<KickUser
+								{...props}
+								member={member}
+								refetchChannel={props.refetchChannel}
+							/>
+							<BanUser
+								{...props}
+								member={member}
+								refetchChannel={props.refetchChannel}
+							/>
+							<MuteUser
+								{...props}
+								member={member}
+								refetchChannel={props.refetchChannel}
+							/>
 						</div>
 					);
 				})}
@@ -60,7 +80,11 @@ export default function ChangePrivileges(props: any) {
 							<div className="name">{member.username}</div>
 							<div className="unclickable_link admin">make admin</div>
 							<div className="unclickable_link">kick</div>
-							{banUser(props.group, member, props.refetchChannel)}
+							<BanUser
+								{...props}
+								member={member}
+								refetchChannel={props.refetchChannel}
+							/>
 							<div className="unclickable_link mute">mute</div>
 						</div>
 					);
@@ -71,44 +95,62 @@ export default function ChangePrivileges(props: any) {
 }
 
 function AdminPrivileges(props: any) {
-	console.log(props.group.admins);
+	// console.log(props.group.admins);
 
-	let memberIsAdmin = props.group.admins.some((admin: any) => admin.id === props.member.id);
-	let linkText = memberIsAdmin ? "remove admin" : "make admin";
-	useEffect(() => {
-		memberIsAdmin = props.group.admins.some((admin: any) => admin.id === props.member.id);
-		linkText = memberIsAdmin ? "remove admin" : "make admin";
-	}, [props.group.admins]);
+	const memberIsAdmin = props.group.admins.some((admin: any) => admin.id === props.member.id);
 
 	const [promoteAdminMutation] = useMutation(PROMOTE_ADMIN);
 	const [demoteAdminMutation] = useMutation(DEMOTE_ADMIN);
 
-	function handleAdminAction(): void {
+	async function handleAdminAction(): Promise<void> {
 		const mutation = memberIsAdmin ? demoteAdminMutation : promoteAdminMutation;
-		mutation({
-			variables: {
-				channelId: props.group.id,
-				userId: props.member.id,
-			},
-		});
-		props.refetchChannel();
+
+		try {
+			await mutation({
+				variables: {
+					channelId: props.group.id,
+					userId: props.member.id,
+				},
+			});
+			await props.refetchChannel();
+			const alertMsg = memberIsAdmin ? " is no longer admin" : " is now admin";
+			alert(props.member.username + alertMsg);
+			props.setShowModal(false);
+			// props.toggleModal(
+			// 	<ChangePrivileges
+			// 		{...props}
+			// 		group={props.group}
+			// 		refetchChannel={props.refetchChannel}
+			// 	/>
+			// );
+		} catch (error) {
+			console.error("An error occurred while handling the admin action:", error);
+		}
 	}
+
 	return (
 		<div className="link admin" onClick={handleAdminAction}>
-			{linkText}
+			{memberIsAdmin ? "remove admin" : "make admin"}
 		</div>
 	);
 }
 
-function kickUser(group: any, member: any, refetchChannel: () => void) {
+function KickUser(props: any) {
 	const [kickMemberMutation] = useMutation(KICK_MEMBER);
-	function kickMember(): void {
-		kickMemberMutation({
-			variables: {
-				channelId: group.id,
-				userId: member.id,
-			},
-		});
+	async function kickMember(): Promise<void> {
+		try {
+			await kickMemberMutation({
+				variables: {
+					channelId: props.group.id,
+					userId: props.member.id,
+				},
+			});
+			await props.refetchChannel();
+			alert(props.member.username + "has been kicked from this channel");
+			props.setShowModal(false);
+		} catch (error) {
+			console.error("An error occurred while handling the admin action:", error);
+		}
 	}
 	return (
 		<div className="link" onClick={kickMember}>
@@ -117,21 +159,31 @@ function kickUser(group: any, member: any, refetchChannel: () => void) {
 	);
 }
 
-function banUser(group: any, member: any, refetchChannel: () => void) {
-	const memberIsBanned = group.banned_users.some((user: any) => user.id === member.id);
+function BanUser(props: any) {
+	const memberIsBanned = props.group.banned_users.some(
+		(user: any) => user.id === props.member.id
+	);
 
 	const [banMemberMutation] = useMutation(BAN_MEMBER);
 	const [unbanMemberMutation] = useMutation(UNBAN_MEMBER);
 
-	function handleBanAction(): void {
+	async function handleBanAction(): Promise<void> {
 		const mutation = memberIsBanned ? unbanMemberMutation : banMemberMutation;
-		mutation({
-			variables: {
-				channelId: group.id,
-				userId: member.id,
-			},
-		});
-		refetchChannel();
+
+		try {
+			await mutation({
+				variables: {
+					channelId: props.group.id,
+					userId: props.member.id,
+				},
+			});
+			await props.refetchChannel();
+			const alertMsg = memberIsBanned ? " is no longer banned" : " is now banned";
+			alert(props.member.username + alertMsg);
+			props.setShowModal(false);
+		} catch (error) {
+			console.error("An error occurred while handling the admin action:", error);
+		}
 	}
 	const linkText = memberIsBanned ? "unban" : "ban";
 	return (
@@ -141,26 +193,27 @@ function banUser(group: any, member: any, refetchChannel: () => void) {
 	);
 }
 
-function muteUser(group: any, member: any, refetchChannel: () => void) {
-	const memberIsBanned = group.banned_users.some((user: any) => user.id === member.id);
-
-	const [banMemberMutation] = useMutation(MUTE_MEMBER);
-	const [unbanMemberMutation] = useMutation(UNMUTE_MEMBER);
-
-	function handleBanAction(): void {
-		const mutation = memberIsBanned ? unbanMemberMutation : banMemberMutation;
-		mutation({
-			variables: {
-				channelId: group.id,
-				userId: member.id,
-			},
-		});
-		refetchChannel();
+function MuteUser(props: any) {
+	const [muteMemberMutation] = useMutation(MUTE_MEMBER);
+	async function muteMember(): Promise<void> {
+		try {
+			await muteMemberMutation({
+				variables: {
+					channelId: props.group.id,
+					userId: props.member.id,
+					timeout: 60,
+				},
+			});
+			await props.refetchChannel();
+			alert(props.member.username + "is now muted for 60 seconds");
+			props.setShowModal(false);
+		} catch (error) {
+			console.error("An error occurred while handling the admin action:", error);
+		}
 	}
-	const linkText = memberIsBanned ? "unmute" : "mute";
 	return (
-		<div className="link mute" onClick={handleBanAction}>
-			{linkText}
+		<div className="link mute" onClick={muteMember}>
+			mute
 		</div>
 	);
 }
