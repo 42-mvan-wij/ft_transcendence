@@ -101,6 +101,12 @@ input:focus {
 	outline: none;
 }
 
+.grayed-out {
+	color: $color-tertairy;
+	pointer-events: none;
+	cursor: default;
+}
+
 /////////////
 // AVATAR  //
 /////////////
