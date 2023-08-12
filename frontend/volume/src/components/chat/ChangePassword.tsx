@@ -1,6 +1,7 @@
 import { convertEncodedImage } from "../../utils/convertEncodedImage";
 import { gql, useMutation } from "@apollo/client";
 import { useEffect } from "react";
+import { goBackToGroupStats } from "./GroupStats";
 
 export default function ChangePassword(props: any) {
 	function ChangePW(chatId: string) {
@@ -39,6 +40,7 @@ export default function ChangePassword(props: any) {
 					<button onClick={() => ChangePW(props.group.id)}>Change Password</button>
 				</label>
 			</div>
+			{goBackToGroupStats(props)}
 		</div>
 	);
 }

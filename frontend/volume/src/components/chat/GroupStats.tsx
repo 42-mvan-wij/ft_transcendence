@@ -6,7 +6,7 @@ import { gql, useMutation, useQuery } from "@apollo/client";
 import { ChatState } from "../../utils/constants";
 import ChangePassword from "./ChangePassword";
 
-function GroupStats(props: any) {
+export default function GroupStats(props: any) {
 	return (
 		<div className="userStats">
 			<h1>{props.selectedGroup.name}</h1>
@@ -46,6 +46,8 @@ function RenderActions(props: any) {
 						<ChangePrivileges
 							{...props}
 							group={props.group}
+							setChatState={props.setChatState}
+							selectedGroup={props.data.group_chat}
 							refetchChannel={props.refetchChannel}
 						/>
 					)
@@ -113,4 +115,26 @@ function RenderFriendsList(props: any) {
 	);
 }
 
-export default GroupStats;
+export function goBackToGroupStats(props: any) {
+	return (
+		<>
+			<br />
+			<br />
+			<div
+				className="link"
+				onClick={() =>
+					props.toggleModal(
+						<GroupStats
+							{...props}
+							setChatState={props.setChatState}
+							selectedGroup={props.data.group_chat}
+							refetchChannel={props.refetchChannel}
+						/>
+					)
+				}
+			>
+				back to groupstats
+			</div>
+		</>
+	);
+}

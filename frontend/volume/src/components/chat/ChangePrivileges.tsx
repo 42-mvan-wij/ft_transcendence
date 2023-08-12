@@ -1,6 +1,7 @@
 import { convertEncodedImage } from "../../utils/convertEncodedImage";
 import { gql, useMutation } from "@apollo/client";
 import { useEffect } from "react";
+import GroupStats, { goBackToGroupStats } from "./GroupStats";
 
 const createMutation = (operation: any) => gql`
   mutation ${operation}($channelId: String!, $userId: String!) {
@@ -35,6 +36,7 @@ export default function ChangePrivileges(props: any) {
 		return (
 			<div className="userStats">
 				<h1>{props.group.name}</h1>No actions available
+				{goBackToGroupStats(props)}
 			</div>
 		);
 	return (
@@ -90,13 +92,12 @@ export default function ChangePrivileges(props: any) {
 					);
 				})}
 			</div>
+			{goBackToGroupStats(props)}
 		</div>
 	);
 }
 
 function AdminPrivileges(props: any) {
-	// console.log(props.group.admins);
-
 	const memberIsAdmin = props.group.admins.some((admin: any) => admin.id === props.member.id);
 
 	const [promoteAdminMutation] = useMutation(PROMOTE_ADMIN);
@@ -116,13 +117,6 @@ function AdminPrivileges(props: any) {
 			const alertMsg = memberIsAdmin ? " is no longer admin" : " is now admin";
 			alert(props.member.username + alertMsg);
 			props.setShowModal(false);
-			// props.toggleModal(
-			// 	<ChangePrivileges
-			// 		{...props}
-			// 		group={props.group}
-			// 		refetchChannel={props.refetchChannel}
-			// 	/>
-			// );
 		} catch (error) {
 			console.error("An error occurred while handling the admin action:", error);
 		}
