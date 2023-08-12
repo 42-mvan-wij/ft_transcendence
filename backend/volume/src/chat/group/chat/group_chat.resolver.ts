@@ -144,6 +144,12 @@ export class GroupChatResolver {
 		);
 	}
 
+	@UseGuards(JwtAuthGuard)
+	@Mutation(() => GroupChat)
+	async leaveGroupChat(@AuthUser() user: UserInfo, @Args('channel_id') channel_id: string) {
+		return await this.group_chat_service.leaveGroupChat(channel_id, user.userUid);
+	}
+	
 	@ResolveField()
 	async members(@Parent() channel: GroupChat) {
 		return this.group_chat_service.getMembers(channel);

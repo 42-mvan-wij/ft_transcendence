@@ -2,6 +2,9 @@ import "../../styles/style.css";
 import UserStats from "../common/UserStats";
 import { convertEncodedImage } from "../../utils/convertEncodedImage";
 import ChangePrivileges from "./ChangePrivileges";
+import { gql, useMutation, useQuery } from "@apollo/client";
+import { ChatState } from "../../utils/constants";
+import ChangePassword from "./ChangePassword";
 
 function GroupStats(props: any) {
 	return (
@@ -10,6 +13,7 @@ function GroupStats(props: any) {
 			<RenderActions
 				{...props}
 				group={props.selectedGroup}
+				setChatState={props.setChatState}
 				refetchChannel={props.refetchChannel}
 			/>
 			<br />
@@ -18,6 +22,14 @@ function GroupStats(props: any) {
 		</div>
 	);
 }
+
+const LEAVE_GROUP_CHAT = gql`
+	mutation LeaveGroupChat($channelId: String!) {
+		leaveGroupChat(channel_id: $channelId) {
+			id
+		}
+	}
+`;
 
 function RenderActions(props: any) {
 	const userIsAdmin = props.selectedGroup.admins.some((admin: any) => admin.id === props.userId);
@@ -45,13 +57,30 @@ function RenderActions(props: any) {
 
 	if (isPrivateChannel && userIsAdmin)
 		actions.push(
-			<a className="link" key="pw">
+			<a
+				className="link"
+				key="pw"
+				onClick={() => props.toggleModal(<ChangePassword {...props} group={props.group} />)}
+			>
 				change password
 			</a>
 		);
 
+	const [LeaveGroupChat, { loading, error }] = useMutation(LEAVE_GROUP_CHAT);
+	async function Leave(channelId: string) {
+		try {
+			const { data } = await LeaveGroupChat({
+				variables: { channelId: channelId },
+			});
+			console.log(channelId);
+			props.setShowModal(false);
+			props.setChatState(ChatState.overview);
+		} catch (error) {
+			console.log("Error leaving ", error);
+		}
+	}
 	actions.push(
-		<a className="link" key="leave">
+		<a className="link" key="leave" onClick={() => Leave(props.group.id)}>
 			leave group
 		</a>
 	);

@@ -250,6 +250,26 @@ export class GroupChatService {
 		return await this.channelRepository.save(channel);
 	}
 
+	async leaveGroupChat(channel_id: string, user_id: string) {
+		const channel = await this.getChannelById(channel_id, {owner: true, members: true, admins: true});
+		if (!channel)
+			throw new Error(`Channel with id ${channel_id} does not exist`);
+		// TODO: betere remove + owner rights doorgeven aan random admin / user?
+		if (channel.owner.id === user_id) {
+			const new_owner = await this.userService.getUser("NEW OWNER");
+			channel.owner = new_owner;
+		}
+		const admin_index = channel.admins.findIndex((admin) => admin.id === user_id);
+		if (admin_index >= 0)
+			channel.admins.splice(admin_index, 1);
+		const member_index = channel.members.findIndex((member) => member.id === user_id);
+		if (member_index >= 0)
+			channel.members.splice(member_index, 1);
+		else 
+			throw new Error(`User ${user_id} is not in channel ${channel_id}`);
+		return this.channelRepository.save(channel);
+	}
+
 	async promote(
 		channel_id: string,
 		supposed_owner_id: string,

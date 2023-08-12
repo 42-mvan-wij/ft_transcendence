@@ -1,6 +1,7 @@
 import { gql, useMutation, useQuery } from "@apollo/client";
 import * as i from "../../types/Interfaces";
 import { useState } from "react";
+import { AVATAR_GROUPCHAT } from "../../utils/constants";
 
 const CREATE_CHANNEL = gql`
 	mutation CreateChannel(
@@ -29,7 +30,7 @@ export default function CreateChannel(props: i.ModalProps & { refetchChannels: (
 		const name = form.elements[0].value;
 		const member_ids = [props.userId];
 		const password = form.elements[1].value;
-		const logo = "none";
+		const logo = AVATAR_GROUPCHAT;
 
 		if (!name || !logo || member_ids.length === 0) {
 			alert("All fields are required");
@@ -65,49 +66,19 @@ export default function CreateChannel(props: i.ModalProps & { refetchChannels: (
 	);
 }
 
-const GET_ALL_PRIVATE_CHANNELS = gql`
-	query All_available_private_channels {
-		all_available_private_channels {
-			name
-		}
-	}
-`;
-
-const GET_ALL_PUBLIC_CHANNELS = gql`
-	query All_available_public_channels {
-		all_available_public_channels {
+const GET_ALL_CHANNELS = gql`
+	query All_group_chats {
+		all_group_chats {
 			name
 		}
 	}
 `;
 
 function getAllChannels() {
-	const {
-		loading: loadingPrivate,
-		data: dataPrivate,
-		error: errorPrivate,
-	} = useQuery(GET_ALL_PRIVATE_CHANNELS);
-	const {
-		loading: loadingPublic,
-		data: dataPublic,
-		error: errorPublic,
-	} = useQuery(GET_ALL_PUBLIC_CHANNELS);
+	const { loading, data, error } = useQuery(GET_ALL_CHANNELS);
 
-	if (errorPrivate || errorPublic) {
-		console.error("Error loading channels:", { errorPrivate, errorPublic });
-		return {};
-	}
+	if (error) return {};
+	if (loading) return "Loading...";
 
-	if (loadingPrivate || loadingPublic) return <p>Loading...</p>;
-
-	if (dataPrivate && dataPublic) {
-		console.log("dataPrivate:", dataPrivate);
-		console.log("dataPublic:", dataPublic);
-		return dataPrivate.all_available_private_channels.concat(
-			dataPublic.all_available_public_channels
-		);
-	} else {
-		console.error("Unexpected data format:", { dataPrivate, dataPublic });
-		return {};
-	}
+	return data.all_group_chats;
 }

@@ -31,15 +31,16 @@ export default function PrivateChannel({ setShowModal, refetchChannels }: any) {
 
 	async function Join(channelId: string) {
 		const password = passwords[channelId] || "";
+		console.log("Joining", channelId, "with password", password);
 		try {
 			const { data: joinData } = await joinPrivateGroupChat({
 				variables: { channelId: channelId, password: password },
 			});
-			const joinSuccessful = joinData?.joinPrivateGroupChat;
-
 			refetch();
 			refetchChannels();
 			setShowModal(false);
+			const joinSuccessful = joinData?.joinPrivateGroupChat;
+			console.log("joinData ", joinData);
 			if (!joinSuccessful) {
 				alert("Wrong password!");
 			}
@@ -57,14 +58,16 @@ export default function PrivateChannel({ setShowModal, refetchChannels }: any) {
 	return (
 		<div className="new_chat">
 			{data.all_available_private_channels.map((chat: any) => (
-				<Channel
-					chat={chat}
-					selectedChannel={selectedChannel}
-					setSelectedChannel={setSelectedChannel}
-					passwords={passwords}
-					setPasswords={setPasswords}
-					Join={Join}
-				/>
+				<div className="chooseChannel" key={chat.id}>
+					<Channel
+						chat={chat}
+						selectedChannel={selectedChannel}
+						setSelectedChannel={setSelectedChannel}
+						passwords={passwords}
+						setPasswords={setPasswords}
+						Join={Join}
+					/>
+				</div>
 			))}
 		</div>
 	);
@@ -79,7 +82,7 @@ function Channel({
 	Join,
 }: any) {
 	return (
-		<div className="chooseChannel" key={chat.id}>
+		<>
 			<div className="selectUser" onClick={() => setSelectedChannel(chat.id)}>
 				<div className="link">{chat.name}</div>
 				<div className="unclickable_link">{chat.members.length} members</div>
@@ -97,6 +100,6 @@ function Channel({
 					</label>
 				</div>
 			)}
-		</div>
+		</>
 	);
 }

@@ -5,6 +5,7 @@ import GroupStats from "./GroupStats";
 import { gql, useMutation, useQuery } from "@apollo/client";
 import { convertEncodedImage } from "src/utils/convertEncodedImage";
 import { renderSendContainer } from "./Chat";
+import { ChatState } from "../../utils/constants";
 
 const GET_CHANNEL = gql`
 	query group_chat($channel_id: String!) {
@@ -91,10 +92,12 @@ const SEND_MESSAGE = gql`
 
 export default function GroupChat({
 	props,
+	setChatState,
 	channel_id,
 	renderOverview,
 }: {
 	props: i.ModalProps;
+	setChatState: (state: ChatState) => void;
 	channel_id: string;
 	renderOverview: () => void;
 }) {
@@ -182,6 +185,7 @@ export default function GroupChat({
 			<RenderHeader
 				{...props}
 				data={data}
+				setChatState={setChatState}
 				renderOverview={renderOverview}
 				refetchChannel={refetchChannel}
 			/>
@@ -212,6 +216,7 @@ function RenderHeader(props: any) {
 						props.toggleModal(
 							<GroupStats
 								{...props}
+								setChatState={props.setChatState}
 								selectedGroup={props.data.group_chat}
 								refetchChannel={props.refetchChannel}
 							/>
