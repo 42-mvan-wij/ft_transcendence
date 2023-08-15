@@ -28,8 +28,9 @@ const MUTE_MEMBER = gql`
 // const UNMUTE_MEMBER = createMutation("Unmute");
 
 export default function ChangePrivileges(props: any) {
+	console.log(props.group.owner);
 	const members = props.group.members.filter(
-		(member: any) => member.id != props.userId && member.id != props.group.owner
+		(member: any) => member.id != props.userId && member.id != props.group.owner.id
 	);
 
 	if (members.length === 0 && props.group.banned_users.length === 0)

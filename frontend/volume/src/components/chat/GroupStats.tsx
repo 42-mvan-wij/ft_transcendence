@@ -36,7 +36,7 @@ function RenderActions(props: any) {
 	const isPrivateChannel = !props.selectedGroup.isPublic;
 	const actions = [];
 
-	if (isPrivateChannel || userIsAdmin)
+	if (userIsAdmin)
 		actions.push(
 			<a
 				className="link"
@@ -74,7 +74,7 @@ function RenderActions(props: any) {
 			const { data } = await LeaveGroupChat({
 				variables: { channelId: channelId },
 			});
-			console.log(channelId);
+			console.log(data);
 			props.setShowModal(false);
 			props.setChatState(ChatState.overview);
 		} catch (error) {

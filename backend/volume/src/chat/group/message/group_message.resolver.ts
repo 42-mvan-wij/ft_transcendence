@@ -14,10 +14,12 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { UseGuards } from '@nestjs/common';
 import { AuthUser } from 'src/auth/decorators/auth-user.decorator';
 import { UserInfo } from 'src/auth/user-info.interface';
+import { GroupChatService } from '../chat/group_chat.service';
+import { MessageType } from 'src/user/dto/message-received-subscrption.dto';
 
 @Resolver(() => GroupMessage)
 export class GroupMessageResolver {
-	constructor(private readonly group_message_service: GroupMessageService) {}
+	constructor(private readonly group_message_service: GroupMessageService, private readonly group_chat_service: GroupChatService) {}
 
 	@UseGuards(JwtAuthGuard)
 	@Mutation(() => GroupMessage, { nullable: true })
@@ -30,6 +32,13 @@ export class GroupMessageResolver {
 			user_info.userUid,
 		);
 		pubSub.publish('group_message_sent', { group_message_sent: message });
+		message.then((gm) => {
+			this.group_chat_service.getMembers(gm.channel).then((members) => {
+				for (const member of members) {
+					pubSub.publish('message_received', { message_received: { type: MessageType.GROUP, message: gm }, user_id: member.id })
+				}
+			});
+		})
 		return message;
 	}
 

@@ -9,7 +9,7 @@ import { GroupMessage } from '../message/entities/group_message.entity';
 import { Not, In } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 
-const mute_table: {[_: string]: string[]} = {};
+const mute_table: { [_: string]: string[] } = {};
 
 @Injectable()
 export class GroupChatService {
@@ -65,7 +65,7 @@ export class GroupChatService {
 		const owner = await this.userService.getUserById(owner_id);
 		members.push(owner);
 
-		let channel = this.channelRepository.create({
+		const channel = this.channelRepository.create({
 			members,
 			owner,
 			admins: [owner],
@@ -116,7 +116,7 @@ export class GroupChatService {
 		userId: string,
 		channelId: string,
 		password: string,
-	): Promise<Boolean> {
+	): Promise<boolean> {
 		const channel = await this.getChannelById(channelId, {
 			banned_users: true,
 			members: true,
@@ -149,17 +149,30 @@ export class GroupChatService {
 	}
 
 	// TODO: for all similar functions: Owner should be able to kick/ban/... admins
-	async mute(channelId: string, supposed_admin_id: string, userId: string, timeout: number) {
-		const channel = await this.getChannelById(channelId, {owner: true, admins: true, members: true});
+	async mute(
+		channelId: string,
+		supposed_admin_id: string,
+		userId: string,
+		timeout: number,
+	) {
+		const channel = await this.getChannelById(channelId, {
+			owner: true,
+			admins: true,
+			members: true,
+		});
 		if (!channel)
 			throw new Error(`Channel with id ${channelId} does not exist`);
 		if (!channel.admins.some((admin) => admin.id === supposed_admin_id))
 			throw new Error(`Only admins can mute members`);
-		const index = channel.members.findIndex((member) => member.id === userId)
+		const index = channel.members.findIndex(
+			(member) => member.id === userId,
+		);
 		if (index < 0)
 			throw new Error(`User with id ${userId} is not a member`);
 		if (channel.admins.some((admin) => admin.id === userId))
-			throw new Error(`User with id ${userId} is an admin, can only kick non-admins`);
+			throw new Error(
+				`User with id ${userId} is an admin, can only kick non-admins`,
+			);
 		if (this.isMuted(userId, channelId))
 			throw new Error(`User with id ${userId} is already muted`);
 		if (!mute_table[channelId]) {
@@ -167,19 +180,19 @@ export class GroupChatService {
 		}
 		mute_table[channelId].push(userId);
 		setTimeout(() => this.unmute(channelId, userId), timeout * 60 * 1000);
-		console.log('set:',mute_table);
+		console.log('set:', mute_table);
 		return channel;
 	}
 
 	isMuted(userId: string, channelId: string): boolean {
-		console.log('test:',mute_table)
+		console.log('test:', mute_table);
 		if (!mute_table[channelId]) return false;
 		return mute_table[channelId]?.some((user) => user === userId);
 	}
 
 	private async unmute(channelId: string, userId: string) {
 		if (!mute_table[channelId]) return;
-		const index = mute_table[channelId].findIndex((user) => (user == userId));
+		const index = mute_table[channelId].findIndex((user) => user == userId);
 		mute_table[channelId].splice(index, 1);
 	}
 
@@ -299,8 +312,12 @@ export class GroupChatService {
 
 	async getMutedMembers(channel: GroupChat): Promise<Array<User>> {
 		if (!mute_table[channel.id]) return [];
-		const channel_with_members = await this.getChannelById(channel.id, {members: true});
-		return mute_table[channel.id].map((userId) => channel_with_members.members.find((user) => user.id == userId));
+		const channel_with_members = await this.getChannelById(channel.id, {
+			members: true,
+		});
+		return mute_table[channel.id].map((userId) =>
+			channel_with_members.members.find((user) => user.id == userId),
+		);
 	}
 
 	async getMembers(channel: GroupChat): Promise<Array<User>> {
@@ -344,17 +361,22 @@ export class GroupChatService {
 	}
 
 	async leaveGroupChat(channel_id: string, user_id: string) {
-		const channel = await this.getChannelById(channel_id, {owner: true, members: true, admins: true});
+		const channel = await this.getChannelById(channel_id, {
+			owner: true,
+			members: true,
+			admins: true,
+		});
 		if (!channel)
 			throw new Error(`Channel with id ${channel_id} does not exist`);
-		const admin_index = channel.admins.findIndex((admin) => admin.id === user_id);
-		if (admin_index >= 0)
-			channel.admins.splice(admin_index, 1);
-		const member_index = channel.members.findIndex((member) => member.id === user_id);
-		if (member_index >= 0)
-			channel.members.splice(member_index, 1);
-		else 
-			throw new Error(`User ${user_id} is not in channel ${channel_id}`);
+		const admin_index = channel.admins.findIndex(
+			(admin) => admin.id === user_id,
+		);
+		if (admin_index >= 0) channel.admins.splice(admin_index, 1);
+		const member_index = channel.members.findIndex(
+			(member) => member.id === user_id,
+		);
+		if (member_index >= 0) channel.members.splice(member_index, 1);
+		else throw new Error(`User ${user_id} is not in channel ${channel_id}`);
 		if (channel.owner.id === user_id) {
 			let new_owner: User;
 			if (channel.admins[0]) {
@@ -372,36 +394,44 @@ export class GroupChatService {
 
 	// TESTING
 
-
-	async TESTING_join(user_name: string, channel_name: string): Promise<Number> {
-		const channel = await this.channelRepository.findOne({ 
-			where: { name: channel_name }, 
-			relations: {banned_users: true, members: true} 
+	async TESTING_join(
+		user_name: string,
+		channel_name: string,
+	): Promise<number> {
+		const channel = await this.channelRepository.findOne({
+			where: { name: channel_name },
+			relations: { banned_users: true, members: true },
 		});
 		const user = await this.userService.getUser(user_name);
 		this.join(user.id, channel.id);
 		return 1;
 	}
 
-	async TESTING_leaveGroupChat(user_name: string, channel_name: string): Promise<Number> {
-		const channel = await this.channelRepository.findOne({ 
-			where: { name: channel_name }, 
+	async TESTING_leaveGroupChat(
+		user_name: string,
+		channel_name: string,
+	): Promise<number> {
+		const channel = await this.channelRepository.findOne({
+			where: { name: channel_name },
 		});
 		const user = await this.userService.getUser(user_name);
 		this.leaveGroupChat(channel.id, user.id);
 		return 1;
 	}
 
-	async TESTING_createGroupChat(user_name: string, channel_name: string, password: string) {
-		const channelInput = new CreateGroupChannelInput;
+	async TESTING_createGroupChat(
+		user_name: string,
+		channel_name: string,
+		password: string,
+	) {
+		const channelInput = new CreateGroupChannelInput();
 		const user = await this.userService.getUser(user_name);
 		channelInput.name = channel_name;
-		channelInput.logo = "";
+		channelInput.logo = '';
 		channelInput.password = password;
 		channelInput.member_ids = [];
 
 		this.create(channelInput, user.id);
 		return 3;
 	}
-
 }

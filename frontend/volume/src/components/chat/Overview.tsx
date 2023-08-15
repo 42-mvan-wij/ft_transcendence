@@ -6,7 +6,7 @@ import { convertEncodedImage } from "src/utils/convertEncodedImage";
 import JoinChannel from "./JoinChannel";
 import CreateChannel from "./CreateChannel";
 import NewChat from "./NewChat";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 const GET_CHANNELS = gql`
 	query GetChannels {
@@ -30,6 +30,9 @@ const GET_CHANNELS = gql`
 				name
 				logo
 				lastMessage {
+					author {
+						blocked_by_me
+					}
 					content
 					dateSent
 				}
@@ -46,15 +49,37 @@ const GET_CHANNELS = gql`
 	}
 `;
 
-// const MESSAGE_SUBSCRIPTION = gql`
-// 	subscription group_message_sent {
-// 		group_message_sent {
-// 			id
-// 			content
-// 			dateSent
-// 		}
-// 	}
-// `;
+const MESSAGE_SUBSCRIPTION = gql`
+	subscription messageReceived {
+		message_received {
+			message {
+				... on GroupMessage {
+					author {
+						blocked_by_me
+					}
+					channel {
+						id
+					}
+					content
+					dateSent
+				}
+				... on PersonalMessage {
+					channel {
+						id
+					}
+					content
+					dateSent
+				}
+			}
+			type
+		}
+	}
+`;
+
+enum MessageType {
+	GROUP,
+	PERSONAL,
+}
 
 function Overview({
 	props,
@@ -65,21 +90,84 @@ function Overview({
 	setSelectedChannel: (channel_id: string) => void;
 	setChatState: (state: ChatState) => void;
 }) {
-	// const { data: newMessageData } = useSubscription(MESSAGE_SUBSCRIPTION);
-	const { loading, error, data, refetch } = useQuery(GET_CHANNELS);
+	const [dataFresh, setDataFresh] = useState(false);
+	const { loading, error, data, refetch, subscribeToMore } = useQuery(GET_CHANNELS);
+
+	useEffect(() => {
+		return subscribeToMore({
+			document: MESSAGE_SUBSCRIPTION,
+			updateQuery: (prev, { subscriptionData }) => {
+				if (!subscriptionData.data) return prev;
+				const message_received = subscriptionData.data.message_received;
+				if (message_received.type === MessageType.GROUP) {
+					const group_chat_index = prev.currentUserQuery.group_chats.findIndex(
+						(gc: any) => gc.id === message_received.message.channel.id
+					);
+					const old_group_chat = prev.currentUserQuery.group_chats[group_chat_index];
+					const new_group_chat = Object.assign({}, old_group_chat, {
+						lastMessage: {
+							...old_group_chat.lastMessage,
+							author: {
+								...old_group_chat.lastMessage.author,
+								blocked_by_me: message_received.message.author.blocked_by_me,
+							},
+							content: message_received.message.content,
+							dateSent: message_received.message.dateSent,
+						},
+					});
+					return Object.assign({}, prev, {
+						currentUserQuery: {
+							...prev.currentUserQuery,
+							group_chats: [
+								...prev.currentUserQuery.group_chats.slice(0, group_chat_index),
+								new_group_chat,
+								...prev.currentUserQuery.group_chats.slice(group_chat_index + 1),
+							],
+						},
+					});
+				} else if (message_received.type === MessageType.PERSONAL) {
+					const personal_chat_index = prev.currentUserQuery.personal_chats.findIndex(
+						(pc: any) => pc.id === message_received.message.channel.id
+					);
+					const old_personal_chat =
+						prev.currentUserQuery.personal_chats[personal_chat_index];
+					const new_personal_chat = Object.assign({}, old_personal_chat, {
+						lastMessage: {
+							...old_personal_chat.lastMessage,
+							content: message_received.message.content,
+							dateSent: message_received.message.dateSent,
+						},
+					});
+					return Object.assign({}, prev, {
+						currentUserQuery: {
+							...prev.currentUserQuery,
+							group_chats: [
+								...prev.currentUserQuery.group_chats.slice(0, personal_chat_index),
+								new_personal_chat,
+								...prev.currentUserQuery.group_chats.slice(personal_chat_index + 1),
+							],
+						},
+					});
+				}
+				return prev;
+			},
+		});
+	}, []);
 
 	const refetchChannels = () => {
 		refetch();
 	};
 
-	useEffect(() => {
+	if (dataFresh == false) {
+		setDataFresh(true);
 		refetchChannels();
-	}, []);
+	}
 
 	if (error) return <p>Error: {error.message}</p>;
 	if (loading) return <p>Loading...</p>;
 
 	function renderChat(channel_id: string, isPublic?: boolean) {
+		setDataFresh(false);
 		setSelectedChannel(channel_id);
 		if (isPublic === undefined) setChatState(ChatState.personalMessage);
 		else setChatState(ChatState.groupMessage);
@@ -105,7 +193,9 @@ function Overview({
 									<h3 className="name">{chat.name}</h3>
 								</div>
 								<div className="chat_preview">
-									{chat.lastMessage?.content ?? ""}
+									{chat.lastMessage?.author?.blocked_by_me
+										? "This message was blocked"
+										: chat.lastMessage?.content ?? ""}
 								</div>
 							</div>
 						</div>

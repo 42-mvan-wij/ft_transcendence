@@ -106,14 +106,32 @@ export class GroupChatResolver {
 
 	@UseGuards(JwtAuthGuard)
 	@Mutation(() => GroupChat)
-	async mute(@AuthUser() user: UserInfo, @Args('channel_id') channel_id: string, @Args('user_id') user_id: string, @Args('timeout') timeout: number) {
-		return await this.group_chat_service.mute(channel_id, user.userUid, user_id, timeout);
+	async mute(
+		@AuthUser() user: UserInfo,
+		@Args('channel_id') channel_id: string,
+		@Args('user_id') user_id: string,
+		@Args('timeout') timeout: number,
+	) {
+		return await this.group_chat_service.mute(
+			channel_id,
+			user.userUid,
+			user_id,
+			timeout,
+		);
 	}
 
 	@UseGuards(JwtAuthGuard)
 	@Mutation(() => GroupChat)
-	async kick(@AuthUser() user: UserInfo, @Args('channel_id') channel_id: string, @Args('user_id') user_id: string) {
-		return await this.group_chat_service.kick(channel_id, user.userUid, user_id);
+	async kick(
+		@AuthUser() user: UserInfo,
+		@Args('channel_id') channel_id: string,
+		@Args('user_id') user_id: string,
+	) {
+		return await this.group_chat_service.kick(
+			channel_id,
+			user.userUid,
+			user_id,
+		);
 	}
 
 	@UseGuards(JwtAuthGuard)
@@ -146,10 +164,16 @@ export class GroupChatResolver {
 
 	@UseGuards(JwtAuthGuard)
 	@Mutation(() => GroupChat)
-	async leaveGroupChat(@AuthUser() user: UserInfo, @Args('channel_id') channel_id: string) {
-		return await this.group_chat_service.leaveGroupChat(channel_id, user.userUid);
+	async leaveGroupChat(
+		@AuthUser() user: UserInfo,
+		@Args('channel_id') channel_id: string,
+	) {
+		return await this.group_chat_service.leaveGroupChat(
+			channel_id,
+			user.userUid,
+		);
 	}
-	
+
 	@ResolveField()
 	async members(@Parent() channel: GroupChat) {
 		return this.group_chat_service.getMembers(channel);
