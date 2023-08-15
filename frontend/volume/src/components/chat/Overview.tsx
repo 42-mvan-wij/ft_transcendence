@@ -1,7 +1,7 @@
 import "../../styles/style.css";
 import * as i from "../../types/Interfaces";
 import { ChatState } from "../../utils/constants";
-import { gql, useQuery, useMutation, useSubscription } from "@apollo/client";
+import { gql, useQuery } from "@apollo/client";
 import { convertEncodedImage } from "src/utils/convertEncodedImage";
 import JoinChannel from "./JoinChannel";
 import CreateChannel from "./CreateChannel";
@@ -17,6 +17,10 @@ const GET_CHANNELS = gql`
 				name
 				logo
 				lastMessage {
+					author {
+						id
+						blocked_by_me
+					}
 					content
 					dateSent
 				}
@@ -31,6 +35,7 @@ const GET_CHANNELS = gql`
 				logo
 				lastMessage {
 					author {
+						id
 						blocked_by_me
 					}
 					content
@@ -55,6 +60,7 @@ const MESSAGE_SUBSCRIPTION = gql`
 			message {
 				... on GroupMessage {
 					author {
+						id
 						blocked_by_me
 					}
 					channel {
@@ -64,6 +70,10 @@ const MESSAGE_SUBSCRIPTION = gql`
 					dateSent
 				}
 				... on PersonalMessage {
+					author {
+						id
+						blocked_by_me
+					}
 					channel {
 						id
 					}
@@ -72,6 +82,15 @@ const MESSAGE_SUBSCRIPTION = gql`
 				}
 			}
 			type
+		}
+	}
+`;
+
+const SUBSCRIBE_BLOCK = gql`
+	subscription BlockStateChanged($user_ids: [String!]!) {
+		multi_block_state_changed(user_ids: $user_ids) {
+			user_id
+			blocked
 		}
 	}
 `;
@@ -109,6 +128,7 @@ function Overview({
 							...old_group_chat.lastMessage,
 							author: {
 								...old_group_chat.lastMessage.author,
+								id: message_received.message.author.id,
 								blocked_by_me: message_received.message.author.blocked_by_me,
 							},
 							content: message_received.message.content,
@@ -134,6 +154,11 @@ function Overview({
 					const new_personal_chat = Object.assign({}, old_personal_chat, {
 						lastMessage: {
 							...old_personal_chat.lastMessage,
+							author: {
+								...old_personal_chat.lastMessage.author,
+								id: message_received.message.author.id,
+								blocked_by_me: message_received.message.author.blocked_by_me,
+							},
 							content: message_received.message.content,
 							dateSent: message_received.message.dateSent,
 						},
@@ -153,6 +178,71 @@ function Overview({
 			},
 		});
 	}, []);
+
+	useEffect(() => {
+		if (!data) return;
+		const group_members = data.currentUserQuery.group_chats.flatMap((group_chat: any) =>
+			group_chat.members.map((member: any) => member.id)
+		);
+		const personal_members = data.currentUserQuery.personal_chats.flatMap(
+			(personal_chat: any) => personal_chat.members.map((member: any) => member.id)
+		);
+		const members = [...new Set([...group_members, ...personal_members])];
+		return subscribeToMore({
+			document: SUBSCRIBE_BLOCK,
+			variables: {
+				user_ids: members,
+			},
+			updateQuery: (prev, { subscriptionData }) => {
+				if (!subscriptionData.data) return prev;
+				const block_update = subscriptionData.data.multi_block_state_changed;
+				console.log({ block_update });
+				const new_group_chats = [];
+				for (const group_chat of prev.currentUserQuery.group_chats) {
+					if (group_chat.lastMessage?.author?.id === block_update.user_id) {
+						new_group_chats.push(
+							Object.assign({}, group_chat, {
+								lastMessage: {
+									...group_chat.lastMessage,
+									author: {
+										...group_chat.lastMessage.author,
+										blocked_by_me: block_update.blocked,
+									},
+								},
+							})
+						);
+					} else {
+						new_group_chats.push(group_chat);
+					}
+				}
+				const new_personal_chats = [];
+				for (const personal_chat of prev.currentUserQuery.personal_chats) {
+					if (personal_chat.lastMessage?.author?.id === block_update.user_id) {
+						new_personal_chats.push(
+							Object.assign({}, personal_chat, {
+								lastMessage: {
+									...personal_chat.lastMessage,
+									author: {
+										...personal_chat.lastMessage.author,
+										blocked_by_me: block_update.blocked,
+									},
+								},
+							})
+						);
+					} else {
+						new_personal_chats.push(personal_chat);
+					}
+				}
+				return Object.assign({}, prev, {
+					currentUserQuery: {
+						...prev.currentUserQuery,
+						group_chats: new_group_chats,
+						personal_chats: new_personal_chats,
+					},
+				});
+			},
+		});
+	}, [loading]);
 
 	const refetchChannels = () => {
 		refetch();
