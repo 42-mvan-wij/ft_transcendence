@@ -1,23 +1,36 @@
-import { convertEncodedImage } from "../../utils/convertEncodedImage";
 import { gql, useMutation } from "@apollo/client";
-import { useEffect } from "react";
+import { useState } from "react";
 import { goBackToGroupStats } from "./GroupStats";
 
-export default function ChangePassword(props: any) {
-	function ChangePW(chatId: string) {
-		console.log("ChangePW");
-		try {
-			// const { data: joinData } = await joinPrivateGroupChat({
-			// variables: { channelId: channelId, password: password },
-			// });
-			props.setShowModal(false);
-			const joinSuccessful = true;
-			alert(joinSuccessful ? "Password changed!" : "Incorrect password!");
+const CHANGE_PASSWORD = gql`
+	mutation ChangePassword($channelId: String!, $oldPassword: String!, $newPassword: String!) {
+		changePassword(
+			channel_id: $channelId
+			old_password: $oldPassword
+			new_password: $newPassword
+		)
+	}
+`;
 
-			// const joinSuccessful = joinData?.joinPrivateGroupChat;
-			// console.log("joinData ", joinData);
+export default function ChangePassword(props: any) {
+	const [changePassword, { data }] = useMutation(CHANGE_PASSWORD);
+	const [old_password, setOldPassword] = useState("");
+	const [new_password, setNewPassword] = useState("");
+
+	async function ChangePW(channelId: string, oldPassword: string, newPassword: string) {
+		try {
+			if (newPassword.length === 0 || newPassword.length > 16) {
+				alert("Password length has to be between 1 and 16 characters");
+			} else {
+				const check: any = await changePassword({
+					variables: { channelId, oldPassword, newPassword },
+				});
+				const passwordCorrect = check.data.changePassword;
+				alert(passwordCorrect ? "Password changed!" : "Incorrect password!");
+			}
+			props.setShowModal(false);
 		} catch (error) {
-			console.log("Error joining ", error);
+			console.log("Error changing password ", error);
 		}
 	}
 	return (
@@ -26,18 +39,20 @@ export default function ChangePassword(props: any) {
 			<div className="inputField">
 				<input
 					type="password"
-					// value={passwords[chat.id] || ""}
-					// onChange={(e) => setPasswords({ ...passwords, [chat.id]: e.target.value })}
+					value={old_password}
+					onChange={(e) => setOldPassword(e.target.value)}
 					placeholder="Old password"
 				/>
 				<input
 					type="password"
-					// value={passwords[chat.id] || ""}
-					// onChange={(e) => setPasswords({ ...passwords, [chat.id]: e.target.value })}
+					value={new_password}
+					onChange={(e) => setNewPassword(e.target.value)}
 					placeholder="New password"
 				/>
 				<label>
-					<button onClick={() => ChangePW(props.group.id)}>Change Password</button>
+					<button onClick={() => ChangePW(props.group.id, old_password, new_password)}>
+						Change Password
+					</button>
 				</label>
 			</div>
 			{goBackToGroupStats(props)}
