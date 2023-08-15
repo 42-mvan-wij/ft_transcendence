@@ -1,6 +1,6 @@
-import { useState, useRef } from "react";
+import { useState, useEffect } from "react";
 import "../../styles/style.css";
-import { gql, useQuery, useMutation } from "@apollo/client";
+import { gql, useQuery, useMutation, useSubscription } from "@apollo/client";
 
 const GET_ALL_PRIVATE_CHANNELS = gql`
 	query All_available_private_channels {
@@ -21,11 +21,33 @@ const JOIN_PRIVATE_GROUP_CHAT = gql`
 	}
 `;
 
+const CHANNEL_CREATED_SUBSCRIPTION = gql`
+	subscription {
+		channelCreated {
+			id
+		}
+	}
+`;
+
 export default function PrivateChannel({ setShowModal, refetchChannels }: any) {
 	const [selectedChannel, setSelectedChannel] = useState<string | null>(null);
 	const { loading, data, error, refetch } = useQuery(GET_ALL_PRIVATE_CHANNELS);
 	const [joinPrivateGroupChat, { loading: joinLoading, error: joinError }] =
 		useMutation(JOIN_PRIVATE_GROUP_CHAT);
+
+	const { data: subscriptionData, error: subscriptionError } = useSubscription(
+		CHANNEL_CREATED_SUBSCRIPTION
+	);
+
+	if (subscriptionError) console.error("Subscription error", subscriptionError);
+
+	console.log("subscriptionData", subscriptionData);
+	useEffect(() => {
+		if (subscriptionData) {
+			console.log("subscriptionData", subscriptionData);
+			refetch();
+		}
+	}, [subscriptionData, refetch]);
 
 	const [passwords, setPasswords] = useState<{ [key: string]: string }>({});
 

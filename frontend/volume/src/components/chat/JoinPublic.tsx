@@ -1,5 +1,6 @@
 import "../../styles/style.css";
-import { gql, useMutation, useQuery } from "@apollo/client";
+import { gql, useMutation, useQuery, useSubscription } from "@apollo/client";
+import { useEffect } from "react";
 
 const GET_ALL_PUBLIC_CHANNELS = gql`
 	query {
@@ -27,6 +28,14 @@ const JOIN_GROUP_CHAT = gql`
 	}
 `;
 
+const CHANNEL_CREATED_SUBSCRIPTION = gql`
+	subscription {
+		channelCreated {
+			id
+		}
+	}
+`;
+
 export default function PublicChannel({
 	setShowModal,
 	refetchChannels,
@@ -37,6 +46,19 @@ export default function PublicChannel({
 	const { loading, data, error, refetch } = useQuery(GET_ALL_PUBLIC_CHANNELS);
 	const [joinGroupChat, { loading: joinLoading, error: joinError }] =
 		useMutation(JOIN_GROUP_CHAT);
+
+	const { data: subscriptionData, error: subscriptionError } = useSubscription(
+		CHANNEL_CREATED_SUBSCRIPTION
+	);
+
+	if (subscriptionError) console.error("Subscription error", subscriptionError);
+
+	useEffect(() => {
+		if (subscriptionData) {
+			console.log("subscriptionData", subscriptionData);
+			refetch();
+		}
+	}, [subscriptionData, refetch]);
 
 	async function Join(channelId: string) {
 		try {

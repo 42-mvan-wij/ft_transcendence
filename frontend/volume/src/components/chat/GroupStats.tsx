@@ -33,6 +33,7 @@ const LEAVE_GROUP_CHAT = gql`
 
 function RenderActions(props: any) {
 	const userIsAdmin = props.selectedGroup.admins.some((admin: any) => admin.id === props.userId);
+	const userIsOwner = props.selectedGroup.owner.id === props.userId;
 	const isPrivateChannel = !props.selectedGroup.isPublic;
 	const actions = [];
 
@@ -57,7 +58,7 @@ function RenderActions(props: any) {
 			</a>
 		);
 
-	if (isPrivateChannel && userIsAdmin)
+	if (isPrivateChannel && userIsOwner)
 		actions.push(
 			<a
 				className="link"
@@ -133,7 +134,7 @@ export function goBackToGroupStats(props: any) {
 					)
 				}
 			>
-				back to groupstats
+				back to options
 			</div>
 		</>
 	);
