@@ -1,7 +1,6 @@
 import { convertEncodedImage } from "../../utils/convertEncodedImage";
 import { gql, useMutation } from "@apollo/client";
-import { useEffect } from "react";
-import GroupStats, { goBackToGroupStats } from "./GroupStats";
+import { goBackToGroupStats } from "./GroupStats";
 
 const createMutation = (operation: any) => gql`
   mutation ${operation}($channelId: String!, $userId: String!) {

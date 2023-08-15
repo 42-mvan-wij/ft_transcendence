@@ -2,7 +2,7 @@ import "../../styles/style.css";
 import UserStats from "../common/UserStats";
 import { convertEncodedImage } from "../../utils/convertEncodedImage";
 import ChangePrivileges from "./ChangePrivileges";
-import { gql, useMutation, useQuery } from "@apollo/client";
+import { gql, useMutation } from "@apollo/client";
 import { ChatState } from "../../utils/constants";
 import ChangePassword from "./ChangePassword";
 
@@ -70,6 +70,7 @@ function RenderActions(props: any) {
 		);
 
 	const [LeaveGroupChat, { loading, error }] = useMutation(LEAVE_GROUP_CHAT);
+	if (loading || error) console.log(loading, error);
 	async function Leave(channelId: string) {
 		try {
 			const { data } = await LeaveGroupChat({

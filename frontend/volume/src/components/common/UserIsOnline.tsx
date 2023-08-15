@@ -10,7 +10,7 @@ const USER_IS_ONLINE = gql`
 `;
 
 export default function UserIsOnline() {
-	const [user_is_online, { data, loading, error }] = useMutation(USER_IS_ONLINE);
+	const [user_is_online] = useMutation(USER_IS_ONLINE);
 
 	useEffect(() => {
 		const interval = setInterval(() => {

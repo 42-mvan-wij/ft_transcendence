@@ -1,6 +1,5 @@
 import { gql, useMutation, useQuery } from "@apollo/client";
 import * as i from "../../types/Interfaces";
-import { useState } from "react";
 import { AVATAR_GROUPCHAT } from "../../utils/constants";
 
 const CREATE_CHANNEL = gql`
@@ -17,9 +16,8 @@ const CREATE_CHANNEL = gql`
 	}
 `;
 
-// TO DO: add checks for existing channel
 export default function CreateChannel(props: i.ModalProps & { refetchChannels: () => void }) {
-	const [createChannel, { data }] = useMutation(CREATE_CHANNEL);
+	const [createChannel] = useMutation(CREATE_CHANNEL);
 
 	const allChannels = getAllChannels();
 	console.log(allChannels);
