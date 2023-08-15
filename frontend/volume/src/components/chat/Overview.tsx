@@ -128,8 +128,8 @@ function getAllChats(data: any, userId: string) {
 		if (!newChat.logo) {
 			newChat.logo =
 				userId === newChat.members[0]
-					? newChat.members[0].avatar.file
-					: newChat.members[1].avatar.file;
+					? newChat.members[0]?.avatar.file
+					: newChat.members[1]?.avatar.file;
 		}
 		return newChat;
 	});

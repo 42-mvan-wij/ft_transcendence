@@ -250,26 +250,6 @@ export class GroupChatService {
 		return await this.channelRepository.save(channel);
 	}
 
-	async leaveGroupChat(channel_id: string, user_id: string) {
-		const channel = await this.getChannelById(channel_id, {owner: true, members: true, admins: true});
-		if (!channel)
-			throw new Error(`Channel with id ${channel_id} does not exist`);
-		// TODO: betere remove + owner rights doorgeven aan random admin / user?
-		if (channel.owner.id === user_id) {
-			const new_owner = await this.userService.getUser("NEW OWNER");
-			channel.owner = new_owner;
-		}
-		const admin_index = channel.admins.findIndex((admin) => admin.id === user_id);
-		if (admin_index >= 0)
-			channel.admins.splice(admin_index, 1);
-		const member_index = channel.members.findIndex((member) => member.id === user_id);
-		if (member_index >= 0)
-			channel.members.splice(member_index, 1);
-		else 
-			throw new Error(`User ${user_id} is not in channel ${channel_id}`);
-		return this.channelRepository.save(channel);
-	}
-
 	async promote(
 		channel_id: string,
 		supposed_owner_id: string,
@@ -362,4 +342,66 @@ export class GroupChatService {
 		});
 		return channel_with_messages.messages;
 	}
+
+	async leaveGroupChat(channel_id: string, user_id: string) {
+		const channel = await this.getChannelById(channel_id, {owner: true, members: true, admins: true});
+		if (!channel)
+			throw new Error(`Channel with id ${channel_id} does not exist`);
+		const admin_index = channel.admins.findIndex((admin) => admin.id === user_id);
+		if (admin_index >= 0)
+			channel.admins.splice(admin_index, 1);
+		const member_index = channel.members.findIndex((member) => member.id === user_id);
+		if (member_index >= 0)
+			channel.members.splice(member_index, 1);
+		else 
+			throw new Error(`User ${user_id} is not in channel ${channel_id}`);
+		if (channel.owner.id === user_id) {
+			let new_owner: User;
+			if (channel.admins[0]) {
+				new_owner = channel.admins[0];
+			} else if (channel.members[0]) {
+				new_owner = channel.members[0];
+			} else {
+				this.channelRepository.delete(channel.id);
+				return channel;
+			}
+			channel.owner = new_owner;
+		}
+		return this.channelRepository.save(channel);
+	}
+
+	// TESTING
+
+
+	async TESTING_join(user_name: string, channel_name: string): Promise<Number> {
+		const channel = await this.channelRepository.findOne({ 
+			where: { name: channel_name }, 
+			relations: {banned_users: true, members: true} 
+		});
+		const user = await this.userService.getUser(user_name);
+		this.join(user.id, channel.id);
+		return 1;
+	}
+
+	async TESTING_leaveGroupChat(user_name: string, channel_name: string): Promise<Number> {
+		const channel = await this.channelRepository.findOne({ 
+			where: { name: channel_name }, 
+		});
+		const user = await this.userService.getUser(user_name);
+		this.leaveGroupChat(channel.id, user.id);
+		return 1;
+	}
+
+	async TESTING_createGroupChat(user_name: string, channel_name: string, password: string) {
+		const channelInput = new CreateGroupChannelInput;
+		const user = await this.userService.getUser(user_name);
+		channelInput.name = channel_name;
+		channelInput.logo = "";
+		channelInput.password = password;
+		channelInput.member_ids = [];
+
+		this.create(channelInput, user.id);
+		return 3;
+	}
+
 }
