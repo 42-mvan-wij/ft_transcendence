@@ -1,12 +1,17 @@
 section#queue {
 	grid-area: queue;
 
+	.queueMessage {
+		line-height: 2em;
+		padding-top: 1em;
+	}
+
 	.flex_row_spacebetween:first-child {
 		transition: $transition-ultra_slow;
 	}
 
 	.section_content {
-		padding: 1em;
+		padding: 1em 1em 1em 3em;
 		box-sizing: border-box;
 	}
 

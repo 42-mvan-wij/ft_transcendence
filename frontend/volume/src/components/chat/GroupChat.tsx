@@ -5,12 +5,31 @@ import GroupStats from "./GroupStats";
 import { gql, useMutation, useQuery } from "@apollo/client";
 import { convertEncodedImage } from "src/utils/convertEncodedImage";
 import { renderSendContainer } from "./Chat";
+import { ChatState } from "../../utils/constants";
 
 const GET_CHANNEL = gql`
 	query group_chat($channel_id: String!) {
 		group_chat(id: $channel_id) {
+			admins {
+				id
+			}
+			banned_users {
+				id
+				username
+				avatar {
+					file
+				}
+			}
+			id
 			name
 			logo
+			isPublic
+			owner {
+				id
+			}
+			admins {
+				id
+			}
 			messages {
 				id
 				content
@@ -73,10 +92,12 @@ const SEND_MESSAGE = gql`
 
 export default function GroupChat({
 	props,
+	setChatState,
 	channel_id,
 	renderOverview,
 }: {
 	props: i.ModalProps;
+	setChatState: (state: ChatState) => void;
 	channel_id: string;
 	renderOverview: () => void;
 }) {
@@ -85,6 +106,10 @@ export default function GroupChat({
 	});
 	const [freshData, setFreshData] = useState(false);
 	const [sendMessageMutation] = useMutation(SEND_MESSAGE);
+
+	const refetchChannel = () => {
+		refetch();
+	};
 
 	useEffect(() => {
 		return subscribeToMore({
@@ -163,35 +188,48 @@ export default function GroupChat({
 
 	return (
 		<div className="personalMessage">
-			{renderHeader(
-				data,
-				() => {
+			<RenderHeader
+				{...props}
+				data={data}
+				setChatState={setChatState}
+				renderOverview={() => {
 					setFreshData(false);
 					renderOverview();
-				},
-				props
-			)}
+				}}
+				refetchChannel={refetchChannel}
+			/>
 			<Messages data={data} current_user={current_user} />
 			{renderSendContainer(message, handleMessageInput, sendMessage)}
 		</div>
 	);
 }
 
-function renderHeader(data: any, renderOverview: () => void, props: any) {
+function RenderHeader(props: any) {
 	return (
 		<div className="chat_pm_header">
 			<div className="go_back">
-				<img className="arrow_back" src="/img/arrow_back.png" onClick={renderOverview} />
+				<img
+					className="arrow_back"
+					src="/img/arrow_back.png"
+					onClick={props.renderOverview}
+				/>
 			</div>
 			<div className="pm_user">
-				<img className="pm_avatar" src={convertEncodedImage(data.group_chat.logo)} />
-				<h3>{data.group_chat.name}</h3>
+				<img className="pm_avatar" src={convertEncodedImage(props.data.group_chat.logo)} />
+				<h3>{props.data.group_chat.name}</h3>
 			</div>
 			<div className="groupchat_info">
 				<a
 					className="link"
 					onClick={() =>
-						props.toggleModal(<GroupStats {...props} selectedGroup={data.group_chat} />)
+						props.toggleModal(
+							<GroupStats
+								{...props}
+								setChatState={props.setChatState}
+								selectedGroup={props.data.group_chat}
+								refetchChannel={props.refetchChannel}
+							/>
+						)
 					}
 				>
 					group stats

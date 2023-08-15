@@ -6,7 +6,6 @@ import Auth from "src/components/login/Auth";
 import TwoFactor from "./components/login/TwoFactor";
 import NewUser from "./components/settings/NewUser";
 import Home from "src/components/Home";
-import Error from "./components/Error";
 import { AuthProvider } from "./utils/authLogic";
 import UserIsOnline from "./components/common/UserIsOnline";
 import NotFound from "./components/NotFound";

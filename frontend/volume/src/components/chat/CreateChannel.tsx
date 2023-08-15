@@ -1,6 +1,7 @@
-import { gql, useMutation } from "@apollo/client";
+import { gql, useMutation, useQuery } from "@apollo/client";
 import * as i from "../../types/Interfaces";
 import { useState } from "react";
+import { AVATAR_GROUPCHAT } from "../../utils/constants";
 
 const CREATE_CHANNEL = gql`
 	mutation CreateChannel(
@@ -17,20 +18,27 @@ const CREATE_CHANNEL = gql`
 `;
 
 // TO DO: add checks for existing channel
-// TO DO: let user upload image for channel logo
 export default function CreateChannel(props: i.ModalProps & { refetchChannels: () => void }) {
 	const [createChannel, { data }] = useMutation(CREATE_CHANNEL);
+
+	const allChannels = getAllChannels();
+	console.log(allChannels);
 
 	const onSubmit = async (event: any) => {
 		event.preventDefault();
 		const form = event.currentTarget;
 		const name = form.elements[0].value;
-		const logo = form.elements[1].value;
 		const member_ids = [props.userId];
-		const password = form.elements[2].value;
+		const password = form.elements[1].value;
+		const logo = AVATAR_GROUPCHAT;
 
 		if (!name || !logo || member_ids.length === 0) {
 			alert("All fields are required");
+			return;
+		}
+
+		if (allChannels.some((channel: any) => channel.name === name)) {
+			alert("There already exists a channel with this name");
 			return;
 		}
 
@@ -48,17 +56,29 @@ export default function CreateChannel(props: i.ModalProps & { refetchChannels: (
 			<form onSubmit={onSubmit}>
 				<h3>Name</h3>
 				<input type="text" placeholder="Channel Name"></input>
-				<h3>Chat picture</h3>
-				<div className="flex_row_spacebetween">
-					<label className="choose_file" htmlFor="channelPicture">
-						<input id="channelPicture" type="file" name="channelPicture" />
-						<h3>Upload an image</h3>
-					</label>
-				</div>
+				<br />
+				<br />
 				<h3>Password</h3>
-				<input type="text" placeholder="leave blank to create public channel"></input>
+				<input type="password" placeholder="leave blank to create public channel"></input>
 				<button type="submit">Create channel</button>
 			</form>
 		</div>
 	);
+}
+
+const GET_ALL_CHANNELS = gql`
+	query All_group_chats {
+		all_group_chats {
+			name
+		}
+	}
+`;
+
+function getAllChannels() {
+	const { loading, data, error } = useQuery(GET_ALL_CHANNELS);
+
+	if (error) return {};
+	if (loading) return "Loading...";
+
+	return data.all_group_chats;
 }

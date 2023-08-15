@@ -173,28 +173,7 @@ function Overview({
 		else setChatState(ChatState.groupMessage);
 	}
 
-	// merge personal and group chats
-	let allChats = data.currentUserQuery.personal_chats.concat(data.currentUserQuery.group_chats);
-
-	// if chat has no name(and therefor is personal chat), use the other member's name and avatar
-	// TODO: move back to backend
-	allChats = allChats.map((chat: any) => {
-		const newChat = { ...chat };
-		if (!newChat.logo) {
-			newChat.logo =
-				props.userId === newChat.members[0]
-					? newChat.members[0].avatar.file
-					: newChat.members[1].avatar.file;
-		}
-		return newChat;
-	});
-
-	// sort by dateSent
-	allChats.sort(function (a: any, b: any) {
-		if (a.lastMessage?.dateSent && b.lastMessage?.dateSent) {
-			return Date.parse(b.lastMessage.dateSent) - Date.parse(a.lastMessage.dateSent);
-		}
-	});
+	const allChats = getAllChats(data, props.userId);
 
 	return (
 		<>
@@ -212,7 +191,6 @@ function Overview({
 							<div className="wrap_name_message">
 								<div className="flex_row_spacebetween">
 									<h3 className="name">{chat.name}</h3>
-									<div className="status">online</div>
 								</div>
 								<div className="chat_preview">
 									{chat.lastMessage?.author?.blocked_by_me
@@ -227,6 +205,33 @@ function Overview({
 			{renderNewChatOptions({ props, refetchChannels })}
 		</>
 	);
+}
+
+function getAllChats(data: any, userId: string) {
+	// merge personal and group chats
+	let allChats = data.currentUserQuery.personal_chats.concat(data.currentUserQuery.group_chats);
+
+	// if chat has no logo(and therefor is personal chat), use the other member's name and avatar
+	// TODO: move back to backend
+	allChats = allChats.map((chat: any) => {
+		const newChat = { ...chat };
+		if (!newChat.logo) {
+			newChat.logo =
+				userId === newChat.members[0]
+					? newChat.members[0]?.avatar.file
+					: newChat.members[1]?.avatar.file;
+		}
+		return newChat;
+	});
+
+	// sort by dateSent
+	allChats.sort(function (a: any, b: any) {
+		const dateA = a.lastMessage?.dateSent ? Date.parse(a.lastMessage.dateSent) : 0;
+		const dateB = b.lastMessage?.dateSent ? Date.parse(b.lastMessage.dateSent) : 0;
+		return dateB - dateA;
+	});
+
+	return allChats;
 }
 
 function renderNewChatOptions({

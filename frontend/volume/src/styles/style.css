@@ -211,6 +211,10 @@ table {
   text-align: right;
 }
 
+.unclickable_link {
+  color: #9db6c1;
+}
+
 :root {
   font-family: Poppins;
   line-height: 1.5;
@@ -539,6 +543,7 @@ section#chat .new_chat {
   justify-content: space-between;
   align-items: center;
   padding: 1em 0;
+  margin-top: 1em;
   box-sizing: border-box;
 }
 .new_chat .selectUser button {
@@ -579,6 +584,69 @@ input[type=file] {
 .choose_file:hover {
   color: #0fa2a9;
   cursor: pointer;
+}
+
+summary {
+  font-weight: bold;
+  width: 100%;
+}
+
+details > summary {
+  list-style: none;
+}
+
+details > summary::-webkit-details-marker {
+  display: none;
+}
+
+.change_privileges {
+  margin-top: 2em;
+}
+.change_privileges .privileges_row {
+  display: flex;
+  justify-content: space-between;
+  height: 40px;
+}
+.change_privileges .name {
+  max-width: 20%;
+  min-width: 20%;
+}
+.change_privileges .admin {
+  width: 8em;
+  text-align: center;
+}
+.change_privileges .ban {
+  width: 4em;
+  text-align: center;
+}
+.change_privileges .mute {
+  width: 4em;
+  text-align: right;
+}
+.change_privileges .friends_avatar_container {
+  width: 30px;
+  height: 30px;
+  flex-basis: 30px;
+  margin-top: -3px;
+  border-radius: 100%;
+  overflow: hidden;
+}
+.change_privileges .friends_avatar_container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.chooseChannel {
+  margin-top: 1em;
+}
+.chooseChannel .inputField {
+  margin-top: -0.5em;
+  margin-bottom: 2em;
+}
+.chooseChannel .inputField button {
+  margin-top: 0em;
 }
 
 #game {
@@ -789,11 +857,15 @@ section#profile .settings {
 section#queue {
   grid-area: queue;
 }
+section#queue .queueMessage {
+  line-height: 2em;
+  padding-top: 1em;
+}
 section#queue .flex_row_spacebetween:first-child {
   transition: 5s;
 }
 section#queue .section_content {
-  padding: 1em;
+  padding: 1em 1em 1em 3em;
   box-sizing: border-box;
 }
 section#queue .player {
@@ -1086,11 +1158,52 @@ div.background {
   margin: auto;
 }
 .white_block .new_user_content {
-  margin: 2em;
+  margin: 3em;
 }
 .white_block .new_user_header {
-  text-align: center;
   margin-bottom: 2em;
+}
+.white_block .avatar_container {
+  width: 15em;
+  height: 15em;
+}
+.white_block .change_avatar {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  gap: 3em;
+  margin-bottom: 2em;
+}
+.white_block .avatar_container {
+  width: 7em;
+  height: 7em;
+}
+.white_block h3 {
+  margin: 1em 0;
+}
+.white_block input {
+  margin-top: 0;
+  margin-bottom: 2em;
+}
+.white_block input[type=file] {
+  display: none;
+  margin: 0;
+}
+.white_block .choose_file {
+  font-weight: 500;
+  color: #309a9f;
+  text-decoration: inherit;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.white_block .choose_file:hover {
+  color: #0fa2a9;
+  cursor: pointer;
+}
+.white_block .submit_button {
+  margin-top: 2em;
 }
 
 /*# sourceMappingURL=style.css.map */

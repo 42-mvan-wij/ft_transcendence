@@ -33,7 +33,14 @@ export default function Chat(props: i.ModalProps) {
 		);
 
 	if (chatState === ChatState.groupMessage)
-		return <GroupChat props={props} channel_id={channel_id} renderOverview={renderOverview} />;
+		return (
+			<GroupChat
+				props={props}
+				setChatState={setChatState}
+				channel_id={channel_id}
+				renderOverview={renderOverview}
+			/>
+		);
 
 	return <>No state defined</>;
 }
