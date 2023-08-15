@@ -21,6 +21,7 @@ import { pubSub } from 'src/app.module';
 import { getSubscriptionUser } from 'src/utils/getSubscriptionUser';
 import { MultiBlockStateChange, MultiBlockStateChangeInput } from './dto/multi-block-state-change.dto';
 import { GraphQLError } from 'graphql';
+import { MessageReceivedSubscription } from './dto/message-received-subscrption.dto';
 
 @Resolver(() => User)
 export class UserResolver {
@@ -258,6 +259,17 @@ export class UserResolver {
 	})
 	async multi_block_state_changed(@Args() _input: MultiBlockStateChangeInput) {
 		return pubSub.asyncIterator('block_state_changed');
+	}
+
+	@UseGuards(JwtSubscriptionGuard)
+	@Subscription(() => MessageReceivedSubscription, {
+		filter: (payload, _, context) => {
+			const user = getSubscriptionUser(context);
+			return payload.user_id === user.userUid;
+		},
+	})
+	async message_received() {
+		return pubSub.asyncIterator('message_received');
 	}
 
 	// TESTING

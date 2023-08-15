@@ -80,9 +80,10 @@ export default function GroupChat({
 	channel_id: string;
 	renderOverview: () => void;
 }) {
-	const { loading, data, error, subscribeToMore } = useQuery(GET_CHANNEL, {
+	const { loading, data, error, refetch, subscribeToMore } = useQuery(GET_CHANNEL, {
 		variables: { channel_id: channel_id },
-	}); // FIXME: If a user is in the channel overview and a new message is sent, the user will not see the new message until he reloads the page
+	});
+	const [freshData, setFreshData] = useState(false);
 	const [sendMessageMutation] = useMutation(SEND_MESSAGE);
 
 	useEffect(() => {
@@ -146,6 +147,11 @@ export default function GroupChat({
 
 	const [message, setMessage] = useState("");
 
+	if (freshData == false) {
+		setFreshData(true);
+		refetch();
+	}
+
 	window.onkeydown = function (e) {
 		if (e.key === "Enter" && message !== "") sendMessage();
 	};
@@ -157,7 +163,14 @@ export default function GroupChat({
 
 	return (
 		<div className="personalMessage">
-			{renderHeader(data, renderOverview, props)}
+			{renderHeader(
+				data,
+				() => {
+					setFreshData(false);
+					renderOverview();
+				},
+				props
+			)}
 			<Messages data={data} current_user={current_user} />
 			{renderSendContainer(message, handleMessageInput, sendMessage)}
 		</div>
