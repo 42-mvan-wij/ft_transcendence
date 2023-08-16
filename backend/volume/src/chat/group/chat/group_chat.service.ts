@@ -9,7 +9,7 @@ import { GroupMessage } from '../message/entities/group_message.entity';
 import { Not, In } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 
-const mute_table: { [_: string]: string[] } = {};
+const mute_table: { [_: string]: [string, NodeJS.Timeout][] } = {};
 
 @Injectable()
 export class GroupChatService {
@@ -173,26 +173,29 @@ export class GroupChatService {
 			throw new Error(
 				`User with id ${userId} is an admin, can only kick non-admins`,
 			);
+		const timeoutId = setTimeout(() => this.unmute(channelId, userId), timeout * 60 * 1000);
 		if (this.isMuted(userId, channelId))
-			throw new Error(`User with id ${userId} is already muted`);
+		{
+			const index = mute_table[channelId].findIndex((user) => user[0] === userId);
+			clearTimeout(mute_table[channelId][index][1]);
+			mute_table[channelId][index][1] = timeoutId;
+			return channel;
+		}
 		if (!mute_table[channelId]) {
 			mute_table[channelId] = [];
 		}
-		mute_table[channelId].push(userId);
-		setTimeout(() => this.unmute(channelId, userId), timeout * 60 * 1000);
-		console.log('set:', mute_table);
+		mute_table[channelId].push([userId, timeoutId]);
 		return channel;
 	}
 
 	isMuted(userId: string, channelId: string): boolean {
-		console.log('test:', mute_table);
 		if (!mute_table[channelId]) return false;
-		return mute_table[channelId]?.some((user) => user === userId);
+		return mute_table[channelId].some((user) => user[0] === userId);
 	}
 
 	private async unmute(channelId: string, userId: string) {
 		if (!mute_table[channelId]) return;
-		const index = mute_table[channelId].findIndex((user) => user == userId);
+		const index = mute_table[channelId].findIndex((user) => user[0] == userId);
 		mute_table[channelId].splice(index, 1);
 	}
 
@@ -316,7 +319,7 @@ export class GroupChatService {
 			members: true,
 		});
 		return mute_table[channel.id].map((userId) =>
-			channel_with_members.members.find((user) => user.id == userId),
+			channel_with_members.members.find((user) => user.id === userId[0]),
 		);
 	}
 
