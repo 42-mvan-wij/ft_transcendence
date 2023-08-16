@@ -329,7 +329,6 @@ export class QueueService {
 
 	async acceptChallenge(user_id: string, challenger_id: string) {
 		this.addChallengeMatch(user_id, challenger_id);
-		// TODO: pubsub message that challenge is accepted
 		for (let i = 0; i < this.is_challenger.length; i++) {
 			if (challenger_id === this.is_challenger[i]) {
 				this.is_challenger.splice(i, 1);
@@ -343,7 +342,6 @@ export class QueueService {
 	}
 	
 	async denyChallenge(user_id: string, friend_id: string) {
-		// TODO: pubsub message that challege is denied
 		for (let i = 0; i < this.is_challenger.length; i++) {
 			if (friend_id === this.is_challenger[i]) {
 				this.is_challenger.splice(i, 1);
