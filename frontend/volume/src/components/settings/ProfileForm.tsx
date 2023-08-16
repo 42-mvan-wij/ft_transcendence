@@ -8,7 +8,7 @@ import "src/styles/style.css";
 import { gqlErrorCode } from "src/utils/gqlErrorData";
 
 export default function ProfileForm({ user }): JSX.Element {
-	const [formMutation, formMutationState] = useMutation(FORM_MUTATION, {
+	const [formMutation] = useMutation(FORM_MUTATION, {
 		refetchQueries: [{ query: CURRENT_USER }],
 	});
 
@@ -35,7 +35,7 @@ export default function ProfileForm({ user }): JSX.Element {
 			},
 		});
 		result.then(
-			(data) => {
+			() => {
 				setPreexistingUsername(false);
 				setFileTooBig(false);
 				return;

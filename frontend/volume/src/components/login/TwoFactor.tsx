@@ -7,7 +7,7 @@ import { LOGIN_WITH_TWO_FA } from "src/utils/graphQLMutations";
 function TwoFactor(): JSX.Element {
 	const [invalidCode, setInvalidCode] = useState(false);
 	const navigate = useNavigate();
-	const [twoFACodeMutation, { loading, error, data }] = useMutation(LOGIN_WITH_TWO_FA, {
+	const [twoFACodeMutation] = useMutation(LOGIN_WITH_TWO_FA, {
 		onCompleted(data) {
 			if (data.loginWithTwoFA == true) navigate("/home");
 			else setInvalidCode(true);
