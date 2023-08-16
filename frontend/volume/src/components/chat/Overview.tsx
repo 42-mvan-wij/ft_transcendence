@@ -302,11 +302,8 @@ function Overview({
 }
 
 function getAllChats(data: any, userId: string) {
-	// merge personal and group chats
 	let allChats = data.currentUserQuery.personal_chats.concat(data.currentUserQuery.group_chats);
 
-	// if chat has no logo(and therefor is personal chat), use the other member's name and avatar
-	// TODO: move back to backend
 	allChats = allChats.map((chat: any) => {
 		const newChat = { ...chat };
 		if (!newChat.logo) {
