@@ -151,7 +151,6 @@ export class GroupChatService {
 		return false;
 	}
 
-	// TODO: for all similar functions: Owner should be able to kick/ban/... admins
 	async mute(
 		channelId: string,
 		supposed_admin_id: string,
@@ -172,10 +171,12 @@ export class GroupChatService {
 		);
 		if (index < 0)
 			throw new Error(`User with id ${userId} is not a member`);
-		if (channel.admins.some((admin) => admin.id === userId))
-			throw new Error(
-				`User with id ${userId} is an admin, can only kick non-admins`,
-			);
+		if (channel.owner.id != supposed_admin_id) {
+			if (channel.admins.some((admin) => admin.id === userId))
+				throw new Error(
+					`User with id ${userId} is an admin, can only kick non-admins`,
+				);
+		}
 		const timeoutId = setTimeout(() => this.unmute(channelId, userId), timeout * 60 * 1000);
 		if (this.isMuted(userId, channelId))
 		{
@@ -217,10 +218,19 @@ export class GroupChatService {
 		);
 		if (index < 0)
 			throw new Error(`User with id ${userId} is not a member`);
-		if (channel.admins.some((admin) => admin.id === userId))
-			throw new Error(
-				`User with id ${userId} is an admin, can only kick non-admins`,
-			);
+		if (channel.owner.id != supposed_admin_id) {
+			if (channel.admins.some((admin) => admin.id === userId))
+				throw new Error(
+					`User with id ${userId} is an admin, can only kick non-admins`,
+				);
+		} else  {
+			if (channel.admins.some((admin) => admin.id === userId)) {
+				const admin_index = channel.admins.findIndex(
+					(admin) => admin.id === userId,
+					);
+				channel.admins.splice(admin_index, 1);
+			}
+		}
 		channel.members.splice(index, 1);
 		return await this.channelRepository.save(channel);
 	}
@@ -241,10 +251,19 @@ export class GroupChatService {
 		);
 		if (index < 0)
 			throw new Error(`User with id ${userId} is not a member`);
-		if (channel.admins.some((admin) => admin.id === userId))
-			throw new Error(
-				`User with id ${userId} is an admin, can only ban non-admins`,
-			);
+		if (channel.owner.id != supposed_admin_id) {
+			if (channel.admins.some((admin) => admin.id === userId))
+				throw new Error(
+					`User with id ${userId} is an admin, can only ban non-admins`,
+				);
+		} else {
+			if (channel.admins.some((admin) => admin.id === userId)) {
+				const admin_index = channel.admins.findIndex(
+					(admin) => admin.id === userId,
+					);
+				channel.admins.splice(admin_index, 1);
+			}
+		}
 		channel.banned_users.push(channel.members[index]);
 		channel.members.splice(index, 1);
 		return await this.channelRepository.save(channel);
