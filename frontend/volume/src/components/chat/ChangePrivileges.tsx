@@ -27,28 +27,29 @@ const MUTE_MEMBER = gql`
 // const UNMUTE_MEMBER = createMutation("Unmute");
 
 export default function ChangePrivileges(props: any) {
-	console.log(props.group.owner);
+	console.log(props.selectedGroup.owner);
 
-	let members = props.group.members.filter(
-		(member: any) => member.id != props.userId && member.id != props.group.owner.id
+	let members = props.selectedGroup.members.filter(
+		(member: any) => member.id != props.userId && member.id != props.selectedGroup.owner.id
 	);
 
-	const userIsOwner = props.group.owner.id === props.userId;
+	const userIsOwner = props.selectedGroup.owner.id === props.userId;
 	if (!userIsOwner)
 		members = members.filter(
-			(member: any) => !props.group.admins.some((admin: any) => admin.id === member.id)
+			(member: any) =>
+				!props.selectedGroup.admins.some((admin: any) => admin.id === member.id)
 		);
 
-	if (members.length === 0 && props.group.banned_users.length === 0)
+	if (members.length === 0 && props.selectedGroup.banned_users.length === 0)
 		return (
 			<div className="userStats">
-				<h1>{props.group.name}</h1>No actions available
+				<h1>{props.selectedGroup.name}</h1>No actions available
 				{goBackToGroupStats(props)}
 			</div>
 		);
 	return (
 		<div className="userStats">
-			<h1>{props.group.name}</h1>
+			<h1>{props.selectedGroup.name}</h1>
 			<div className="change_privileges">
 				{members.map(function (member: any) {
 					return (
@@ -80,7 +81,7 @@ export default function ChangePrivileges(props: any) {
 						</div>
 					);
 				})}
-				{props.group.banned_users.map(function (member: any) {
+				{props.selectedGroup.banned_users.map(function (member: any) {
 					return (
 						<div className="privileges_row" key={"banned" + member.id}>
 							<div className="friends_avatar_container">
@@ -105,7 +106,9 @@ export default function ChangePrivileges(props: any) {
 }
 
 function AdminPrivileges(props: any) {
-	const memberIsAdmin = props.group.admins.some((admin: any) => admin.id === props.member.id);
+	const memberIsAdmin = props.selectedGroup.admins.some(
+		(admin: any) => admin.id === props.member.id
+	);
 
 	const [promoteAdminMutation] = useMutation(PROMOTE_ADMIN);
 	const [demoteAdminMutation] = useMutation(DEMOTE_ADMIN);
@@ -116,7 +119,7 @@ function AdminPrivileges(props: any) {
 		try {
 			await mutation({
 				variables: {
-					channelId: props.group.id,
+					channelId: props.selectedGroup.id,
 					userId: props.member.id,
 				},
 			});
@@ -142,7 +145,7 @@ function KickUser(props: any) {
 		try {
 			await kickMemberMutation({
 				variables: {
-					channelId: props.group.id,
+					channelId: props.selectedGroup.id,
 					userId: props.member.id,
 				},
 			});
@@ -161,7 +164,7 @@ function KickUser(props: any) {
 }
 
 function BanUser(props: any) {
-	const memberIsBanned = props.group.banned_users.some(
+	const memberIsBanned = props.selectedGroup.banned_users.some(
 		(user: any) => user.id === props.member.id
 	);
 
@@ -174,7 +177,7 @@ function BanUser(props: any) {
 		try {
 			await mutation({
 				variables: {
-					channelId: props.group.id,
+					channelId: props.selectedGroup.id,
 					userId: props.member.id,
 				},
 			});
@@ -202,7 +205,7 @@ function MuteUser(props: any) {
 		try {
 			await muteMemberMutation({
 				variables: {
-					channelId: props.group.id,
+					channelId: props.selectedGroup.id,
 					userId: props.member.id,
 					timeout: MUTE_TIME_SEC,
 				},

@@ -222,14 +222,12 @@ function RenderHeader(props: any) {
 				<a
 					className="link"
 					onClick={() =>
-						props.toggleModal(
-							<GroupStats
-								{...props}
-								setChatState={props.setChatState}
-								selectedGroup={props.data.group_chat}
-								refetchChannel={props.refetchChannel}
-							/>
-						)
+						props.toggleModal({
+							type: "GroupStats",
+							setChatState: props.setChatState,
+							selectedGroup: props.data.group_chat,
+							refetchChannel: props.refetchChannel,
+						})
 					}
 				>
 					options

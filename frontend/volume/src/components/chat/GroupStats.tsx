@@ -42,16 +42,23 @@ function RenderActions(props: any) {
 			<a
 				className="link"
 				key="change_privileges"
-				onClick={() =>
-					props.toggleModal(
-						<ChangePrivileges
-							{...props}
-							group={props.group}
-							setChatState={props.setChatState}
-							selectedGroup={props.data.group_chat}
-							refetchChannel={props.refetchChannel}
-						/>
-					)
+				onClick={
+					() =>
+						props.toggleModal({
+							type: "ChangePrivileges",
+							setChatState: props.setChatState,
+							selectedGroup: props.selectedGroup,
+							refetchChannel: props.refetchChannel,
+						})
+					// 	props.toggleModal(
+					// 		<ChangePrivileges
+					// 			{...props}
+					// 			group={props.group}
+					// 			setChatState={props.setChatState}
+					// 			selectedGroup={props.data.group_chat}
+					// 			refetchChannel={props.refetchChannel}
+					// 		/>
+					// 	)
 				}
 			>
 				change user privileges
@@ -125,14 +132,12 @@ export function goBackToGroupStats(props: any) {
 			<div
 				className="link"
 				onClick={() =>
-					props.toggleModal(
-						<GroupStats
-							{...props}
-							setChatState={props.setChatState}
-							selectedGroup={props.data.group_chat}
-							refetchChannel={props.refetchChannel}
-						/>
-					)
+					props.toggleModal({
+						type: "GroupStats",
+						setChatState: props.setChatState,
+						selectedGroup: props.selectedGroup,
+						refetchChannel: props.refetchChannel,
+					})
 				}
 			>
 				back to options
