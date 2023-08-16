@@ -218,4 +218,9 @@ export class GroupChatResolver {
 	channelCreated() {
 		return pubSub.asyncIterator('channelCreated');
 	}
+
+	@Subscription(() => GroupChat)
+	channelUpdated() {
+		return pubSub.asyncIterator('channelUpdated');
+	}
 }

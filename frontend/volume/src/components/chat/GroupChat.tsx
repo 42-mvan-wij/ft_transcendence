@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import "../../styles/style.css";
 import * as i from "../../types/Interfaces";
-import { gql, useMutation, useQuery } from "@apollo/client";
+import { gql, useMutation, useQuery, useSubscription } from "@apollo/client";
 import { convertEncodedImage } from "src/utils/convertEncodedImage";
 import { renderSendContainer } from "./Chat";
 import { ChatState } from "../../utils/constants";
@@ -89,6 +89,52 @@ const SEND_MESSAGE = gql`
 	}
 `;
 
+const CHANNEL_UPDATED_SUBSCRIPTION = gql`
+	subscription {
+		channelUpdated {
+			admins {
+				id
+			}
+			banned_users {
+				id
+				username
+				avatar {
+					file
+				}
+			}
+			id
+			name
+			logo
+			isPublic
+			owner {
+				id
+			}
+			admins {
+				id
+			}
+			messages {
+				id
+				content
+				author {
+					id
+					username
+					blocked_by_me
+					avatar {
+						file
+					}
+				}
+			}
+			members {
+				id
+				username
+				avatar {
+					file
+				}
+			}
+		}
+	}
+`;
+
 export default function GroupChat({
 	props,
 	setChatState,
@@ -106,9 +152,16 @@ export default function GroupChat({
 	const [freshData, setFreshData] = useState(false);
 	const [sendMessageMutation] = useMutation(SEND_MESSAGE);
 
-	const refetchChannel = () => {
-		refetch();
-	};
+	const { data: subscriptionData, error: subscriptionError } = useSubscription(
+		CHANNEL_UPDATED_SUBSCRIPTION
+	);
+
+	useEffect(() => {
+		console.log("subscriptionData", subscriptionData);
+		if (subscriptionData) props.setSelectedGroup(subscriptionData.channelUpdated);
+	}, [subscriptionData]);
+
+	if (subscriptionError) console.log("subscriptionError", subscriptionError);
 
 	useEffect(() => {
 		return subscribeToMore({
@@ -195,7 +248,6 @@ export default function GroupChat({
 					setFreshData(false);
 					renderOverview();
 				}}
-				refetchChannel={refetchChannel}
 			/>
 			<Messages data={data} current_user={current_user} />
 			{renderSendContainer(message, handleMessageInput, sendMessage)}
@@ -224,7 +276,6 @@ function RenderHeader(props: any) {
 						props.toggleModal({
 							type: "GroupStats",
 							setChatState: props.setChatState,
-							refetchChannel: props.refetchChannel,
 						})
 					}
 				>

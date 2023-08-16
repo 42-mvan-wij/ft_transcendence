@@ -4,15 +4,10 @@ import { gql, useMutation } from "@apollo/client";
 import { ChatState } from "../../utils/constants";
 
 export default function GroupStats(props: any) {
-	console.log(props);
 	return (
 		<div className="userStats">
 			<h1>{props.selectedGroup.name}</h1>
-			<RenderActions
-				{...props}
-				setChatState={props.setChatState}
-				refetchChannel={props.refetchChannel}
-			/>
+			<RenderActions {...props} setChatState={props.setChatState} />
 			<br />
 			<h2>Group members</h2>
 			<RenderFriendsList {...props} />
@@ -43,7 +38,6 @@ function RenderActions(props: any) {
 					props.toggleModal({
 						type: "ChangePrivileges",
 						setChatState: props.setChatState,
-						refetchChannel: props.refetchChannel,
 					})
 				}
 			>
@@ -74,7 +68,6 @@ function RenderActions(props: any) {
 			const { data } = await LeaveGroupChat({
 				variables: { channelId: channelId },
 			});
-			console.log(data);
 			props.setShowModal(false);
 			props.setChatState(ChatState.overview);
 		} catch (error) {
@@ -129,7 +122,6 @@ export function goBackToGroupStats(props: any) {
 					props.toggleModal({
 						type: "GroupStats",
 						setChatState: props.setChatState,
-						refetchChannel: props.refetchChannel,
 					})
 				}
 			>

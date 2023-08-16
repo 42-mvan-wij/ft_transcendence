@@ -18,10 +18,7 @@ export default function useChannelCreatedSubscription() {
 	const [channelCreated, setChannelCreated] = useState(null);
 
 	useEffect(() => {
-		if (subscriptionData) {
-			console.log("subscriptionData", subscriptionData);
-			setChannelCreated(subscriptionData.channelCreated);
-		}
+		if (subscriptionData) setChannelCreated(subscriptionData.channelCreated);
 	}, [subscriptionData]);
 
 	if (subscriptionError) console.log("subscriptionError", subscriptionError);

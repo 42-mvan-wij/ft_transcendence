@@ -16,11 +16,10 @@ const CREATE_CHANNEL = gql`
 	}
 `;
 
-export default function CreateChannel(props: i.ModalProps & { refetchChannels: () => void }) {
+export default function CreateChannel(props: any) {
 	const [createChannel] = useMutation(CREATE_CHANNEL);
 
 	const allChannels = getAllChannels();
-	console.log(allChannels);
 
 	const onSubmit = async (event: any) => {
 		event.preventDefault();
@@ -42,7 +41,6 @@ export default function CreateChannel(props: i.ModalProps & { refetchChannels: (
 
 		try {
 			await createChannel({ variables: { name, logo, member_ids, password } });
-			props.refetchChannels();
 			props.setShowModal(false);
 		} catch (error) {
 			console.log("Error joining ", error);

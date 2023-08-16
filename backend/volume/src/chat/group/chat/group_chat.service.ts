@@ -219,7 +219,9 @@ export class GroupChatService {
 				`User with id ${userId} is an admin, can only kick non-admins`,
 			);
 		channel.members.splice(index, 1);
-		return await this.channelRepository.save(channel);
+		const savedChannel = await this.channelRepository.save(channel);
+		pubSub.publish('channelUpdated', { channelUpdated: savedChannel });
+		return savedChannel;
 	}
 
 	async ban(channelId: string, supposed_admin_id: string, userId: string) {
@@ -244,7 +246,9 @@ export class GroupChatService {
 			);
 		channel.banned_users.push(channel.members[index]);
 		channel.members.splice(index, 1);
-		return await this.channelRepository.save(channel);
+		const savedChannel = await this.channelRepository.save(channel);
+		pubSub.publish('channelUpdated', { channelUpdated: savedChannel });
+		return savedChannel;
 	}
 
 	async unban(channelId: string, supposed_admin_id: string, userId: string) {
@@ -263,7 +267,9 @@ export class GroupChatService {
 		);
 		if (index < 0) throw new Error(`User with id ${userId} is not banned`);
 		channel.banned_users.splice(index, 1);
-		return await this.channelRepository.save(channel);
+		const savedChannel = await this.channelRepository.save(channel);
+		pubSub.publish('channelUpdated', { channelUpdated: savedChannel });
+		return savedChannel;
 	}
 
 	async promote(
@@ -287,7 +293,9 @@ export class GroupChatService {
 		if (!channel.members.some((member) => member.id === user_id))
 			throw new Error(`User with id ${user_id} is not a member`);
 		channel.admins.push(user);
-		return await this.channelRepository.save(channel);
+		const savedChannel = await this.channelRepository.save(channel);
+		pubSub.publish('channelUpdated', { channelUpdated: savedChannel });
+		return savedChannel;
 	}
 
 	async demote(
@@ -310,7 +318,9 @@ export class GroupChatService {
 		if (index < 0)
 			throw new Error(`User with id ${user_id} is not an admin`);
 		channel.admins.splice(index, 1);
-		return await this.channelRepository.save(channel);
+		const savedChannel = await this.channelRepository.save(channel);
+		pubSub.publish('channelUpdated', { channelUpdated: savedChannel });
+		return savedChannel;
 	}
 
 	async getMutedMembers(channel: GroupChat): Promise<Array<User>> {
@@ -395,46 +405,4 @@ export class GroupChatService {
 		return this.channelRepository.save(channel);
 	}
 
-	// TESTING
-
-	async TESTING_join(
-		user_name: string,
-		channel_name: string,
-	): Promise<number> {
-		const channel = await this.channelRepository.findOne({
-			where: { name: channel_name },
-			relations: { banned_users: true, members: true },
-		});
-		const user = await this.userService.getUser(user_name);
-		this.join(user.id, channel.id);
-		return 1;
-	}
-
-	async TESTING_leaveGroupChat(
-		user_name: string,
-		channel_name: string,
-	): Promise<number> {
-		const channel = await this.channelRepository.findOne({
-			where: { name: channel_name },
-		});
-		const user = await this.userService.getUser(user_name);
-		this.leaveGroupChat(channel.id, user.id);
-		return 1;
-	}
-
-	async TESTING_createGroupChat(
-		user_name: string,
-		channel_name: string,
-		password: string,
-	) {
-		const channelInput = new CreateGroupChannelInput();
-		const user = await this.userService.getUser(user_name);
-		channelInput.name = channel_name;
-		channelInput.logo = '';
-		channelInput.password = password;
-		channelInput.member_ids = [];
-
-		this.create(channelInput, user.id);
-		return 3;
-	}
 }

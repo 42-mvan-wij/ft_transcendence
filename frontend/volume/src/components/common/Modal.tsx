@@ -38,7 +38,6 @@ export default function Modal(props: i.ModalProps) {
 
 		const handlePopstate = (event: PopStateEvent) => {
 			const modalState = event.state;
-			console.log(modalState);
 			if (modalState) {
 				props.setShowModal(true);
 				setModalContent(modalState.type, props);
@@ -73,46 +72,41 @@ export default function Modal(props: i.ModalProps) {
 }
 
 function setModalContent(type: string, props: any) {
-	if (type === "Manuel") {
-		props.setContent(<Manuel />);
-	} else if (type === "GroupStats") {
-		props.setContent(
-			<GroupStats
-				{...props}
-				setChatState={props.modalState.setChatState}
-				refetchChannel={props.modalState.refetchChannel}
-			/>
-		);
-	} else if (type === "SettingsModal") {
-		props.setContent(<SettingsModal {...props} user={props.modalState.user} />);
-	} else if (type === "ChangePrivileges") {
-		props.setContent(
-			<ChangePrivileges
-				{...props}
-				setChatState={props.modalState.setChatState}
-				refetchChannel={props.modalState.refetchChannel}
-			/>
-		);
-	} else if (type === "ChangePassword") {
-		props.setContent(<ChangePassword {...props} />);
-	} else if (type === "UserStats") {
-		props.setContent(<UserStats {...props} selectedUser={props.modalState.selectedUser} />);
-	} else if (type === "NewChat") {
-		props.setContent(
-			<NewChat
-				{...props}
-				setShowModal={props.modalState.setShowModal}
-				refetchChannels={props.modalState.refetchChannels}
-			/>
-		);
-	} else if (type === "JoinChannel") {
-		props.setContent(
-			<JoinChannel {...props} refetchChannels={props.modalState.refetchChannels} />
-		);
-	} else if (type === "CreateChannel") {
-		props.setContent(
-			<CreateChannel {...props} refetchChannels={props.modalState.refetchChannels} />
-		);
+	switch (type) {
+		case "Manuel":
+			props.setContent(<Manuel />);
+			break;
+		case "GroupStats":
+			props.setContent(
+				<GroupStats {...props} setChatState={props.modalState.setChatState} />
+			);
+			break;
+		case "SettingsModal":
+			props.setContent(<SettingsModal {...props} user={props.modalState.user} />);
+			break;
+		case "ChangePrivileges":
+			props.setContent(
+				<ChangePrivileges {...props} setChatState={props.modalState.setChatState} />
+			);
+			break;
+		case "ChangePassword":
+			props.setContent(<ChangePassword {...props} />);
+			break;
+		case "UserStats":
+			props.setContent(<UserStats {...props} selectedUser={props.modalState.selectedUser} />);
+			break;
+		case "NewChat":
+			props.setContent(<NewChat {...props} setShowModal={props.modalState.setShowModal} />);
+			break;
+		case "JoinChannel":
+			props.setContent(<JoinChannel {...props} />);
+			break;
+		case "CreateChannel":
+			props.setContent(<CreateChannel {...props} />);
+			break;
+		default:
+			// console.log("Unexpected type", type);
+			break;
 	}
 }
 
@@ -128,9 +122,23 @@ const CURRENT_USER = gql`
 	}
 `;
 
-export function createModalProps(): i.ModalProps {
+function useUser() {
 	const { loading, error, data } = useQuery(CURRENT_USER);
+	let userId = "";
+	let username = "";
+	let avatarfile = "";
 
+	if (!loading && !error) {
+		userId = data.currentUserQuery.id;
+		username = data.currentUserQuery.username;
+		avatarfile = data.currentUserQuery.avatar.file;
+	}
+
+	return { userId, username, avatarfile, loading, error };
+}
+
+export function createModalProps(): i.ModalProps {
+	const { userId, username, avatarfile } = useUser();
 	const [showModal, setShowModal] = useState<boolean>(false);
 	const [modalContent, setContent] = useState(<></>);
 	const [modalState, setmodalState] = useState({});
@@ -139,15 +147,6 @@ export function createModalProps(): i.ModalProps {
 	function toggleModal(state: any) {
 		setmodalState(state);
 		setShowModal(true);
-	}
-
-	let userId = "";
-	let username = "";
-	let avatarfile = "";
-	if (!loading && !error) {
-		userId = data.currentUserQuery.id;
-		username = data.currentUserQuery.username;
-		avatarfile = data.currentUserQuery.avatar.file;
 	}
 
 	const modalProps: i.ModalProps = {

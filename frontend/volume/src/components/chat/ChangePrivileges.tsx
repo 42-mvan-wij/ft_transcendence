@@ -24,11 +24,7 @@ const MUTE_MEMBER = gql`
 	}
 `;
 
-// const UNMUTE_MEMBER = createMutation("Unmute");
-
 export default function ChangePrivileges(props: any) {
-	console.log(props.selectedGroup.owner);
-
 	let members = props.selectedGroup.members.filter(
 		(member: any) => member.id != props.userId && member.id != props.selectedGroup.owner.id
 	);
@@ -58,26 +54,10 @@ export default function ChangePrivileges(props: any) {
 								<img src={convertEncodedImage(member.avatar.file)} />
 							</div>
 							<div className="name">{member.username}</div>
-							<AdminPrivileges
-								{...props}
-								member={member}
-								refetchChannel={props.refetchChannel}
-							/>
-							<KickUser
-								{...props}
-								member={member}
-								refetchChannel={props.refetchChannel}
-							/>
-							<BanUser
-								{...props}
-								member={member}
-								refetchChannel={props.refetchChannel}
-							/>
-							<MuteUser
-								{...props}
-								member={member}
-								refetchChannel={props.refetchChannel}
-							/>
+							<AdminPrivileges {...props} member={member} />
+							<KickUser {...props} member={member} />
+							<BanUser {...props} member={member} />
+							<MuteUser {...props} member={member} />
 						</div>
 					);
 				})}
@@ -90,11 +70,7 @@ export default function ChangePrivileges(props: any) {
 							<div className="name">{member.username}</div>
 							<div className="unclickable_link admin">make admin</div>
 							<div className="unclickable_link">kick</div>
-							<BanUser
-								{...props}
-								member={member}
-								refetchChannel={props.refetchChannel}
-							/>
+							<BanUser {...props} member={member} />
 							<div className="unclickable_link mute">mute</div>
 						</div>
 					);
@@ -123,7 +99,6 @@ function AdminPrivileges(props: any) {
 					userId: props.member.id,
 				},
 			});
-			await props.refetchChannel();
 			const alertMsg = memberIsAdmin ? " is no longer admin" : " is now admin";
 			alert(props.member.username + alertMsg);
 			props.setShowModal(false);
@@ -131,7 +106,6 @@ function AdminPrivileges(props: any) {
 			console.error("An error occurred while handling the admin action:", error);
 		}
 	}
-
 	return (
 		<div className="link admin" onClick={handleAdminAction}>
 			{memberIsAdmin ? "remove admin" : "make admin"}
@@ -149,7 +123,6 @@ function KickUser(props: any) {
 					userId: props.member.id,
 				},
 			});
-			await props.refetchChannel();
 			alert(props.member.username + "has been kicked from this channel");
 			props.setShowModal(false);
 		} catch (error) {
@@ -181,7 +154,6 @@ function BanUser(props: any) {
 					userId: props.member.id,
 				},
 			});
-			await props.refetchChannel();
 			const alertMsg = memberIsBanned ? " is no longer banned" : " is now banned";
 			alert(props.member.username + alertMsg);
 			props.setShowModal(false);
@@ -210,7 +182,6 @@ function MuteUser(props: any) {
 					timeout: MUTE_TIME_SEC,
 				},
 			});
-			await props.refetchChannel();
 
 			const now = new Date();
 			const time = new Date(now.getTime() + MUTE_TIME_SEC * 1000);

@@ -4,7 +4,7 @@ import * as i from "../../types/Interfaces";
 import PrivateChannel from "./JoinPrivate";
 import PublicChannel from "./JoinPublic";
 
-export default function JoinChannel(props: i.ModalProps & { refetchChannels: () => void }) {
+export default function JoinChannel(props: any) {
 	const [toggleChannel, setToggleChannel] = useState(false);
 
 	return (
@@ -24,15 +24,9 @@ export default function JoinChannel(props: i.ModalProps & { refetchChannels: () 
 				</a>
 			</div>
 			{toggleChannel ? (
-				<PrivateChannel
-					setShowModal={props.setShowModal}
-					refetchChannels={props.refetchChannels}
-				/>
+				<PrivateChannel setShowModal={props.setShowModal} />
 			) : (
-				<PublicChannel
-					setShowModal={props.setShowModal}
-					refetchChannels={props.refetchChannels}
-				/>
+				<PublicChannel setShowModal={props.setShowModal} />
 			)}
 		</div>
 	);

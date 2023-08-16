@@ -25,13 +25,7 @@ const CREATE_PERSONAL_CHAT = gql`
 `;
 
 // TODO: Make avatars work
-export default function NewChat({
-	setShowModal,
-	refetchChannels,
-}: {
-	setShowModal: (showModal: boolean) => void;
-	refetchChannels: () => void;
-}) {
+export default function NewChat(setShowModal: (showModal: boolean) => void) {
 	const { loading, data, error, refetch } = useQuery(GET_ALL_CHATS, {
 		fetchPolicy: "network-only",
 	});
@@ -45,7 +39,6 @@ export default function NewChat({
 				variables: { userId: userId },
 			});
 			refetch();
-			refetchChannels();
 			setShowModal(false);
 		} catch (error) {
 			console.log("Error joining ", error);

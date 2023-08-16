@@ -111,10 +111,7 @@ export default function Queue(props: i.ModalProps) {
 	}, []);
 
 	if (queue_loading) return <h3 className="queueMessage"> Loading queue </h3>;
-	if (queue_error) {
-		console.log(queue_error);
-		return <div> Queue error </div>;
-	}
+	if (queue_error) return <div> Queue error </div>;
 	return (
 		<>
 			<RemovedFromQueue />

@@ -4,6 +4,7 @@ import { ChatState } from "../../utils/constants";
 import { gql, useQuery } from "@apollo/client";
 import { convertEncodedImage } from "src/utils/convertEncodedImage";
 import { useEffect, useState } from "react";
+import useChannelCreatedSubscription from "src/utils/useChannelsCreatedSub";
 
 const GET_CHANNELS = gql`
 	query GetChannels {
@@ -172,13 +173,15 @@ function Overview({
 		});
 	}, []);
 
-	const refetchChannels = () => {
-		refetch();
-	};
+	// refetch when a new channel is created
+	const { channelCreated } = useChannelCreatedSubscription();
+	useEffect(() => {
+		if (channelCreated) refetch();
+	}, [channelCreated, refetch]);
 
 	if (dataFresh == false) {
 		setDataFresh(true);
-		refetchChannels();
+		refetch();
 	}
 
 	if (error) return <p>Error: {error.message}</p>;
@@ -221,7 +224,7 @@ function Overview({
 					);
 				})}
 			</div>
-			{renderNewChatOptions({ props, refetchChannels })}
+			{renderNewChatOptions({ ...props })}
 		</>
 	);
 }
@@ -253,13 +256,7 @@ function getAllChats(data: any, userId: string) {
 	return allChats;
 }
 
-function renderNewChatOptions({
-	props,
-	refetchChannels,
-}: {
-	props: i.ModalProps;
-	refetchChannels: () => void;
-}) {
+function renderNewChatOptions(props: i.ModalProps) {
 	return (
 		<div className="new_chat flex_row_spacebetween">
 			<a
@@ -267,7 +264,6 @@ function renderNewChatOptions({
 					props.toggleModal({
 						type: "NewChat",
 						setShowModal: props.setShowModal,
-						refetchChannels: refetchChannels,
 					})
 				}
 			>
@@ -277,7 +273,6 @@ function renderNewChatOptions({
 				onClick={() =>
 					props.toggleModal({
 						type: "JoinChannel",
-						refetchChannels: refetchChannels,
 					})
 				}
 			>
@@ -287,7 +282,6 @@ function renderNewChatOptions({
 				onClick={() =>
 					props.toggleModal({
 						type: "CreateChannel",
-						refetchChannels: refetchChannels,
 					})
 				}
 			>
