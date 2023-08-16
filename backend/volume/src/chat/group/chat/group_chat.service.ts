@@ -8,6 +8,7 @@ import { User } from 'src/user/entities/user.entity';
 import { GroupMessage } from '../message/entities/group_message.entity';
 import { Not, In } from 'typeorm';
 import * as bcrypt from 'bcrypt';
+import { pubSub } from 'src/app.module';
 
 const mute_table: { [_: string]: [string, NodeJS.Timeout][] } = {};
 
@@ -87,7 +88,9 @@ export class GroupChatService {
 			channel.isPublic = false;
 			channel.password = await promise;
 		}
-		return await this.channelRepository.save(channel);
+		const savedChannel = await this.channelRepository.save(channel);
+		pubSub.publish('channelCreated', { channelCreated: savedChannel });
+		return savedChannel;
 	}
 
 	async join(userId: string, channelId: string): Promise<GroupChat> {

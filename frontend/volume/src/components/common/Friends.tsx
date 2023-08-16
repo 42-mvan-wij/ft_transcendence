@@ -3,7 +3,7 @@ import * as i from "../../types/Interfaces";
 import UserStats from "./UserStats";
 import { convertEncodedImage } from "src/utils/convertEncodedImage";
 import { useFriendsData } from "src/utils/useFriendsData";
-import { gql, useQuery, useSubscription } from "@apollo/client";
+import { gql, useQuery } from "@apollo/client";
 import { useEffect } from "react";
 import FriendRequestAlert from "./FriendRequestAlert";
 import ChallengeAlert from "./ChallengeAlert";
@@ -81,13 +81,12 @@ function Friends(modalProps: i.ModalProps & { selectedUser: any }) {
 									}}
 								/>
 							</div>
-							{/* {friend.username} */}
 						</div>
 					);
 				})}
 			</div>
 			<IncomingFriendRequests {...modalProps} />
-			<IncomingChallenge {...modalProps} />
+			<IncomingChallenge />
 		</div>
 	);
 }
@@ -117,7 +116,7 @@ function IncomingFriendRequests(modalProps: i.ModalProps) {
 	return <></>;
 }
 
-function IncomingChallenge(modalProps: i.ModalProps) {
+function IncomingChallenge() {
 	const { data, loading, error, subscribeToMore } = useQuery(GET_INCOMING_CHALLENGE);
 
 	useEffect(() => {

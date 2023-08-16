@@ -1,7 +1,7 @@
 import "../../styles/style.css";
 import * as i from "../../types/Interfaces";
 import { ChatState } from "../../utils/constants";
-import { gql, useQuery, useMutation, useSubscription } from "@apollo/client";
+import { gql, useQuery } from "@apollo/client";
 import { convertEncodedImage } from "src/utils/convertEncodedImage";
 import JoinChannel from "./JoinChannel";
 import CreateChannel from "./CreateChannel";
