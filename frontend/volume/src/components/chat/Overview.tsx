@@ -108,7 +108,7 @@ function Overview({
 						lastMessage: {
 							...old_group_chat.lastMessage,
 							author: {
-								...old_group_chat.lastMessage.author,
+								...old_group_chat.lastMessage?.author,
 								blocked_by_me: message_received.message.author.blocked_by_me,
 							},
 							content: message_received.message.content,
