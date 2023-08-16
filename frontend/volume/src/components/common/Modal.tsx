@@ -2,60 +2,58 @@ import { useState, useEffect } from "react";
 import "../../styles/style.css";
 import * as i from "../../types/Interfaces";
 import { gql, useQuery } from "@apollo/client";
+import Manuel from "../Manual";
+import SettingsModal from "../settings/SettingsModal";
 import ChangePrivileges from "../chat/ChangePrivileges";
 import GroupStats from "../chat/GroupStats";
+import ChangePassword from "../chat/ChangePassword";
+import UserStats from "./UserStats";
+import NewChat from "../chat/NewChat";
+import JoinChannel from "../chat/JoinChannel";
+import CreateChannel from "../chat/CreateChannel";
 
 export default function Modal(props: i.ModalProps) {
 	const closeModal = () => {
 		props.setShowModal(false);
-		window.history.pushState(null, "", window.location.pathname);
+		window.history.pushState(null, "", "home");
 	};
 
 	useEffect(() => {
-		setModalContent(props);
+		setModalContent(props.modalState.type, props);
 
-		const serializableModalState = props.modalState;
-		for (const key in serializableModalState) {
-			if (typeof serializableModalState[key] === "function") {
-				delete serializableModalState[key];
+		if (props.showModal) {
+			const serializableModalState = props.modalState;
+			for (const key in serializableModalState) {
+				if (typeof serializableModalState[key] === "function") {
+					delete serializableModalState[key];
+				}
 			}
+			if (props.modalState.type != undefined)
+				window.history.pushState(
+					serializableModalState,
+					"",
+					`home?${props.modalState.type}`
+				);
 		}
-		window.history.pushState(serializableModalState, "", `home?${props.modalState.type}`);
 
-		// const handlePopstate = (event: PopStateEvent) => {
-		// 	const modalState = event.state;
-		// 	if (modalState) {
-		// 		if (modalState.type === "ChangePrivileges") {
-		// 			props.setContent(
-		// 				<ChangePrivileges
-		// 					{...props}
-		// 					group={modalState.group}
-		// 					setChatState={modalState.setChatState}
-		// 					selectedGroup={modalState.group_chat}
-		// 					refetchChannel={modalState.refetchChannel}
-		// 				/>
-		// 			);
-		// 		} else if (modalState.type === "GroupStats") {
-		// 			props.setContent(
-		// 				<GroupStats
-		// 					{...props}
-		// 					setChatState={modalState.setChatState}
-		// 					selectedGroup={modalState.data.group_chat}
-		// 					refetchChannel={modalState.refetchChannel}
-		// 				/>
-		// 				// <GroupStats selectedUser={{ id: modalState.userId }} /* other props */ />
-		// 			);
-		// 		}
-		// 	}
-		// };
+		const handlePopstate = (event: PopStateEvent) => {
+			const modalState = event.state;
+			console.log(modalState);
+			if (modalState) {
+				props.setShowModal(true);
+				setModalContent(modalState.type, props);
+			} else {
+				props.setShowModal(false);
+			}
+		};
 
 		// Listen for popstate events whenever the component is mounted
-		// window.addEventListener("popstate", handlePopstate);
+		window.addEventListener("popstate", handlePopstate);
 
 		// Clean up the event listener when the component is unmounted
-		// return () => {
-		// window.removeEventListener("popstate", handlePopstate);
-		// };
+		return () => {
+			window.removeEventListener("popstate", handlePopstate);
+		};
 	}, [props.modalState]);
 
 	return (
@@ -74,24 +72,46 @@ export default function Modal(props: i.ModalProps) {
 	);
 }
 
-function setModalContent(props: any) {
-	if (props.modalState.type === "GroupStats") {
+function setModalContent(type: string, props: any) {
+	if (type === "Manuel") {
+		props.setContent(<Manuel />);
+	} else if (type === "GroupStats") {
 		props.setContent(
 			<GroupStats
 				{...props}
 				setChatState={props.modalState.setChatState}
-				selectedGroup={props.modalState.selectedGroup}
 				refetchChannel={props.modalState.refetchChannel}
 			/>
 		);
-	} else if (props.modalState.type === "ChangePrivileges") {
+	} else if (type === "SettingsModal") {
+		props.setContent(<SettingsModal {...props} user={props.modalState.user} />);
+	} else if (type === "ChangePrivileges") {
 		props.setContent(
 			<ChangePrivileges
 				{...props}
 				setChatState={props.modalState.setChatState}
-				selectedGroup={props.modalState.selectedGroup}
 				refetchChannel={props.modalState.refetchChannel}
 			/>
+		);
+	} else if (type === "ChangePassword") {
+		props.setContent(<ChangePassword {...props} />);
+	} else if (type === "UserStats") {
+		props.setContent(<UserStats {...props} selectedUser={props.modalState.selectedUser} />);
+	} else if (type === "NewChat") {
+		props.setContent(
+			<NewChat
+				{...props}
+				setShowModal={props.modalState.setShowModal}
+				refetchChannels={props.modalState.refetchChannels}
+			/>
+		);
+	} else if (type === "JoinChannel") {
+		props.setContent(
+			<JoinChannel {...props} refetchChannels={props.modalState.refetchChannels} />
+		);
+	} else if (type === "CreateChannel") {
+		props.setContent(
+			<CreateChannel {...props} refetchChannels={props.modalState.refetchChannels} />
 		);
 	}
 }
@@ -114,6 +134,7 @@ export function createModalProps(): i.ModalProps {
 	const [showModal, setShowModal] = useState<boolean>(false);
 	const [modalContent, setContent] = useState(<></>);
 	const [modalState, setmodalState] = useState({});
+	const [selectedGroup, setSelectedGroup] = useState({});
 
 	function toggleModal(state: any) {
 		setmodalState(state);
@@ -139,6 +160,8 @@ export function createModalProps(): i.ModalProps {
 		setShowModal,
 		modalContent,
 		setContent,
+		selectedGroup,
+		setSelectedGroup,
 	};
 	return modalProps;
 }

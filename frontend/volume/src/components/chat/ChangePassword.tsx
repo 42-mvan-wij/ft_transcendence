@@ -22,7 +22,7 @@ export default function ChangePassword(props: any) {
 	}
 	return (
 		<div className="userStats">
-			<h1>{props.group.name}</h1>
+			<h1>{props.selectedGroup.name}</h1>
 			<div className="inputField">
 				<input
 					type="password"
@@ -37,7 +37,9 @@ export default function ChangePassword(props: any) {
 					placeholder="New password"
 				/>
 				<label>
-					<button onClick={() => ChangePW(props.group.id)}>Change Password</button>
+					<button onClick={() => ChangePW(props.selectedGroup.id)}>
+						Change Password
+					</button>
 				</label>
 			</div>
 			{goBackToGroupStats(props)}

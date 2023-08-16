@@ -65,6 +65,8 @@ export interface ModalProps {
 	setShowModal: (showModal: boolean) => void;
 	modalContent: JSX.Element | null;
 	setContent: (content: JSX.Element) => void;
+	selectedGroup: any;
+	setSelectedGroup: (selectedGroup: any) => void;
 }
 
 export interface PongProps {

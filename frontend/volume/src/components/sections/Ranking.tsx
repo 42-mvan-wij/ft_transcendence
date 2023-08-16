@@ -1,5 +1,4 @@
 import "src/styles/style.css";
-import UserStats from "src/components/common/UserStats";
 import * as i from "src/types/Interfaces";
 import { gql, useQuery, useSubscription } from "@apollo/client";
 import { useState, useEffect } from "react";
@@ -40,7 +39,7 @@ const RANKING_CHANGED = gql`
 	}
 `;
 
-function Ranking(modalProps: i.ModalProps) {
+function Ranking(props: i.ModalProps) {
 	const [ranking, setRanking] = useState([]);
 	const { data: subData } = useSubscription(RANKING_CHANGED);
 	const { data: queryData, loading: queryLoading, error: queryError } = useQuery(GET_RANKING);
@@ -73,11 +72,12 @@ function Ranking(modalProps: i.ModalProps) {
 					return (
 						<tr
 							key={ranking.user.username}
-							onClick={() => {
-								modalProps.toggleModal(
-									<UserStats {...modalProps} selectedUser={ranking.user} />
-								);
-							}}
+							onClick={() =>
+								props.toggleModal({
+									type: "UserStats",
+									selectedUser: ranking.user,
+								})
+							}
 						>
 							<td>{ranking.rank}</td>
 							<td>{ranking.user.username}</td>

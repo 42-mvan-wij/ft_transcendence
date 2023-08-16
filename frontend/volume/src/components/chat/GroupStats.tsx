@@ -1,18 +1,15 @@
 import "../../styles/style.css";
-import UserStats from "../common/UserStats";
 import { convertEncodedImage } from "../../utils/convertEncodedImage";
-import ChangePrivileges from "./ChangePrivileges";
 import { gql, useMutation } from "@apollo/client";
 import { ChatState } from "../../utils/constants";
-import ChangePassword from "./ChangePassword";
 
 export default function GroupStats(props: any) {
+	console.log(props);
 	return (
 		<div className="userStats">
 			<h1>{props.selectedGroup.name}</h1>
 			<RenderActions
 				{...props}
-				group={props.selectedGroup}
 				setChatState={props.setChatState}
 				refetchChannel={props.refetchChannel}
 			/>
@@ -42,23 +39,12 @@ function RenderActions(props: any) {
 			<a
 				className="link"
 				key="change_privileges"
-				onClick={
-					() =>
-						props.toggleModal({
-							type: "ChangePrivileges",
-							setChatState: props.setChatState,
-							selectedGroup: props.selectedGroup,
-							refetchChannel: props.refetchChannel,
-						})
-					// 	props.toggleModal(
-					// 		<ChangePrivileges
-					// 			{...props}
-					// 			group={props.group}
-					// 			setChatState={props.setChatState}
-					// 			selectedGroup={props.data.group_chat}
-					// 			refetchChannel={props.refetchChannel}
-					// 		/>
-					// 	)
+				onClick={() =>
+					props.toggleModal({
+						type: "ChangePrivileges",
+						setChatState: props.setChatState,
+						refetchChannel: props.refetchChannel,
+					})
 				}
 			>
 				change user privileges
@@ -70,7 +56,12 @@ function RenderActions(props: any) {
 			<a
 				className="link"
 				key="pw"
-				onClick={() => props.toggleModal(<ChangePassword {...props} group={props.group} />)}
+				onClick={() =>
+					props.toggleModal({
+						type: "ChangePassword",
+						group: props.group,
+					})
+				}
 			>
 				change password
 			</a>
@@ -91,14 +82,14 @@ function RenderActions(props: any) {
 		}
 	}
 	actions.push(
-		<a className="link" key="leave" onClick={() => Leave(props.group.id)}>
+		<a className="link" key="leave" onClick={() => Leave(props.selectedGroup.id)}>
 			leave group
 		</a>
 	);
 
 	return (
 		<div className="user_actions">
-			<h1>{props.group.groupname}</h1>
+			<h1>{props.selectedGroup.groupname}</h1>
 			{actions}
 		</div>
 	);
@@ -113,7 +104,10 @@ function RenderFriendsList(props: any) {
 					<div className="friends_avatar_container" key={member.id}>
 						<img
 							onClick={() =>
-								props.toggleModal(<UserStats {...props} selectedUser={member} />)
+								props.toggleModal({
+									type: "UserStats",
+									selectedUser: member,
+								})
 							}
 							src={convertEncodedImage(member.avatar.file)}
 						/>
@@ -135,7 +129,6 @@ export function goBackToGroupStats(props: any) {
 					props.toggleModal({
 						type: "GroupStats",
 						setChatState: props.setChatState,
-						selectedGroup: props.selectedGroup,
 						refetchChannel: props.refetchChannel,
 					})
 				}

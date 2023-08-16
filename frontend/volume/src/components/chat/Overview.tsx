@@ -3,9 +3,6 @@ import * as i from "../../types/Interfaces";
 import { ChatState } from "../../utils/constants";
 import { gql, useQuery } from "@apollo/client";
 import { convertEncodedImage } from "src/utils/convertEncodedImage";
-import JoinChannel from "./JoinChannel";
-import CreateChannel from "./CreateChannel";
-import NewChat from "./NewChat";
 import { useEffect, useState } from "react";
 
 const GET_CHANNELS = gql`
@@ -26,17 +23,38 @@ const GET_CHANNELS = gql`
 				}
 			}
 			group_chats {
+				admins {
+					id
+				}
+				banned_users {
+					id
+					username
+					avatar {
+						file
+					}
+				}
 				id
 				name
 				logo
-				lastMessage {
-					author {
-						blocked_by_me
-					}
-					content
-					dateSent
-				}
 				isPublic
+				owner {
+					id
+				}
+				admins {
+					id
+				}
+				messages {
+					id
+					content
+					author {
+						id
+						username
+						blocked_by_me
+						avatar {
+							file
+						}
+					}
+				}
 				members {
 					id
 					username
@@ -166,10 +184,11 @@ function Overview({
 	if (error) return <p>Error: {error.message}</p>;
 	if (loading) return <p>Loading...</p>;
 
-	function renderChat(channel_id: string, isPublic?: boolean) {
+	function renderChat(channel: any) {
 		setDataFresh(false);
-		setSelectedChannel(channel_id);
-		if (isPublic === undefined) setChatState(ChatState.personalMessage);
+		setSelectedChannel(channel.id);
+		props.setSelectedGroup(channel);
+		if (channel.isPublic === undefined) setChatState(ChatState.personalMessage);
 		else setChatState(ChatState.groupMessage);
 	}
 
@@ -183,7 +202,7 @@ function Overview({
 						<div
 							className="chat_container"
 							key={chat.id + "_key"}
-							onClick={() => renderChat(chat.id, chat.isPublic)}
+							onClick={() => renderChat(chat)}
 						>
 							<div className="avatar_container">
 								<img src={convertEncodedImage(chat.logo)}></img>
@@ -245,28 +264,31 @@ function renderNewChatOptions({
 		<div className="new_chat flex_row_spacebetween">
 			<a
 				onClick={() =>
-					props.toggleModal(
-						<NewChat
-							setShowModal={props.setShowModal}
-							refetchChannels={refetchChannels}
-						/>
-					)
+					props.toggleModal({
+						type: "NewChat",
+						setShowModal: props.setShowModal,
+						refetchChannels: refetchChannels,
+					})
 				}
 			>
 				new chat
 			</a>
 			<a
 				onClick={() =>
-					props.toggleModal(<JoinChannel {...props} refetchChannels={refetchChannels} />)
+					props.toggleModal({
+						type: "JoinChannel",
+						refetchChannels: refetchChannels,
+					})
 				}
 			>
 				join channel
 			</a>
 			<a
 				onClick={() =>
-					props.toggleModal(
-						<CreateChannel {...props} refetchChannels={refetchChannels} />
-					)
+					props.toggleModal({
+						type: "CreateChannel",
+						refetchChannels: refetchChannels,
+					})
 				}
 			>
 				create channel

@@ -27,12 +27,21 @@ function Player({ user, className }: { user: any; className: string }) {
 	if (loading) return <>Loading</>;
 	if (error) return <>Error</>;
 
+	if (className === "player_left")
+		return (
+			<div className={["player", className].join(" ")}>
+				<div className="avatar_container">
+					<img src={convertEncodedImage(player.avatar.file)}></img>
+				</div>
+				<h3 className="name">{player.username}</h3>
+			</div>
+		);
 	return (
 		<div className={["player", className].join(" ")}>
+			<h3 className="name">{player.username}</h3>
 			<div className="avatar_container">
 				<img src={convertEncodedImage(player.avatar.file)}></img>
 			</div>
-			<h3 className="name">{player.username}</h3>
 		</div>
 	);
 }

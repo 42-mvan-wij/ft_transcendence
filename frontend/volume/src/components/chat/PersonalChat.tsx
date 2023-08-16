@@ -198,7 +198,10 @@ function renderHeader(props: i.ModalProps, friend: i.User, data: any, renderOver
 				<a
 					className="link"
 					onClick={() =>
-						props.toggleModal(<UserStats selectedUser={friend} {...props} />)
+						props.toggleModal({
+							type: "UserStats",
+							selectedUser: friend,
+						})
 					}
 				>
 					info

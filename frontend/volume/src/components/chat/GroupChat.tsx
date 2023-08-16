@@ -1,7 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import "../../styles/style.css";
 import * as i from "../../types/Interfaces";
-import GroupStats from "./GroupStats";
 import { gql, useMutation, useQuery } from "@apollo/client";
 import { convertEncodedImage } from "src/utils/convertEncodedImage";
 import { renderSendContainer } from "./Chat";
@@ -225,7 +224,6 @@ function RenderHeader(props: any) {
 						props.toggleModal({
 							type: "GroupStats",
 							setChatState: props.setChatState,
-							selectedGroup: props.data.group_chat,
 							refetchChannel: props.refetchChannel,
 						})
 					}
