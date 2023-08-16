@@ -201,7 +201,7 @@ function renderHeader(props: i.ModalProps, friend: i.User, data: any, renderOver
 						props.toggleModal(<UserStats selectedUser={friend} {...props} />)
 					}
 				>
-					stats
+					info
 				</a>
 			</div>
 		</div>

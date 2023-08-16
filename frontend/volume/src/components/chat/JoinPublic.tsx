@@ -1,5 +1,7 @@
 import "../../styles/style.css";
 import { gql, useMutation, useQuery } from "@apollo/client";
+import { useEffect } from "react";
+import useChannelCreatedSubscription from "src/utils/useChannelsCreatedSub";
 
 const GET_ALL_PUBLIC_CHANNELS = gql`
 	query {
@@ -38,6 +40,14 @@ export default function PublicChannel({
 	const [joinGroupChat, { loading: joinLoading, error: joinError }] =
 		useMutation(JOIN_GROUP_CHAT);
 
+	// refetch when a new channel is created
+	const { channelCreated } = useChannelCreatedSubscription();
+	useEffect(() => {
+		if (channelCreated) {
+			refetch();
+		}
+	}, [channelCreated, refetch]);
+
 	async function Join(channelId: string) {
 		try {
 			await joinGroupChat({
@@ -63,7 +73,6 @@ export default function PublicChannel({
 			{data.all_available_public_channels.map(function (chat: any) {
 				return (
 					<div key={chat.id} className="selectUser">
-						<img className="avatar" src={chat.logo} />
 						<button onClick={() => Join(chat.id)}>Join {chat.name}</button>
 					</div>
 				);

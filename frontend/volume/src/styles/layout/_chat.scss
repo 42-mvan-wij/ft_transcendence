@@ -28,9 +28,9 @@ section#chat {
 			justify-content: center;
 			flex-direction: column;
 			margin: 1em 1em;
-			width:60%;
+			width: 60%;
 		}
-		
+
 		.avatar_container {
 			width: 60px;
 			height: 60px;
@@ -119,12 +119,12 @@ section#chat {
 		}
 
 		.pm_avatar {
-			margin-top:0.5em;
+			margin-top: 0.5em;
 			width: 60px;
 			height: 60px;
 			border-radius: 100%;
 			overflow: hidden;
-		
+
 			img {
 				width: 100%;
 				height: 100%;
@@ -280,6 +280,7 @@ section#chat {
 		justify-content: space-between;
 		align-items: center;
 		padding: 1em 0;
+		margin-top:1em;
 		box-sizing: border-box;
 
 		button {
@@ -327,4 +328,82 @@ input[type="file"] {
 .choose_file:hover {
 	color: $color-hover;
 	cursor: pointer;
+}
+
+details {}
+
+summary {
+	font-weight: bold;
+	width: 100%;
+}
+
+details>summary {
+	list-style: none;
+}
+
+details>summary::-webkit-details-marker {
+	display: none;
+}
+
+details[open] {}
+
+details[open] summary {}
+
+.change_privileges {
+	margin-top: 2em;
+
+	.privileges_row {
+		display: flex;
+		justify-content: space-between;
+		height: 40px;
+	}
+
+	.name {
+		max-width: 20%;
+		min-width: 20%;
+	}
+
+	.admin {
+		width: 8em;
+		text-align: center;
+	}
+
+	.ban {
+		width: 4em;
+		text-align: center;
+	}
+
+	.mute {
+		width: 4em;
+		text-align: right;
+	}
+
+	.friends_avatar_container {
+		width: 30px;
+		height: 30px;
+		flex-basis: 30px;
+		margin-top: -3px;
+		border-radius: 100%;
+		overflow: hidden;
+
+		img {
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+			object-position: center;
+		}
+	}
+}
+
+.chooseChannel{
+	margin-top:1em;
+
+	.inputField{
+		margin-top:-0.5em;
+		margin-bottom:2em;
+
+		button{
+			margin-top:0em;
+		}
+	}
 }

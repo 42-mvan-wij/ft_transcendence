@@ -4,3 +4,5 @@ export enum ChatState {
 	personalMessage,
 	groupMessage,
 }
+
+export const AVATAR_GROUPCHAT = "./img/groupchat.jpg";

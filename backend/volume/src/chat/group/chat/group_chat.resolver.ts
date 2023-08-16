@@ -5,6 +5,7 @@ import {
 	Query,
 	ResolveField,
 	Resolver,
+	Subscription,
 } from '@nestjs/graphql';
 import { GroupChat } from './entities/group_chat.entity';
 import { CreateGroupChannelInput } from './dto/create_group_chat.input';
@@ -13,6 +14,7 @@ import { UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { AuthUser } from 'src/auth/decorators/auth-user.decorator';
 import { UserInfo } from 'src/auth/user-info.interface';
+import { pubSub } from 'src/app.module';
 
 @Resolver(() => GroupChat)
 export class GroupChatResolver {
@@ -30,7 +32,7 @@ export class GroupChatResolver {
 			userInfo.userUid,
 		);
 	}
-	
+
 	@Query(() => [GroupChat])
 	@UseGuards(JwtAuthGuard)
 	async all_available_private_channels(@AuthUser() userInfo: UserInfo) {
@@ -46,7 +48,10 @@ export class GroupChatResolver {
 
 	@UseGuards(JwtAuthGuard)
 	@Mutation(() => GroupChat, { nullable: true })
-	async createGroupChat(@AuthUser() user: UserInfo, @Args() channel_input: CreateGroupChannelInput) {
+	async createGroupChat(
+		@AuthUser() user: UserInfo,
+		@Args() channel_input: CreateGroupChannelInput,
+	) {
 		return this.group_chat_service.create(channel_input, user.userUid);
 	}
 
@@ -58,50 +63,117 @@ export class GroupChatResolver {
 	) {
 		return this.group_chat_service.join(userInfo.userUid, channelId);
 	}
-	
+
 	@Mutation(() => Boolean, { nullable: true })
 	@UseGuards(JwtAuthGuard)
 	async joinPrivateGroupChat(
 		@AuthUser() userInfo: UserInfo,
-		@Args('channelId') channelId: string, @Args('password') password: string
+		@Args('channelId') channelId: string,
+		@Args('password') password: string,
 	) {
-		return this.group_chat_service.joinPrivate(userInfo.userUid, channelId, password);
+		return this.group_chat_service.joinPrivate(
+			userInfo.userUid,
+			channelId,
+			password,
+		);
 	}
 
 	@UseGuards(JwtAuthGuard)
 	@Mutation(() => GroupChat)
-	async promote(@AuthUser() user: UserInfo, @Args('channel_id') channel_id: string, @Args('user_id') user_id: string) {
-		return await this.group_chat_service.promote(channel_id, user.userUid, user_id);
+	async promote(
+		@AuthUser() user: UserInfo,
+		@Args('channel_id') channel_id: string,
+		@Args('user_id') user_id: string,
+	) {
+		return await this.group_chat_service.promote(
+			channel_id,
+			user.userUid,
+			user_id,
+		);
 	}
 
 	@UseGuards(JwtAuthGuard)
 	@Mutation(() => GroupChat)
-	async demote(@AuthUser() user: UserInfo, @Args('channel_id') channel_id: string, @Args('user_id') user_id: string) {
-		return await this.group_chat_service.demote(channel_id, user.userUid, user_id);
+	async demote(
+		@AuthUser() user: UserInfo,
+		@Args('channel_id') channel_id: string,
+		@Args('user_id') user_id: string,
+	) {
+		return await this.group_chat_service.demote(
+			channel_id,
+			user.userUid,
+			user_id,
+		);
 	}
 
 	@UseGuards(JwtAuthGuard)
 	@Mutation(() => GroupChat)
-	async mute(@AuthUser() user: UserInfo, @Args('channel_id') channel_id: string, @Args('user_id') user_id: string, @Args('timeout') timeout: number) {
-		return await this.group_chat_service.mute(channel_id, user.userUid, user_id, timeout);
+	async mute(
+		@AuthUser() user: UserInfo,
+		@Args('channel_id') channel_id: string,
+		@Args('user_id') user_id: string,
+		@Args('timeout') timeout: number,
+	) {
+		return await this.group_chat_service.mute(
+			channel_id,
+			user.userUid,
+			user_id,
+			timeout,
+		);
 	}
 
 	@UseGuards(JwtAuthGuard)
 	@Mutation(() => GroupChat)
-	async kick(@AuthUser() user: UserInfo, @Args('channel_id') channel_id: string, @Args('user_id') user_id: string) {
-		return await this.group_chat_service.kick(channel_id, user.userUid, user_id);
+	async kick(
+		@AuthUser() user: UserInfo,
+		@Args('channel_id') channel_id: string,
+		@Args('user_id') user_id: string,
+	) {
+		return await this.group_chat_service.kick(
+			channel_id,
+			user.userUid,
+			user_id,
+		);
 	}
 
 	@UseGuards(JwtAuthGuard)
 	@Mutation(() => GroupChat)
-	async ban(@AuthUser() user: UserInfo, @Args('channel_id') channel_id: string, @Args('user_id') user_id: string) {
-		return await this.group_chat_service.ban(channel_id, user.userUid, user_id);
+	async ban(
+		@AuthUser() user: UserInfo,
+		@Args('channel_id') channel_id: string,
+		@Args('user_id') user_id: string,
+	) {
+		return await this.group_chat_service.ban(
+			channel_id,
+			user.userUid,
+			user_id,
+		);
 	}
 
 	@UseGuards(JwtAuthGuard)
 	@Mutation(() => GroupChat)
-	async unban(@AuthUser() user: UserInfo, @Args('channel_id') channel_id: string, @Args('user_id') user_id: string) {
-		return await this.group_chat_service.unban(channel_id, user.userUid, user_id);
+	async unban(
+		@AuthUser() user: UserInfo,
+		@Args('channel_id') channel_id: string,
+		@Args('user_id') user_id: string,
+	) {
+		return await this.group_chat_service.unban(
+			channel_id,
+			user.userUid,
+			user_id,
+		);
+	}
+
+	@UseGuards(JwtAuthGuard)
+	@Mutation(() => GroupChat)
+	async leaveGroupChat(
+		@AuthUser() user: UserInfo,
+		@Args('channel_id') channel_id: string,
+	) {
+		return await this.group_chat_service.leaveGroupChat(
+			channel_id,
+			user.userUid,
+		);
 	}
 
 	@ResolveField()
@@ -140,5 +212,10 @@ export class GroupChatResolver {
 		const messages = channel.messages ?? (await this.messages(channel));
 		if (messages.length > 0) return messages[messages.length - 1];
 		return null;
+	}
+
+	@Subscription(() => GroupChat)
+	channelCreated() {
+		return pubSub.asyncIterator('channelCreated');
 	}
 }

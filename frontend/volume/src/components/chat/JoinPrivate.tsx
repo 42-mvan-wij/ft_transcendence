@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "../../styles/style.css";
 import { gql, useQuery, useMutation } from "@apollo/client";
+import useChannelCreatedSubscription from "../../utils/useChannelsCreatedSub";
 
 const GET_ALL_PRIVATE_CHANNELS = gql`
 	query All_available_private_channels {
@@ -21,28 +22,35 @@ const JOIN_PRIVATE_GROUP_CHAT = gql`
 	}
 `;
 
-export default function PrivateChannel({
-	setShowModal,
-	refetchChannels,
-}: {
-	setShowModal: (showModal: boolean) => void;
-	refetchChannels: () => void;
-}) {
+export default function PrivateChannel({ setShowModal, refetchChannels }: any) {
+	const [selectedChannel, setSelectedChannel] = useState<string | null>(null);
 	const { loading, data, error, refetch } = useQuery(GET_ALL_PRIVATE_CHANNELS);
 	const [joinPrivateGroupChat, { loading: joinLoading, error: joinError }] =
 		useMutation(JOIN_PRIVATE_GROUP_CHAT);
 
-	const [password, setPassword] = useState("");
+	// refetch when a new channel is created
+	const { channelCreated } = useChannelCreatedSubscription();
+	useEffect(() => {
+		if (channelCreated) {
+			refetch();
+		}
+	}, [channelCreated, refetch]);
+
+	// passwords for each channel
+	const [passwords, setPasswords] = useState<{ [key: string]: string }>({});
+
 	async function Join(channelId: string) {
+		const password = passwords[channelId] || "";
+		console.log("Joining", channelId, "with password", password);
 		try {
 			const { data: joinData } = await joinPrivateGroupChat({
 				variables: { channelId: channelId, password: password },
 			});
-			const joinSuccessful = joinData?.joinPrivateGroupChat;
-
 			refetch();
 			refetchChannels();
 			setShowModal(false);
+			const joinSuccessful = joinData?.joinPrivateGroupChat;
+			console.log("joinData ", joinData);
 			if (!joinSuccessful) {
 				alert("Wrong password!");
 			}
@@ -59,22 +67,49 @@ export default function PrivateChannel({
 
 	return (
 		<div className="new_chat">
-			<input
-				type="text"
-				value={password}
-				onChange={(e) => setPassword(e.target.value)}
-				placeholder="Enter password"
-			/>
-			{data.all_available_private_channels.map(function (chat: any) {
-				return (
-					<div key={chat.id} className="selectUser">
-						<img className="avatar" src={chat.logo} />
-						<label>
-							<button onClick={() => Join(chat.id)}>Join {chat.name}</button>
-						</label>
-					</div>
-				);
-			})}
+			{data.all_available_private_channels.map((chat: any) => (
+				<div className="chooseChannel" key={chat.id}>
+					<Channel
+						chat={chat}
+						selectedChannel={selectedChannel}
+						setSelectedChannel={setSelectedChannel}
+						passwords={passwords}
+						setPasswords={setPasswords}
+						Join={Join}
+					/>
+				</div>
+			))}
 		</div>
+	);
+}
+
+function Channel({
+	chat,
+	selectedChannel,
+	setSelectedChannel,
+	passwords,
+	setPasswords,
+	Join,
+}: any) {
+	return (
+		<>
+			<div className="selectUser" onClick={() => setSelectedChannel(chat.id)}>
+				<div className="link">{chat.name}</div>
+				<div className="unclickable_link">{chat.members.length} members</div>
+			</div>
+			{selectedChannel === chat.id && (
+				<div className="inputField">
+					<input
+						type="password"
+						value={passwords[chat.id] || ""}
+						onChange={(e) => setPasswords({ ...passwords, [chat.id]: e.target.value })}
+						placeholder="Enter password"
+					/>
+					<label>
+						<button onClick={() => Join(chat.id)}>Join {chat.name}</button>
+					</label>
+				</div>
+			)}
+		</>
 	);
 }
