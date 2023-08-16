@@ -149,6 +149,10 @@ function Overview({
 					const personal_chat_index = prev.currentUserQuery.personal_chats.findIndex(
 						(pc: any) => pc.id === message_received.message.channel.id
 					);
+					if (personal_chat_index == -1) {
+						refetch();
+						return prev;
+					}
 					const old_personal_chat =
 						prev.currentUserQuery.personal_chats[personal_chat_index];
 					const new_personal_chat = Object.assign({}, old_personal_chat, {
