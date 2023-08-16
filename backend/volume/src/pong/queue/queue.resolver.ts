@@ -165,43 +165,4 @@ export class QueueResolver {
 	getWholeQueue() {
 		return this.queueService.getWholeQueue();
 	}
-
-
-	/*
-	TESTING 					// FIXME: REMOVE BEFORE TURNIN
-	*/
-	@Query(() => Number)
-	putInQueue(@Args('id') id: string) {
-		return this.queueService.putInQueue(id);
-	}
-
-	@Query(() => Number)
-	createMatches(@Args('number_of_matches') number: number) {
-		return this.queueService.createMatches(number);
-	}
-
-	@Query(() => Number)
-	fillDbUser() {
-		return this.queueService.fillDbUser();
-	}
-
-	@Query(() => Number)
-	addAvatarToUser(@Args('username') username: string) {
-		return this.queueService.addAvatarToUser(username);
-	}
-
-	@Query(() => Number)
-	printQueue() {
-		return this.queueService.queuePrint();
-	}
-
-	@Query(() => Number)
-	removeQueue() {
-		return this.queueService.removeQueue();
-	}
-
-	@Mutation(() => Boolean, { nullable: true } )
-	async challengeFriend1(@Args('userId') user_id: string, @Args('friendId') friend_id: string) {
-		return this.queueService.challengeFriend(user_id, friend_id);		
-	}
 }
