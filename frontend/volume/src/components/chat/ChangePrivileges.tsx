@@ -1,7 +1,6 @@
 import { convertEncodedImage } from "../../utils/convertEncodedImage";
 import { gql, useMutation } from "@apollo/client";
-import { useEffect } from "react";
-import GroupStats, { goBackToGroupStats } from "./GroupStats";
+import { goBackToGroupStats } from "./GroupStats";
 
 const createMutation = (operation: any) => gql`
   mutation ${operation}($channelId: String!, $userId: String!) {
@@ -29,9 +28,16 @@ const MUTE_MEMBER = gql`
 
 export default function ChangePrivileges(props: any) {
 	console.log(props.group.owner);
-	const members = props.group.members.filter(
+
+	let members = props.group.members.filter(
 		(member: any) => member.id != props.userId && member.id != props.group.owner.id
 	);
+
+	const userIsOwner = props.group.owner.id === props.userId;
+	if (!userIsOwner)
+		members = members.filter(
+			(member: any) => !props.group.admins.some((admin: any) => admin.id === member.id)
+		);
 
 	if (members.length === 0 && props.group.banned_users.length === 0)
 		return (
@@ -188,6 +194,8 @@ function BanUser(props: any) {
 	);
 }
 
+const MUTE_TIME_SEC = 60;
+
 function MuteUser(props: any) {
 	const [muteMemberMutation] = useMutation(MUTE_MEMBER);
 	async function muteMember(): Promise<void> {
@@ -196,11 +204,19 @@ function MuteUser(props: any) {
 				variables: {
 					channelId: props.group.id,
 					userId: props.member.id,
-					timeout: 60,
+					timeout: MUTE_TIME_SEC,
 				},
 			});
 			await props.refetchChannel();
-			alert(props.member.username + "is now muted for 60 seconds");
+
+			const now = new Date();
+			const time = new Date(now.getTime() + MUTE_TIME_SEC * 1000);
+			const timeString = time.toLocaleString("nl-NL", {
+				timeZone: "Europe/Amsterdam",
+				hour12: false,
+			});
+			alert(props.member.username + " is now muted until " + timeString);
+
 			props.setShowModal(false);
 		} catch (error) {
 			console.error("An error occurred while handling the admin action:", error);

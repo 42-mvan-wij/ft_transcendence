@@ -1,6 +1,7 @@
-import { useState, useRef } from "react";
+import { useState, useEffect } from "react";
 import "../../styles/style.css";
 import { gql, useQuery, useMutation } from "@apollo/client";
+import useChannelCreatedSubscription from "../../utils/useChannelsCreatedSub";
 
 const GET_ALL_PRIVATE_CHANNELS = gql`
 	query All_available_private_channels {
@@ -27,6 +28,15 @@ export default function PrivateChannel({ setShowModal, refetchChannels }: any) {
 	const [joinPrivateGroupChat, { loading: joinLoading, error: joinError }] =
 		useMutation(JOIN_PRIVATE_GROUP_CHAT);
 
+	// refetch when a new channel is created
+	const { channelCreated } = useChannelCreatedSubscription();
+	useEffect(() => {
+		if (channelCreated) {
+			refetch();
+		}
+	}, [channelCreated, refetch]);
+
+	// passwords for each channel
 	const [passwords, setPasswords] = useState<{ [key: string]: string }>({});
 
 	async function Join(channelId: string) {

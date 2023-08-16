@@ -8,6 +8,7 @@ import { User } from 'src/user/entities/user.entity';
 import { GroupMessage } from '../message/entities/group_message.entity';
 import { Not, In } from 'typeorm';
 import * as bcrypt from 'bcrypt';
+import { pubSub } from 'src/app.module';
 
 const mute_table: { [_: string]: string[] } = {};
 
@@ -87,7 +88,9 @@ export class GroupChatService {
 			channel.isPublic = false;
 			channel.password = await promise;
 		}
-		return await this.channelRepository.save(channel);
+		const savedChannel = await this.channelRepository.save(channel);
+		pubSub.publish('channelCreated', { channelCreated: savedChannel });
+		return savedChannel;
 	}
 
 	async join(userId: string, channelId: string): Promise<GroupChat> {
@@ -173,8 +176,8 @@ export class GroupChatService {
 			throw new Error(
 				`User with id ${userId} is an admin, can only kick non-admins`,
 			);
-		if (this.isMuted(userId, channelId))
-			throw new Error(`User with id ${userId} is already muted`);
+		// if (this.isMuted(userId, channelId))
+		// throw new Error(`User with id ${userId} is already muted`);
 		if (!mute_table[channelId]) {
 			mute_table[channelId] = [];
 		}

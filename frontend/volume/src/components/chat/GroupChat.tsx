@@ -232,7 +232,7 @@ function RenderHeader(props: any) {
 						)
 					}
 				>
-					group stats
+					options
 				</a>
 			</div>
 		</div>
