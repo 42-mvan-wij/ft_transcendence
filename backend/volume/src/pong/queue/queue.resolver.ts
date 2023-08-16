@@ -1,4 +1,4 @@
-import { Args, Mutation, Resolver, Subscription, Query, ObjectType, Field, GqlExecutionContext } from '@nestjs/graphql';
+import { Args, Mutation, Resolver, Subscription, Query } from '@nestjs/graphql';
 import { QueueService } from './queue.service';
 import { pubSub } from 'src/app.module';
 import { QueuedMatch } from './queuedmatch.model';

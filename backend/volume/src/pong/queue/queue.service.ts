@@ -2,10 +2,8 @@ import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import { pubSub } from 'src/app.module';
 import { QueuedMatch } from './queuedmatch.model';
 import { UserService } from 'src/user/user.service';
-import { CreateUserInput } from 'src/user/dto/create-user.input';
 import { User } from 'src/user/entities/user.entity';
 import { UserAvatarService } from 'src/user/user-avatar.service';
-import { Avatar } from 'src/user/entities/avatar.entity';
 import { Availability } from './queuestatus.model';
 import { QueueStatus, ChallengeStatus } from './queuestatus.model';
 import { Challenge } from './challenge.model';
@@ -26,7 +24,7 @@ export class QueueService {
 	users_looking_for_match: string[] = [];
 	queued_matches: QueuedMatch[] = [];
 	current_match: QueuedMatch;
-	is_challenger: string[] = []; // TODO: as soon as challenge is sent, the challengers id should be in here so he cannot join queue anymore untill challenge is accepted or denied
+	is_challenger: string[] = [];
 	challenges: Challenge[] = [];
 
 	async getStatus(user_id: string) {
