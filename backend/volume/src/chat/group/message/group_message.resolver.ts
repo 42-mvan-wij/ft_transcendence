@@ -27,18 +27,16 @@ export class GroupMessageResolver {
 		@Args() message_input: CreateGroupMessageInput,
 		@AuthUser() user_info: UserInfo,
 	) {
-		const message = this.group_message_service.create(
+		const message = await this.group_message_service.create(
 			message_input,
 			user_info.userUid,
 		);
 		pubSub.publish('group_message_sent', { group_message_sent: message });
-		message.then((gm) => {
-			this.group_chat_service.getMembers(gm.channel).then((members) => {
-				for (const member of members) {
-					pubSub.publish('message_received', { message_received: { type: MessageType.GROUP, message: gm }, user_id: member.id })
-				}
-			});
-		})
+		this.group_chat_service.getMembers(message.channel).then((members) => {
+			for (const member of members) {
+				pubSub.publish('message_received', { message_received: { type: MessageType.GROUP, message }, user_id: member.id })
+			}
+		});
 		return message;
 	}
 
