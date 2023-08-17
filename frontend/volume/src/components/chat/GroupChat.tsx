@@ -157,7 +157,6 @@ export default function GroupChat({
 	);
 
 	useEffect(() => {
-		console.log("subscriptionData", subscriptionData);
 		if (subscriptionData) props.setSelectedGroup(subscriptionData.channelUpdated);
 	}, [subscriptionData]);
 

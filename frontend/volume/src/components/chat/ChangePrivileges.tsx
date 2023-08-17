@@ -86,6 +86,9 @@ function AdminPrivileges(props: any) {
 		(admin: any) => admin.id === props.member.id
 	);
 
+	const userIsOwner = props.selectedGroup.owner.id === props.userId;
+	if (!userIsOwner) return <div className="unclickable_link admin">make admin</div>;
+
 	const [promoteAdminMutation] = useMutation(PROMOTE_ADMIN);
 	const [demoteAdminMutation] = useMutation(DEMOTE_ADMIN);
 
