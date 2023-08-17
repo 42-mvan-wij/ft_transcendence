@@ -30,6 +30,9 @@ export class GroupMessageResolver {
 		@Args() message_input: CreateGroupMessageInput,
 		@AuthUser() user_info: UserInfo,
 	) {
+		if (await this.group_chat_service.isNotAMemberOfChannel(user_info.userUid, message_input.channel_id)) {
+			return null;
+		}
 		const message = await this.group_message_service.create(
 			message_input,
 			user_info.userUid,
