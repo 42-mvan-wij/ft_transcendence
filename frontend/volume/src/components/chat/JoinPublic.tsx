@@ -32,7 +32,13 @@ const JOIN_GROUP_CHAT = gql`
 	}
 `;
 
-export default function PublicChannel(props: any) {
+export default function PublicChannel({
+	userId,
+	setShowModal,
+}: {
+	userId: string;
+	setShowModal: any;
+}) {
 	const { loading, data, error, refetch } = useQuery(GET_ALL_PUBLIC_CHANNELS);
 	const [joinGroupChat, { loading: joinLoading, error: joinError }] =
 		useMutation(JOIN_GROUP_CHAT);
@@ -49,7 +55,7 @@ export default function PublicChannel(props: any) {
 				variables: { channelId: channelId },
 			});
 			refetch();
-			props.setShowModal(false);
+			setShowModal(false);
 		} catch (error) {
 			console.log("Error joining ", error);
 		}
@@ -61,15 +67,11 @@ export default function PublicChannel(props: any) {
 
 	if (error) return <></>;
 	if (loading) return <p>Loading...</p>;
-
 	const filteredChannels = data.all_available_public_channels.filter((channel: any) => {
 		const bannedUsers = channel.banned_users;
 		if (bannedUsers) {
-			for (let i = 0; i < bannedUsers.length; i++) {
-				if (bannedUsers[i].id === props.userId) {
-					return false;
-				}
-			}
+			for (let i = 0; i < bannedUsers.length; i++)
+				if (bannedUsers[i].id === userId) return false;
 		}
 		return true;
 	});
