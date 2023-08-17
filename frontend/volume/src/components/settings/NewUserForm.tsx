@@ -8,7 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { PictureForm, FormData } from "./FormData";
 import { gqlErrorCode } from "src/utils/gqlErrorData";
 
-export default function NewUserForm({ user }): JSX.Element {
+export default function NewUserForm(): JSX.Element {
 	const navigate = useNavigate();
 	const [formMutation] = useMutation(FORM_MUTATION, {
 		refetchQueries: [{ query: CURRENT_USER }],

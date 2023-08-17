@@ -17,7 +17,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 		if (request.cookies && request.cookies['session_cookie']) {
 			let jwtString: string;
 			try {
-				jwtString = JSON.parse(request.cookies['session_cookie']).access_token;
+				jwtString = JSON.parse(
+					request.cookies['session_cookie'],
+				).access_token;
 			} catch (e) {
 				return null;
 			}
@@ -27,11 +29,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 	}
 
 	async validate(payload: any) {
-		if ((Date.now() / 1000) >= payload.exp) {
-			throw new UnauthorizedException("Expired token");
-		}
-		else if (payload.type != TokenType.FULL) {
-			throw new UnauthorizedException("Invalid token type");
+		if (Date.now() / 1000 >= payload.exp) {
+			throw new UnauthorizedException('Expired token');
+		} else if (payload.type != TokenType.FULL) {
+			throw new UnauthorizedException('Invalid token type');
 		}
 		return payload;
 	}

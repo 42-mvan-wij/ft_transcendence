@@ -19,7 +19,10 @@ import { MessageType } from 'src/user/dto/message-received-subscrption.dto';
 
 @Resolver(() => GroupMessage)
 export class GroupMessageResolver {
-	constructor(private readonly group_message_service: GroupMessageService, private readonly group_chat_service: GroupChatService) {}
+	constructor(
+		private readonly group_message_service: GroupMessageService,
+		private readonly group_chat_service: GroupChatService,
+	) {}
 
 	@UseGuards(JwtAuthGuard)
 	@Mutation(() => GroupMessage, { nullable: true })
@@ -34,7 +37,10 @@ export class GroupMessageResolver {
 		pubSub.publish('group_message_sent', { group_message_sent: message });
 		this.group_chat_service.getMembers(message.channel).then((members) => {
 			for (const member of members) {
-				pubSub.publish('message_received', { message_received: { type: MessageType.GROUP, message }, user_id: member.id })
+				pubSub.publish('message_received', {
+					message_received: { type: MessageType.GROUP, message },
+					user_id: member.id,
+				});
 			}
 		});
 		return message;

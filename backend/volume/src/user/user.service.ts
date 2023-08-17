@@ -7,7 +7,6 @@ import { GroupChat } from 'src/chat/group/chat/entities/group_chat.entity';
 import { PersonalChat } from 'src/chat/personal/chat/entities/personal_chat.entity';
 import { Match } from 'src/pong/match/entities/match.entity';
 import { pubSub } from 'src/app.module';
-import { authenticator } from 'otplib';
 
 @Injectable()
 export class UserService {
@@ -272,7 +271,7 @@ export class UserService {
 
 	async getBlockedUsers(user: User) {
 		const user_with_blocked = await this.userRepository.findOne({
-			relations: {blocked_users: true},
+			relations: { blocked_users: true },
 			where: { id: user.id },
 		});
 		return user_with_blocked.blocked_users;
@@ -289,14 +288,22 @@ export class UserService {
 			where: { username: username_to_block },
 		});
 
-		if (current_user.blocked_users.some((user) => user.id === user_to_block.id)) {
+		if (
+			current_user.blocked_users.some(
+				(user) => user.id === user_to_block.id,
+			)
+		) {
 			return false;
 		}
 
 		current_user.blocked_users.push(user_to_block);
 		await this.userRepository.save([current_user]);
 
-		pubSub.publish('block_state_changed', {block_state_changed: true, blocked_id: user_to_block.id, by_user_id: current_user.id });
+		pubSub.publish('block_state_changed', {
+			block_state_changed: true,
+			blocked_id: user_to_block.id,
+			by_user_id: current_user.id,
+		});
 
 		return true;
 	}
@@ -312,7 +319,9 @@ export class UserService {
 			where: { username: username_to_unblock },
 		});
 
-		const index = current_user.blocked_users.findIndex((user) => user.id === user_to_unblock.id);
+		const index = current_user.blocked_users.findIndex(
+			(user) => user.id === user_to_unblock.id,
+		);
 		if (index < 0) {
 			return false;
 		}
@@ -320,7 +329,11 @@ export class UserService {
 		current_user.blocked_users.splice(index, 1);
 		await this.userRepository.save([current_user]);
 
-		pubSub.publish('block_state_changed', {block_state_changed: false, blocked_id: user_to_unblock.id, by_user_id: current_user.id });
+		pubSub.publish('block_state_changed', {
+			block_state_changed: false,
+			blocked_id: user_to_unblock.id,
+			by_user_id: current_user.id,
+		});
 
 		return true;
 	}

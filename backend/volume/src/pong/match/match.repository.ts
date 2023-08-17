@@ -39,14 +39,14 @@ export class MatchRepository {
 		return match;
 	}
 
-	private async publishMatchHistory(
-		match: Match,
-		id: string,
-	): Promise<void> {
+	private async publishMatchHistory(match: Match, id: string): Promise<void> {
 		const user = await this.userService.getUserById(id);
-		const matchHistory: Match[] = await this.userService.getMatchHistory(user);
+		const matchHistory: Match[] = await this.userService.getMatchHistory(
+			user,
+		);
 		pubSub.publish(`matchHistoryHasBeenUpdated`, {
-			matchHistoryHasBeenUpdated: matchHistory, user_id: id
+			matchHistoryHasBeenUpdated: matchHistory,
+			user_id: id,
 		});
 	}
 

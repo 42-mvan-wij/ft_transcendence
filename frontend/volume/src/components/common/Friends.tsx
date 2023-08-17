@@ -1,6 +1,5 @@
 import "../../styles/style.css";
 import * as i from "../../types/Interfaces";
-import UserStats from "./UserStats";
 import { convertEncodedImage } from "src/utils/convertEncodedImage";
 import { useFriendsData } from "src/utils/useFriendsData";
 import { gql, useQuery } from "@apollo/client";

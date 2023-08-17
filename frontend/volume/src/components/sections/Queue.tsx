@@ -3,7 +3,6 @@ import * as i from "src/types/Interfaces";
 import { useEffect } from "react";
 import { convertEncodedImage } from "src/utils/convertEncodedImage";
 import { gql, useMutation, useQuery, useSubscription } from "@apollo/client";
-import UserStats from "src/components/common/UserStats";
 
 const GET_WHOLE_QUEUE = gql`
 	query getWholeQueue {

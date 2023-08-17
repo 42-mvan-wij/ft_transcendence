@@ -10,11 +10,8 @@ function ProtectedRoute({ children }: { children: any }): JSX.Element {
 
 	if (loading) return <Loading />;
 	if (error) {
-		if (gqlErrorCode(error) == "UNAUTHENTICATED") {
-			return <Navigate to="/login" />;
-		} else {
-			return <Error gqlError={error} />;
-		}
+		if (gqlErrorCode(error) == "UNAUTHENTICATED") return <Navigate to="/login" />;
+		return <Error gqlError={error} />;
 	}
 	return children;
 }

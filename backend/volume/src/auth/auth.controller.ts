@@ -19,10 +19,11 @@ export class AuthController {
 			await this.authService.exchangeCodeForToken(
 				JSON.stringify(request.query),
 			);
-		const { user, userIsNew } = await this.authService.linkTokenToUser(intraToken);
+		const { user, userIsNew } = await this.authService.linkTokenToUser(
+			intraToken,
+		);
 
-		if (!userIsNew)
-		{
+		if (!userIsNew) {
 			if (user.twoFAEnabled == true) {
 				redirectPage = '/2fa';
 				userInfo = {
@@ -38,8 +39,7 @@ export class AuthController {
 					type: TokenType.FULL,
 				};
 			}
-		}
-		else {
+		} else {
 			redirectPage = '/new-user';
 			userInfo = {
 				userUid: user.id,

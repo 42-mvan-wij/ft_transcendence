@@ -6,7 +6,11 @@ import { GameLogicService } from './gameLogic.service';
 import { Injectable } from '@nestjs/common';
 import { UserInfo } from 'src/auth/user-info.interface';
 import { RankingService } from './ranking/ranking.service';
-import { Availability, ChallengeStatus, QueueStatus } from './queue/queuestatus.model';
+import {
+	Availability,
+	ChallengeStatus,
+	QueueStatus,
+} from './queue/queuestatus.model';
 import { pubSub } from 'src/app.module';
 
 @Injectable()
@@ -73,16 +77,34 @@ export class PongService {
 			this.emitter.emit('gameIsFinished');
 			await this.matchRepo.saveMatch(this.state.match);
 
-			const queueAvailability: Availability = new Availability;
+			const queueAvailability: Availability = new Availability();
 			queueAvailability.queueStatus = QueueStatus.CAN_JOIN;
 			queueAvailability.challengeStatus = ChallengeStatus.ONLINE;
-			pubSub.publish('queueAvailabilityChanged', { queueAvailabilityChanged: queueAvailability, userId: this.state.match.players[0].id } );
-			pubSub.publish('queueAvailabilityChanged', { queueAvailabilityChanged: queueAvailability, userId: this.state.match.players[1].id } );
+			pubSub.publish('queueAvailabilityChanged', {
+				queueAvailabilityChanged: queueAvailability,
+				userId: this.state.match.players[0].id,
+			});
+			pubSub.publish('queueAvailabilityChanged', {
+				queueAvailabilityChanged: queueAvailability,
+				userId: this.state.match.players[1].id,
+			});
 
-			pubSub.publish('ownChallengeAvailabilityChanged', { ownChallengeAvailabilityChanged: queueAvailability, userId: this.state.match.players[0].id } );
-			pubSub.publish('ownChallengeAvailabilityChanged', { ownChallengeAvailabilityChanged: queueAvailability, userId: this.state.match.players[1].id } );
-			pubSub.publish('challengeAvailabilityChanged', { challengeAvailabilityChanged: queueAvailability, userId: this.state.match.players[0].id } );
-			pubSub.publish('challengeAvailabilityChanged', { challengeAvailabilityChanged: queueAvailability, userId: this.state.match.players[1].id } );
+			pubSub.publish('ownChallengeAvailabilityChanged', {
+				ownChallengeAvailabilityChanged: queueAvailability,
+				userId: this.state.match.players[0].id,
+			});
+			pubSub.publish('ownChallengeAvailabilityChanged', {
+				ownChallengeAvailabilityChanged: queueAvailability,
+				userId: this.state.match.players[1].id,
+			});
+			pubSub.publish('challengeAvailabilityChanged', {
+				challengeAvailabilityChanged: queueAvailability,
+				userId: this.state.match.players[0].id,
+			});
+			pubSub.publish('challengeAvailabilityChanged', {
+				challengeAvailabilityChanged: queueAvailability,
+				userId: this.state.match.players[1].id,
+			});
 			await this.rankingService.updateRanking(
 				this.state.match,
 				this.state.match.players[0],
@@ -145,11 +167,16 @@ export class PongService {
 	removeMatch(offline_user_id: string) {
 		if (this.state.match.players[0].id === offline_user_id) {
 			this.state.match.p2Score = C.MAX_SCORE;
-			pubSub.publish('removedMatch', { removedMatch: this.state.match.id, userId: this.state.match.players[1].id } );
-		}
-		else {
+			pubSub.publish('removedMatch', {
+				removedMatch: this.state.match.id,
+				userId: this.state.match.players[1].id,
+			});
+		} else {
 			this.state.match.p1Score = C.MAX_SCORE;
-			pubSub.publish('removedMatch', { removedMatch: this.state.match.id, userId: this.state.match.players[0].id } );
+			pubSub.publish('removedMatch', {
+				removedMatch: this.state.match.id,
+				userId: this.state.match.players[0].id,
+			});
 		}
 	}
 }

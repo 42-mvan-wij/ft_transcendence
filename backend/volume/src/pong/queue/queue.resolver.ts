@@ -2,7 +2,10 @@ import { Args, Mutation, Resolver, Subscription, Query } from '@nestjs/graphql';
 import { QueueService } from './queue.service';
 import { pubSub } from 'src/app.module';
 import { QueuedMatch } from './queuedmatch.model';
-import { JwtAuthGuard, JwtSubscriptionGuard } from 'src/auth/guards/jwt-auth.guard';
+import {
+	JwtAuthGuard,
+	JwtSubscriptionGuard,
+} from 'src/auth/guards/jwt-auth.guard';
 import { UseGuards } from '@nestjs/common';
 import { AuthUser } from 'src/auth/decorators/auth-user.decorator';
 import { UserInfo } from 'src/auth/user-info.interface';
@@ -19,7 +22,7 @@ export class QueueResolver {
 	async getQueueAvailability(@AuthUser() user: UserInfo) {
 		return await this.queueService.getQueueAvailability(user.userUid);
 	}
-	
+
 	@Query(() => Availability)
 	async getStatus(@Args('user_id') user_id: string) {
 		return this.queueService.getStatus(user_id);
@@ -37,8 +40,8 @@ export class QueueResolver {
 	}
 
 	@UseGuards(JwtAuthGuard)
-	@Query(() => User , {nullable: true})
-	async getIncomingChallenge(@AuthUser() user: UserInfo){
+	@Query(() => User, { nullable: true })
+	async getIncomingChallenge(@AuthUser() user: UserInfo) {
 		return await this.queueService.getIncomingChallenge(user.userUid);
 	}
 
@@ -46,39 +49,33 @@ export class QueueResolver {
 	@Subscription(() => User, {
 		async filter(payload, variables, context) {
 			const user = getSubscriptionUser(context);
-			return (
-				payload.userId === user.userUid
-			);
+			return payload.userId === user.userUid;
 		},
-		nullable: true
+		nullable: true,
 	})
 	incomingChallenge() {
 		return pubSub.asyncIterator('incomingChallenge');
 	}
-	
+
 	@UseGuards(JwtSubscriptionGuard)
 	@Subscription(() => String, {
 		async filter(payload, variables, context) {
 			const user = getSubscriptionUser(context);
-			return (
-				payload.userId === user.userUid
-			);
+			return payload.userId === user.userUid;
 		},
-		nullable: true
+		nullable: true,
 	})
 	removedFromQueue() {
 		return pubSub.asyncIterator('removedFromQueue');
 	}
-	
+
 	@UseGuards(JwtSubscriptionGuard)
 	@Subscription(() => String, {
 		async filter(payload, variables, context) {
 			const user = getSubscriptionUser(context);
-			return (
-				payload.userId === user.userUid
-			);
+			return payload.userId === user.userUid;
 		},
-		nullable: true
+		nullable: true,
 	})
 	removedMatch() {
 		return pubSub.asyncIterator('removedMatch');
@@ -94,7 +91,7 @@ export class QueueResolver {
 	}
 
 	@UseGuards(JwtAuthGuard)
-	@Mutation(() => Boolean, { nullable: true } )
+	@Mutation(() => Boolean, { nullable: true })
 	async denyChallenge(
 		@AuthUser() userInfo: UserInfo,
 		@Args('friend_id') friend_id: string,
@@ -109,9 +106,12 @@ export class QueueResolver {
 	}
 
 	@UseGuards(JwtAuthGuard)
-	@Mutation(() => Boolean, { nullable: true } )
-	async challengeFriend(@AuthUser() user: UserInfo, @Args('friendId') friend_id: string) {
-		return this.queueService.challengeFriend(user.userUid, friend_id);		
+	@Mutation(() => Boolean, { nullable: true })
+	async challengeFriend(
+		@AuthUser() user: UserInfo,
+		@Args('friendId') friend_id: string,
+	) {
+		return this.queueService.challengeFriend(user.userUid, friend_id);
 	}
 
 	@UseGuards(JwtAuthGuard)
@@ -119,7 +119,7 @@ export class QueueResolver {
 	async joinQueue(@AuthUser() user: UserInfo) {
 		return await this.queueService.joinQueue(user.userUid);
 	}
-	
+
 	@Subscription(() => [QueuedMatch])
 	queueChanged() {
 		return pubSub.asyncIterator('queueChanged');
@@ -129,11 +129,8 @@ export class QueueResolver {
 	@Subscription(() => Availability, {
 		async filter(payload, variables, context) {
 			const user = getSubscriptionUser(context);
-			return (
-				payload.userId === user.userUid
-			);
+			return payload.userId === user.userUid;
 		},
-
 	})
 	ownChallengeAvailabilityChanged() {
 		return pubSub.asyncIterator('ownChallengeAvailabilityChanged');
@@ -141,9 +138,7 @@ export class QueueResolver {
 
 	@Subscription(() => Availability, {
 		filter: async (payload, variables) => {
-			return (
-				payload.userId === variables.friend_id
-			);
+			return payload.userId === variables.friend_id;
 		},
 	})
 	challengeAvailabilityChanged(@Args('friend_id') friend_id: string) {
@@ -152,9 +147,7 @@ export class QueueResolver {
 
 	@Subscription(() => Availability, {
 		filter: async (payload, variables) => {
-			return (
-				payload.userId === variables.userId
-			);
+			return payload.userId === variables.userId;
 		},
 	})
 	queueAvailabilityChanged(@Args('userId') userId: string) {

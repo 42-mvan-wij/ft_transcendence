@@ -16,6 +16,11 @@ import { Avatar } from 'src/user/entities/avatar.entity';
 		TypeOrmModule.forFeature([PersonalMessage]),
 		TypeOrmModule.forFeature([Avatar]),
 	],
-	providers: [PersonalChatService, PersonalChatResolver, UserService, UserAvatarService],
+	providers: [
+		PersonalChatService,
+		PersonalChatResolver,
+		UserService,
+		UserAvatarService,
+	],
 })
 export class PersonalChatModule {}
