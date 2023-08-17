@@ -7,7 +7,7 @@ import { PictureForm, FormData } from "./FormData";
 import "src/styles/style.css";
 import { gqlErrorCode } from "src/utils/gqlErrorData";
 
-export default function ProfileForm(user: any): JSX.Element {
+export default function ProfileForm({ user }: { user: any }): JSX.Element {
 	const [formMutation] = useMutation(FORM_MUTATION, {
 		refetchQueries: [{ query: CURRENT_USER }],
 	});

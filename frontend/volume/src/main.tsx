@@ -21,10 +21,7 @@ const wsLink = new GraphQLWsLink(
 	createClient({ url: `wss://${import.meta.env["VITE_DOMAIN"]}/api/graphql` })
 );
 
-const errorLink = onError(({ graphqlErrors, networkError }) => {
-	if (graphqlErrors) {
-		console.log("ERROR: cannot reach backend");
-	}
+const errorLink = onError(({ networkError }) => {
 	if (networkError) {
 		console.log("ERROR: network error");
 	}

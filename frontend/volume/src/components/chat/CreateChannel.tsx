@@ -1,5 +1,4 @@
 import { gql, useMutation, useQuery } from "@apollo/client";
-import * as i from "../../types/Interfaces";
 import { AVATAR_GROUPCHAT } from "../../utils/constants";
 
 const CREATE_CHANNEL = gql`

@@ -27,7 +27,17 @@ export class GroupMessageService {
 				createMessageInput.channel_id,
 			)
 		) {
-			throw new Error(`Cannot send message, because author is muted`);
+			const author = await this.userService.getUserById(author_id);
+			const channel = await this.channelService.getChannelById(
+				createMessageInput.channel_id,
+			);
+
+			const message = this.messageRepository.create({
+				author,
+				channel,
+				content: 'User is muted',
+			});
+			return await this.messageRepository.save(message);
 		}
 		const author = await this.userService.getUserById(author_id);
 		const channel = await this.channelService.getChannelById(

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import "../../styles/style.css";
 import { gql, useQuery, useMutation } from "@apollo/client";
-import useChannelCreatedSubscription from "../../utils/useChannelsCreatedSub";
+import useChannelCreatedSubscription from "src/utils/useChannelsCreatedSub";
 
 const GET_ALL_PRIVATE_CHANNELS = gql`
 	query All_available_private_channels {
@@ -22,7 +22,11 @@ const JOIN_PRIVATE_GROUP_CHAT = gql`
 	}
 `;
 
-export default function PrivateChannel(setShowModal: any) {
+export default function PrivateChannel({
+	setShowModal,
+}: {
+	setShowModal: (showModal: boolean) => void;
+}) {
 	const [selectedChannel, setSelectedChannel] = useState<string | null>(null);
 	const { loading, data, error, refetch } = useQuery(GET_ALL_PRIVATE_CHANNELS);
 	const [joinPrivateGroupChat, { loading: joinLoading, error: joinError }] =
