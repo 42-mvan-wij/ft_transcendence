@@ -23,7 +23,7 @@ export class RankingRepository {
 	public async getRankingByUser(userId: string): Promise<Ranking> {
 		const user = await this.userService.getUserById(userId);
 		if (!user) throw new Error('User not found');
-		return await this.rankingRepo.findOne({ where: { user: user } });
+		return await this.rankingRepo.findOne({ where: { user: { id: user.id } } });
 	}
 
 	public async saveRanking(ranking: Ranking): Promise<Ranking> {

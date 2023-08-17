@@ -39,4 +39,10 @@ export class PersonalChat {
 
 	@Field(() => PersonalMessage, { nullable: true })
 	lastMessage: PersonalMessage;
+
+	@Column({ default: true })
+	@Field(() => Boolean, {
+		description: 'Determines if the channel is public or not',
+	})
+	isPublic: boolean;
 }
