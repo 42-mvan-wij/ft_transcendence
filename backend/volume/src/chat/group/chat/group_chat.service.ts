@@ -408,6 +408,9 @@ export class GroupChatService {
 				new_owner = channel.admins[0];
 			} else if (channel.members[0]) {
 				new_owner = channel.members[0];
+				const user = await this.userService.getUserById(channel.members[0].id);
+				if (!user) throw new Error(`User with id ${user_id} does not exist`);
+				channel.admins.push(user);
 			} else {
 				this.channelRepository.delete(channel.id);
 				return channel;
@@ -415,5 +418,37 @@ export class GroupChatService {
 			channel.owner = new_owner;
 		}
 		return this.channelRepository.save(channel);
+	}
+
+	async changePassword(user_id: string, channel_id: string, old_password: string, new_password: string) {
+		const channel = await this.getChannelById(channel_id, { owner: true	});
+		if (!channel)
+			throw new Error(`Channel with id ${channel_id} does not exist`);
+		if (channel.owner.id !== user_id)
+			throw new Error(`User with id ${user_id} is not the owner`);
+		const same_password = await new Promise<boolean>((resolve, reject) => {
+			bcrypt.compare(old_password, channel.password, function (err, result) {
+				if (err) reject(err);
+				resolve(result);
+			});
+		});
+		if (same_password) {
+			const salt_rounds = 10;
+			const promise = new Promise<string>((resolve, reject) => {
+				bcrypt.hash(
+					new_password,
+					salt_rounds,
+					function (err, hash) {
+						if (err) reject(err);
+						resolve(hash);
+					},
+				);
+			});
+			channel.password = await promise;
+			await this.channelRepository.save(channel);
+			return true;
+		} else {
+			return false;
+		}
 	}
 }
