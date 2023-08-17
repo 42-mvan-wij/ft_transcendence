@@ -24,31 +24,28 @@ const MUTE_MEMBER = gql`
 	}
 `;
 
-// const UNMUTE_MEMBER = createMutation("Unmute");
-
 export default function ChangePrivileges(props: any) {
-	console.log(props.group.owner);
-
-	let members = props.group.members.filter(
-		(member: any) => member.id != props.userId && member.id != props.group.owner.id
+	let members = props.selectedGroup.members.filter(
+		(member: any) => member.id != props.userId && member.id != props.selectedGroup.owner.id
 	);
 
-	const userIsOwner = props.group.owner.id === props.userId;
+	const userIsOwner = props.selectedGroup.owner.id === props.userId;
 	if (!userIsOwner)
 		members = members.filter(
-			(member: any) => !props.group.admins.some((admin: any) => admin.id === member.id)
+			(member: any) =>
+				!props.selectedGroup.admins.some((admin: any) => admin.id === member.id)
 		);
 
-	if (members.length === 0 && props.group.banned_users.length === 0)
+	if (members.length === 0 && props.selectedGroup.banned_users.length === 0)
 		return (
 			<div className="userStats">
-				<h1>{props.group.name}</h1>No actions available
+				<h1>{props.selectedGroup.name}</h1>No actions available
 				{goBackToGroupStats(props)}
 			</div>
 		);
 	return (
 		<div className="userStats">
-			<h1>{props.group.name}</h1>
+			<h1>{props.selectedGroup.name}</h1>
 			<div className="change_privileges">
 				{members.map(function (member: any) {
 					return (
@@ -57,30 +54,14 @@ export default function ChangePrivileges(props: any) {
 								<img src={convertEncodedImage(member.avatar.file)} />
 							</div>
 							<div className="name">{member.username}</div>
-							<AdminPrivileges
-								{...props}
-								member={member}
-								refetchChannel={props.refetchChannel}
-							/>
-							<KickUser
-								{...props}
-								member={member}
-								refetchChannel={props.refetchChannel}
-							/>
-							<BanUser
-								{...props}
-								member={member}
-								refetchChannel={props.refetchChannel}
-							/>
-							<MuteUser
-								{...props}
-								member={member}
-								refetchChannel={props.refetchChannel}
-							/>
+							<AdminPrivileges {...props} member={member} />
+							<KickUser {...props} member={member} />
+							<BanUser {...props} member={member} />
+							<MuteUser {...props} member={member} />
 						</div>
 					);
 				})}
-				{props.group.banned_users.map(function (member: any) {
+				{props.selectedGroup.banned_users.map(function (member: any) {
 					return (
 						<div className="privileges_row" key={"banned" + member.id}>
 							<div className="friends_avatar_container">
@@ -89,11 +70,7 @@ export default function ChangePrivileges(props: any) {
 							<div className="name">{member.username}</div>
 							<div className="unclickable_link admin">make admin</div>
 							<div className="unclickable_link">kick</div>
-							<BanUser
-								{...props}
-								member={member}
-								refetchChannel={props.refetchChannel}
-							/>
+							<BanUser {...props} member={member} />
 							<div className="unclickable_link mute">mute</div>
 						</div>
 					);
@@ -105,7 +82,9 @@ export default function ChangePrivileges(props: any) {
 }
 
 function AdminPrivileges(props: any) {
-	const memberIsAdmin = props.group.admins.some((admin: any) => admin.id === props.member.id);
+	const memberIsAdmin = props.selectedGroup.admins.some(
+		(admin: any) => admin.id === props.member.id
+	);
 
 	const [promoteAdminMutation] = useMutation(PROMOTE_ADMIN);
 	const [demoteAdminMutation] = useMutation(DEMOTE_ADMIN);
@@ -116,11 +95,10 @@ function AdminPrivileges(props: any) {
 		try {
 			await mutation({
 				variables: {
-					channelId: props.group.id,
+					channelId: props.selectedGroup.id,
 					userId: props.member.id,
 				},
 			});
-			await props.refetchChannel();
 			const alertMsg = memberIsAdmin ? " is no longer admin" : " is now admin";
 			alert(props.member.username + alertMsg);
 			props.setShowModal(false);
@@ -128,7 +106,6 @@ function AdminPrivileges(props: any) {
 			console.error("An error occurred while handling the admin action:", error);
 		}
 	}
-
 	return (
 		<div className="link admin" onClick={handleAdminAction}>
 			{memberIsAdmin ? "remove admin" : "make admin"}
@@ -142,11 +119,10 @@ function KickUser(props: any) {
 		try {
 			await kickMemberMutation({
 				variables: {
-					channelId: props.group.id,
+					channelId: props.selectedGroup.id,
 					userId: props.member.id,
 				},
 			});
-			await props.refetchChannel();
 			alert(props.member.username + "has been kicked from this channel");
 			props.setShowModal(false);
 		} catch (error) {
@@ -161,7 +137,7 @@ function KickUser(props: any) {
 }
 
 function BanUser(props: any) {
-	const memberIsBanned = props.group.banned_users.some(
+	const memberIsBanned = props.selectedGroup.banned_users.some(
 		(user: any) => user.id === props.member.id
 	);
 
@@ -174,11 +150,10 @@ function BanUser(props: any) {
 		try {
 			await mutation({
 				variables: {
-					channelId: props.group.id,
+					channelId: props.selectedGroup.id,
 					userId: props.member.id,
 				},
 			});
-			await props.refetchChannel();
 			const alertMsg = memberIsBanned ? " is no longer banned" : " is now banned";
 			alert(props.member.username + alertMsg);
 			props.setShowModal(false);
@@ -202,12 +177,11 @@ function MuteUser(props: any) {
 		try {
 			await muteMemberMutation({
 				variables: {
-					channelId: props.group.id,
+					channelId: props.selectedGroup.id,
 					userId: props.member.id,
 					timeout: MUTE_TIME_SEC,
 				},
 			});
-			await props.refetchChannel();
 
 			const now = new Date();
 			const time = new Date(now.getTime() + MUTE_TIME_SEC * 1000);

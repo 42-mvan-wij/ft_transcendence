@@ -59,11 +59,14 @@ export interface ModalProps {
 	userId: string;
 	username: string;
 	avatarfile: string;
-	toggleModal: (content: JSX.Element) => void;
+	toggleModal: (modalState: any) => void;
+	modalState: any;
 	showModal: boolean;
 	setShowModal: (showModal: boolean) => void;
 	modalContent: JSX.Element | null;
 	setContent: (content: JSX.Element) => void;
+	selectedGroup: any;
+	setSelectedGroup: (selectedGroup: any) => void;
 }
 
 export interface PongProps {

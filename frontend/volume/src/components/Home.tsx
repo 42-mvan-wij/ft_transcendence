@@ -10,12 +10,10 @@ import Modal, { createModalProps } from "src/components/common/Modal";
 import { Game, createPongProps, handleFinishGame } from "src/components/game/Game";
 import * as i from "src/types/Interfaces";
 import { useAuth } from "src/utils/authLogic";
-import SettingsModal from "src/components/settings/SettingsModal";
 import Loading from "./authorization/Loading";
 import Error from "./Error";
 import { CURRENT_USER } from "src/utils/graphQLQueries";
-import Manuel from "./Manual";
-import UserIsOnline from "../components/common/UserIsOnline";
+import UserIsOnline from "./common/UserIsOnline";
 
 function Home(): JSX.Element {
 	const modalProps: i.ModalProps = createModalProps();
@@ -40,12 +38,21 @@ function Home(): JSX.Element {
 			<Header {...pongProps} />
 
 			<div id="right_top">
-				<a onClick={() => modalProps.toggleModal(<Manuel />)}>help</a>
 				<a
 					onClick={() =>
-						modalProps.toggleModal(
-							<SettingsModal user={currentUser.data.currentUserQuery} />
-						)
+						modalProps.toggleModal({
+							type: "Manuel",
+						})
+					}
+				>
+					help
+				</a>
+				<a
+					onClick={() =>
+						modalProps.toggleModal({
+							type: "SettingsModal",
+							user: currentUser.data.currentUserQuery,
+						})
 					}
 				>
 					settings

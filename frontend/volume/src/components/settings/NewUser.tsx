@@ -26,7 +26,7 @@ function NewUser(): JSX.Element {
 					<div className="new_user_header">
 						<h2>Create your profile and get started</h2>
 					</div>
-					<NewUserForm user={data.currentUserQuery} />
+					<NewUserForm />
 				</div>
 			</div>
 		</div>

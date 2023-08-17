@@ -79,7 +79,7 @@ export class User {
 	@JoinTable()
 	@Field(() => [User])
 	outgoing_friend_requests: User[];
-	
+
 	@ManyToMany(() => User, (user) => user.blocked_by)
 	@JoinTable()
 	@Field(() => [User])

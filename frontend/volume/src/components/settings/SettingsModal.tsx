@@ -6,7 +6,7 @@ import { SET_TWO_FA_MUTATION } from "src/utils/graphQLMutations";
 import { CURRENT_USER, QR_CODE_QUERY } from "src/utils/graphQLQueries";
 import ProfileForm from "./ProfileForm";
 
-export default function SettingsModule({ user }): JSX.Element {
+export default function SettingsModule(user: any): JSX.Element {
 	const [TwoFAFormMutation] = useMutation(SET_TWO_FA_MUTATION, {
 		refetchQueries: [{ query: CURRENT_USER }, { query: QR_CODE_QUERY }],
 	});

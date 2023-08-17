@@ -1,5 +1,12 @@
 import { UseGuards } from '@nestjs/common';
-import { Resolver, Query, Mutation, GqlExecutionContext, Args, Context } from '@nestjs/graphql';
+import {
+	Resolver,
+	Query,
+	Mutation,
+	GqlExecutionContext,
+	Args,
+	Context,
+} from '@nestjs/graphql';
 import { TokenType, UserInfo } from './user-info.interface';
 import { UserService } from 'src/user/user.service';
 import { AuthService } from './auth.service';
@@ -17,11 +24,14 @@ export class AuthResolver {
 	) {}
 
 	@UseGuards(JwtAuthGuard)
-	@Query(returns => String, { nullable: true })
+	@Query((returns) => String, { nullable: true })
 	async QRCodeQuery(@AuthUser() userInfo: UserInfo) {
 		const user = await this.userService.getUserById(userInfo.userUid);
 		if (user.twoFAEnabled == false) return null;
-		const keyuri = await this.authService.getQRCode(user.id, user.twoFASecret);
+		const keyuri = await this.authService.getQRCode(
+			user.id,
+			user.twoFASecret,
+		);
 		return toDataURL(keyuri);
 	}
 
@@ -29,19 +39,18 @@ export class AuthResolver {
 	@Mutation(() => String)
 	async setTwoFactorMutation(
 		@AuthUser() userInfo: UserInfo,
-		@Args({name: 'TwoFAState', type: () => Boolean}) TwoFAState: boolean
+		@Args({ name: 'TwoFAState', type: () => Boolean }) TwoFAState: boolean,
 	) {
 		const user = await this.userService.getUserById(userInfo.userUid);
 		if (TwoFAState == true && user.twoFAEnabled != true) {
-			const { secret, otpAuthUrl } = await this.authService.generateTwoFASecret(userInfo.userUid);
+			const { secret, otpAuthUrl } =
+				await this.authService.generateTwoFASecret(userInfo.userUid);
 			await this.userService.setTwoFA(secret, user);
 			return true;
-		}
-		else if (TwoFAState == true) {
+		} else if (TwoFAState == true) {
 			return true;
-		}
-		else {
-			console.log("unsetting");
+		} else {
+			console.log('unsetting');
 			await this.userService.unsetTwoFA(user);
 			return false;
 		}
@@ -52,9 +61,12 @@ export class AuthResolver {
 	async loginWithTwoFA(
 		@Context() context: GraphQLContext,
 		@AuthUser() userInfo: UserInfo,
-		@Args({name: 'twoFACode', type: () => String}) twoFACode: string
+		@Args({ name: 'twoFACode', type: () => String }) twoFACode: string,
 	) {
-		const isCodeValid = await this.authService.verify2FACode(twoFACode, userInfo.userUid);
+		const isCodeValid = await this.authService.verify2FACode(
+			twoFACode,
+			userInfo.userUid,
+		);
 		if (!isCodeValid) return false;
 		const jwtCookie = await this.authService.getJwtCookie({
 			userUid: userInfo.userUid,

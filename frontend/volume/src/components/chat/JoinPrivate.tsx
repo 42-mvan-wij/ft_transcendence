@@ -22,7 +22,7 @@ const JOIN_PRIVATE_GROUP_CHAT = gql`
 	}
 `;
 
-export default function PrivateChannel({ setShowModal, refetchChannels }: any) {
+export default function PrivateChannel(setShowModal: any) {
 	const [selectedChannel, setSelectedChannel] = useState<string | null>(null);
 	const { loading, data, error, refetch } = useQuery(GET_ALL_PRIVATE_CHANNELS);
 	const [joinPrivateGroupChat, { loading: joinLoading, error: joinError }] =
@@ -31,9 +31,7 @@ export default function PrivateChannel({ setShowModal, refetchChannels }: any) {
 	// refetch when a new channel is created
 	const { channelCreated } = useChannelCreatedSubscription();
 	useEffect(() => {
-		if (channelCreated) {
-			refetch();
-		}
+		if (channelCreated) refetch();
 	}, [channelCreated, refetch]);
 
 	// passwords for each channel
@@ -41,16 +39,13 @@ export default function PrivateChannel({ setShowModal, refetchChannels }: any) {
 
 	async function Join(channelId: string) {
 		const password = passwords[channelId] || "";
-		console.log("Joining", channelId, "with password", password);
 		try {
 			const { data: joinData } = await joinPrivateGroupChat({
 				variables: { channelId: channelId, password: password },
 			});
 			refetch();
-			refetchChannels();
 			setShowModal(false);
 			const joinSuccessful = joinData?.joinPrivateGroupChat;
-			console.log("joinData ", joinData);
 			if (!joinSuccessful) {
 				alert("Wrong password!");
 			}

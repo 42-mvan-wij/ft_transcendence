@@ -177,10 +177,14 @@ export class GroupChatService {
 					`User with id ${userId} is an admin, can only kick non-admins`,
 				);
 		}
-		const timeoutId = setTimeout(() => this.unmute(channelId, userId), timeout * 60 * 1000);
-		if (this.isMuted(userId, channelId))
-		{
-			const index = mute_table[channelId].findIndex((user) => user[0] === userId);
+		const timeoutId = setTimeout(
+			() => this.unmute(channelId, userId),
+			timeout * 60 * 1000,
+		);
+		if (this.isMuted(userId, channelId)) {
+			const index = mute_table[channelId].findIndex(
+				(user) => user[0] === userId,
+			);
 			clearTimeout(mute_table[channelId][index][1]);
 			mute_table[channelId][index][1] = timeoutId;
 			return channel;
@@ -199,7 +203,9 @@ export class GroupChatService {
 
 	private async unmute(channelId: string, userId: string) {
 		if (!mute_table[channelId]) return;
-		const index = mute_table[channelId].findIndex((user) => user[0] == userId);
+		const index = mute_table[channelId].findIndex(
+			(user) => user[0] == userId,
+		);
 		mute_table[channelId].splice(index, 1);
 	}
 
@@ -223,16 +229,18 @@ export class GroupChatService {
 				throw new Error(
 					`User with id ${userId} is an admin, can only kick non-admins`,
 				);
-		} else  {
+		} else {
 			if (channel.admins.some((admin) => admin.id === userId)) {
 				const admin_index = channel.admins.findIndex(
 					(admin) => admin.id === userId,
-					);
+				);
 				channel.admins.splice(admin_index, 1);
 			}
 		}
 		channel.members.splice(index, 1);
-		return await this.channelRepository.save(channel);
+		const savedChannel = await this.channelRepository.save(channel);
+		pubSub.publish('channelUpdated', { channelUpdated: savedChannel });
+		return savedChannel;
 	}
 
 	async ban(channelId: string, supposed_admin_id: string, userId: string) {
@@ -260,13 +268,15 @@ export class GroupChatService {
 			if (channel.admins.some((admin) => admin.id === userId)) {
 				const admin_index = channel.admins.findIndex(
 					(admin) => admin.id === userId,
-					);
+				);
 				channel.admins.splice(admin_index, 1);
 			}
 		}
 		channel.banned_users.push(channel.members[index]);
 		channel.members.splice(index, 1);
-		return await this.channelRepository.save(channel);
+		const savedChannel = await this.channelRepository.save(channel);
+		pubSub.publish('channelUpdated', { channelUpdated: savedChannel });
+		return savedChannel;
 	}
 
 	async unban(channelId: string, supposed_admin_id: string, userId: string) {
@@ -285,7 +295,9 @@ export class GroupChatService {
 		);
 		if (index < 0) throw new Error(`User with id ${userId} is not banned`);
 		channel.banned_users.splice(index, 1);
-		return await this.channelRepository.save(channel);
+		const savedChannel = await this.channelRepository.save(channel);
+		pubSub.publish('channelUpdated', { channelUpdated: savedChannel });
+		return savedChannel;
 	}
 
 	async promote(
@@ -309,7 +321,9 @@ export class GroupChatService {
 		if (!channel.members.some((member) => member.id === user_id))
 			throw new Error(`User with id ${user_id} is not a member`);
 		channel.admins.push(user);
-		return await this.channelRepository.save(channel);
+		const savedChannel = await this.channelRepository.save(channel);
+		pubSub.publish('channelUpdated', { channelUpdated: savedChannel });
+		return savedChannel;
 	}
 
 	async demote(
@@ -332,7 +346,9 @@ export class GroupChatService {
 		if (index < 0)
 			throw new Error(`User with id ${user_id} is not an admin`);
 		channel.admins.splice(index, 1);
-		return await this.channelRepository.save(channel);
+		const savedChannel = await this.channelRepository.save(channel);
+		pubSub.publish('channelUpdated', { channelUpdated: savedChannel });
+		return savedChannel;
 	}
 
 	async getMutedMembers(channel: GroupChat): Promise<Array<User>> {
@@ -408,8 +424,11 @@ export class GroupChatService {
 				new_owner = channel.admins[0];
 			} else if (channel.members[0]) {
 				new_owner = channel.members[0];
-				const user = await this.userService.getUserById(channel.members[0].id);
-				if (!user) throw new Error(`User with id ${user_id} does not exist`);
+				const user = await this.userService.getUserById(
+					channel.members[0].id,
+				);
+				if (!user)
+					throw new Error(`User with id ${user_id} does not exist`);
 				channel.admins.push(user);
 			} else {
 				this.channelRepository.delete(channel.id);
@@ -420,29 +439,34 @@ export class GroupChatService {
 		return this.channelRepository.save(channel);
 	}
 
-	async changePassword(user_id: string, channel_id: string, old_password: string, new_password: string) {
-		const channel = await this.getChannelById(channel_id, { owner: true	});
+	async changePassword(
+		user_id: string,
+		channel_id: string,
+		old_password: string,
+		new_password: string,
+	) {
+		const channel = await this.getChannelById(channel_id, { owner: true });
 		if (!channel)
 			throw new Error(`Channel with id ${channel_id} does not exist`);
 		if (channel.owner.id !== user_id)
 			throw new Error(`User with id ${user_id} is not the owner`);
 		const same_password = await new Promise<boolean>((resolve, reject) => {
-			bcrypt.compare(old_password, channel.password, function (err, result) {
-				if (err) reject(err);
-				resolve(result);
-			});
+			bcrypt.compare(
+				old_password,
+				channel.password,
+				function (err, result) {
+					if (err) reject(err);
+					resolve(result);
+				},
+			);
 		});
 		if (same_password) {
 			const salt_rounds = 10;
 			const promise = new Promise<string>((resolve, reject) => {
-				bcrypt.hash(
-					new_password,
-					salt_rounds,
-					function (err, hash) {
-						if (err) reject(err);
-						resolve(hash);
-					},
-				);
+				bcrypt.hash(new_password, salt_rounds, function (err, hash) {
+					if (err) reject(err);
+					resolve(hash);
+				});
 			});
 			channel.password = await promise;
 			await this.channelRepository.save(channel);

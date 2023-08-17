@@ -16,7 +16,10 @@ import { UserAvatarService } from 'src/user/user-avatar.service';
 
 @Resolver(() => PersonalChat)
 export class PersonalChatResolver {
-	constructor(private readonly personal_chat_service: PersonalChatService, private readonly user_avatar_service: UserAvatarService) {}
+	constructor(
+		private readonly personal_chat_service: PersonalChatService,
+		private readonly user_avatar_service: UserAvatarService,
+	) {}
 
 	@Query(() => [PersonalChat])
 	async all_personal_chats() {
@@ -47,9 +50,11 @@ export class PersonalChatResolver {
 		return this.personal_chat_service.getMessages(channel);
 	}
 
-
 	@ResolveField()
-	async name(@Parent() channel: PersonalChat, @AuthUser() user_info: UserInfo) {
+	async name(
+		@Parent() channel: PersonalChat,
+		@AuthUser() user_info: UserInfo,
+	) {
 		const members = await this.personal_chat_service.getMembers(channel);
 		if (members[0].id === user_info.userUid) return members[1].username;
 		return members[0].username;
@@ -69,7 +74,12 @@ export class PersonalChatResolver {
 		@AuthUser() user_info: UserInfo,
 	) {
 		const members = channel.members ?? (await this.members(channel));
-		if (members[0].id === user_info.userUid) return this.user_avatar_service.getAvatar(members[1].id).then((avatar) => avatar.file);
-		return this.user_avatar_service.getAvatar(members[0].id).then((avatar) => avatar.file);
+		if (members[0].id === user_info.userUid)
+			return this.user_avatar_service
+				.getAvatar(members[1].id)
+				.then((avatar) => avatar.file);
+		return this.user_avatar_service
+			.getAvatar(members[0].id)
+			.then((avatar) => avatar.file);
 	}
 }

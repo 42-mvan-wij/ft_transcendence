@@ -20,8 +20,8 @@ export interface IntraToken {
 }
 
 export interface UserLink {
-	user: User,
-	userIsNew: boolean,
+	user: User;
+	userIsNew: boolean;
 }
 
 async function postTemporaryCode(intraCode: string): Promise<string> {
@@ -41,7 +41,6 @@ async function postTemporaryCode(intraCode: string): Promise<string> {
 		console.error(error);
 		return null;
 	}
-	
 }
 
 async function downloadIntraAvatar(
@@ -76,7 +75,7 @@ export class AuthService {
 
 	private async createUniqueUsername(): Promise<string> {
 		let username = uuid();
-		while (await this.userService.getUser(username) != null) {
+		while ((await this.userService.getUser(username)) != null) {
 			username = uuid();
 		}
 		return username;
@@ -95,7 +94,9 @@ export class AuthService {
 			axiosConfig,
 		);
 
-		let user: User = await this.userService.getUserByIntraId(response.data.id);
+		let user: User = await this.userService.getUserByIntraId(
+			response.data.id,
+		);
 		if (!user) {
 			const intraAvatar = await downloadIntraAvatar(
 				response.data.image.versions.small,
@@ -117,12 +118,16 @@ export class AuthService {
 	async getJwtCookie(userInfo: UserInfo): Promise<string> {
 		const token = await this.jwtService.signAsync(userInfo);
 		const jsonWrapper = JSON.stringify({ access_token: token });
-		return ('session_cookie=' + jsonWrapper + '; HttpOnly; Secure; SameSite=Strict');
+		return (
+			'session_cookie=' +
+			jsonWrapper +
+			'; HttpOnly; Secure; SameSite=Strict'
+		);
 	}
 
 	async isCookieValid(request: Request): Promise<Boolean> {
 		const reqCookie = request.cookies['session_cookie'];
-	
+
 		if (reqCookie == undefined) return false;
 	}
 

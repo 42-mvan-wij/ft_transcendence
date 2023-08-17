@@ -61,10 +61,8 @@ function MatchHistory({ userId }: { userId: string }) {
 	}, [subData]);
 
 	if (queryLoading) return <div> Loading </div>;
-	if (queryError) {
-		console.log(queryError);
-		return <div> Error </div>;
-	}
+	if (queryError) console.log(queryError);
+
 	const m = matches.slice();
 	m.sort(function (a: any, b: any) {
 		return Date.parse(b.matchDate) - Date.parse(a.matchDate);

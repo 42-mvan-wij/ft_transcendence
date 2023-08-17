@@ -3,10 +3,8 @@ import * as i from "../../types/Interfaces";
 import { ChatState } from "../../utils/constants";
 import { gql, useQuery } from "@apollo/client";
 import { convertEncodedImage } from "src/utils/convertEncodedImage";
-import JoinChannel from "./JoinChannel";
-import CreateChannel from "./CreateChannel";
-import NewChat from "./NewChat";
 import { useEffect, useState } from "react";
+import useChannelCreatedSubscription from "src/utils/useChannelsCreatedSub";
 
 const GET_CHANNELS = gql`
 	query GetChannels {
@@ -33,18 +31,38 @@ const GET_CHANNELS = gql`
 				}
 			}
 			group_chats {
+				admins {
+					id
+				}
+				banned_users {
+					id
+					username
+					avatar {
+						file
+					}
+				}
 				id
 				name
 				logo
-				lastMessage {
+				isPublic
+				owner {
+					id
+				}
+				admins {
+					id
+				}
+				messages {
+					id
+					content
 					author {
 						id
+						username
 						blocked_by_me
+						avatar {
+							file
+						}
 					}
-					content
-					dateSent
 				}
-				isPublic
 				members {
 					id
 					username
@@ -186,6 +204,12 @@ function Overview({
 		});
 	}, []);
 
+	// refetch when a new channel is created
+	const { channelCreated } = useChannelCreatedSubscription();
+	useEffect(() => {
+		if (channelCreated) refetch();
+	}, [channelCreated, refetch]);
+
 	useEffect(() => {
 		if (!data) return;
 		const group_members = data.currentUserQuery.group_chats.flatMap((group_chat: any) =>
@@ -204,7 +228,7 @@ function Overview({
 				if (!subscriptionData.data) return prev;
 				const block_update = subscriptionData.data.multi_block_state_changed;
 				console.log({ block_update });
-				const new_group_chats = [];
+				const new_group_chats: any = [];
 				for (const group_chat of prev.currentUserQuery.group_chats) {
 					if (group_chat.lastMessage?.author?.id === block_update.user_id) {
 						new_group_chats.push(
@@ -251,22 +275,19 @@ function Overview({
 		});
 	}, [loading]);
 
-	const refetchChannels = () => {
-		refetch();
-	};
-
 	if (dataFresh == false) {
 		setDataFresh(true);
-		refetchChannels();
+		refetch();
 	}
 
 	if (error) return <p>Error: {error.message}</p>;
 	if (loading) return <p>Loading...</p>;
 
-	function renderChat(channel_id: string, isPublic?: boolean) {
+	function renderChat(channel: any) {
 		setDataFresh(false);
-		setSelectedChannel(channel_id);
-		if (isPublic === undefined) setChatState(ChatState.personalMessage);
+		setSelectedChannel(channel.id);
+		props.setSelectedGroup(channel);
+		if (channel.isPublic === undefined) setChatState(ChatState.personalMessage);
 		else setChatState(ChatState.groupMessage);
 	}
 
@@ -280,7 +301,7 @@ function Overview({
 						<div
 							className="chat_container"
 							key={chat.id + "_key"}
-							onClick={() => renderChat(chat.id, chat.isPublic)}
+							onClick={() => renderChat(chat)}
 						>
 							<div className="avatar_container">
 								<img src={convertEncodedImage(chat.logo)}></img>
@@ -299,7 +320,7 @@ function Overview({
 					);
 				})}
 			</div>
-			{renderNewChatOptions({ props, refetchChannels })}
+			{renderNewChatOptions({ ...props })}
 		</>
 	);
 }
@@ -328,39 +349,33 @@ function getAllChats(data: any, userId: string) {
 	return allChats;
 }
 
-function renderNewChatOptions({
-	props,
-	refetchChannels,
-}: {
-	props: i.ModalProps;
-	refetchChannels: () => void;
-}) {
+function renderNewChatOptions(props: i.ModalProps) {
 	return (
 		<div className="new_chat flex_row_spacebetween">
 			<a
 				onClick={() =>
-					props.toggleModal(
-						<NewChat
-							setShowModal={props.setShowModal}
-							refetchChannels={refetchChannels}
-						/>
-					)
+					props.toggleModal({
+						type: "NewChat",
+						setShowModal: props.setShowModal,
+					})
 				}
 			>
 				new chat
 			</a>
 			<a
 				onClick={() =>
-					props.toggleModal(<JoinChannel {...props} refetchChannels={refetchChannels} />)
+					props.toggleModal({
+						type: "JoinChannel",
+					})
 				}
 			>
 				join channel
 			</a>
 			<a
 				onClick={() =>
-					props.toggleModal(
-						<CreateChannel {...props} refetchChannels={refetchChannels} />
-					)
+					props.toggleModal({
+						type: "CreateChannel",
+					})
 				}
 			>
 				create channel

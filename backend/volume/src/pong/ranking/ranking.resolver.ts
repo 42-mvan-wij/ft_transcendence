@@ -29,9 +29,7 @@ export class RankingResolver {
 	@Subscription(() => Ranking, {
 		async filter(payload, variables, context) {
 			const user = getSubscriptionUser(context);
-			return (
-				payload.userId === user.userUid
-			);
+			return payload.userId === user.userUid;
 		},
 	})
 	statsHaveBeenUpdated() {

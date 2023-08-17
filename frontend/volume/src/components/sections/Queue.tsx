@@ -3,7 +3,6 @@ import * as i from "src/types/Interfaces";
 import { useEffect } from "react";
 import { convertEncodedImage } from "src/utils/convertEncodedImage";
 import { gql, useMutation, useQuery, useSubscription } from "@apollo/client";
-import UserStats from "src/components/common/UserStats";
 
 const GET_WHOLE_QUEUE = gql`
 	query getWholeQueue {
@@ -111,10 +110,7 @@ export default function Queue(props: i.ModalProps) {
 	}, []);
 
 	if (queue_loading) return <h3 className="queueMessage"> Loading queue </h3>;
-	if (queue_error) {
-		console.log(queue_error);
-		return <div> Queue error </div>;
-	}
+	if (queue_error) return <div> Queue error </div>;
 	return (
 		<>
 			<RemovedFromQueue />
@@ -126,7 +122,10 @@ export default function Queue(props: i.ModalProps) {
 						<div
 							className="player player--one"
 							onClick={() =>
-								props.toggleModal(<UserStats {...props} selectedUser={game.p1} />)
+								props.toggleModal({
+									type: "UserStats",
+									selectedUser: game.p1,
+								})
 							}
 						>
 							<h3 className="name">{game.p1.username}</h3>
@@ -138,7 +137,10 @@ export default function Queue(props: i.ModalProps) {
 						<div
 							className="player player--two"
 							onClick={() =>
-								props.toggleModal(<UserStats {...props} selectedUser={game.p2} />)
+								props.toggleModal({
+									type: "UserStats",
+									selectedUser: game.p2,
+								})
 							}
 						>
 							<div className="avatar_container">

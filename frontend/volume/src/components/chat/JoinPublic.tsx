@@ -29,13 +29,7 @@ const JOIN_GROUP_CHAT = gql`
 	}
 `;
 
-export default function PublicChannel({
-	setShowModal,
-	refetchChannels,
-}: {
-	setShowModal: (showModal: boolean) => void;
-	refetchChannels: () => void;
-}) {
+export default function PublicChannel(setShowModal: any) {
 	const { loading, data, error, refetch } = useQuery(GET_ALL_PUBLIC_CHANNELS);
 	const [joinGroupChat, { loading: joinLoading, error: joinError }] =
 		useMutation(JOIN_GROUP_CHAT);
@@ -43,9 +37,7 @@ export default function PublicChannel({
 	// refetch when a new channel is created
 	const { channelCreated } = useChannelCreatedSubscription();
 	useEffect(() => {
-		if (channelCreated) {
-			refetch();
-		}
+		if (channelCreated) refetch();
 	}, [channelCreated, refetch]);
 
 	async function Join(channelId: string) {
@@ -54,7 +46,6 @@ export default function PublicChannel({
 				variables: { channelId: channelId },
 			});
 			refetch();
-			refetchChannels();
 			setShowModal(false);
 		} catch (error) {
 			console.log("Error joining ", error);

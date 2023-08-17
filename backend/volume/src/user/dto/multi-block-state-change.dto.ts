@@ -1,11 +1,11 @@
-import { ArgsType, Field, ObjectType } from "@nestjs/graphql";
+import { ArgsType, Field, ObjectType } from '@nestjs/graphql';
 
 @ObjectType()
 export class MultiBlockStateChange {
 	@Field()
-	user_id: String;
+	user_id: string;
 	@Field()
-	blocked: Boolean;
+	blocked: boolean;
 }
 
 @ArgsType()

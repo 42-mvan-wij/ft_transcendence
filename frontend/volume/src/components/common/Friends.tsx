@@ -1,6 +1,5 @@
 import "../../styles/style.css";
 import * as i from "../../types/Interfaces";
-import UserStats from "./UserStats";
 import { convertEncodedImage } from "src/utils/convertEncodedImage";
 import { useFriendsData } from "src/utils/useFriendsData";
 import { gql, useQuery } from "@apollo/client";
@@ -58,8 +57,8 @@ const INCOMING_CHALLENGE = gql`
 	}
 `;
 
-function Friends(modalProps: i.ModalProps & { selectedUser: any }) {
-	const { friends, loading, error } = useFriendsData(modalProps.selectedUser.id);
+function Friends(props: i.ModalProps & { selectedUser: any }) {
+	const { friends, loading, error } = useFriendsData(props.selectedUser.id);
 
 	if (loading) return <div>Loading friends</div>;
 	if (error) return <div>Error friends</div>;
@@ -74,18 +73,19 @@ function Friends(modalProps: i.ModalProps & { selectedUser: any }) {
 							<div className="friends_avatar_container">
 								<img
 									src={convertEncodedImage(friend.avatar.file)}
-									onClick={() => {
-										modalProps.toggleModal(
-											<UserStats {...modalProps} selectedUser={friend} />
-										);
-									}}
+									onClick={() =>
+										props.toggleModal({
+											type: "UserStats",
+											selectedUser: friend,
+										})
+									}
 								/>
 							</div>
 						</div>
 					);
 				})}
 			</div>
-			<IncomingFriendRequests {...modalProps} />
+			<IncomingFriendRequests {...props} />
 			<IncomingChallenge />
 		</div>
 	);

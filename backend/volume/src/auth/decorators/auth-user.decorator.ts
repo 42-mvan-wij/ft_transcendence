@@ -7,7 +7,7 @@ export const AuthUser = createParamDecorator(
 			const client = context.switchToWs().getClient();
 			const user = client.user;
 			if (user) return user;
-		} else if (context.getType() as string === 'graphql') {
+		} else if ((context.getType() as string) === 'graphql') {
 			const gqlContext = GqlExecutionContext.create(context);
 			const req = gqlContext.getContext().req;
 			if (req?.user) return req.user;

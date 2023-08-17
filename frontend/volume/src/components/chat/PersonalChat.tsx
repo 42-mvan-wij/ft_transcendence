@@ -3,7 +3,7 @@ import "../../styles/style.css";
 import * as i from "../../types/Interfaces";
 import { gql, useMutation, useQuery } from "@apollo/client";
 import { convertEncodedImage } from "../../utils/convertEncodedImage";
-import UserStats, { ChallengeStatus } from "../common/UserStats";
+import { ChallengeStatus } from "../common/UserStats";
 import { renderSendContainer } from "./Chat";
 import {
 	useChallengeAvailability,
@@ -198,7 +198,10 @@ function renderHeader(props: i.ModalProps, friend: i.User, data: any, renderOver
 				<a
 					className="link"
 					onClick={() =>
-						props.toggleModal(<UserStats selectedUser={friend} {...props} />)
+						props.toggleModal({
+							type: "UserStats",
+							selectedUser: friend,
+						})
 					}
 				>
 					info

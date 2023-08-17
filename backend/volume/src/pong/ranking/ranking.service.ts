@@ -79,8 +79,14 @@ export class RankingService {
 		await this.rankingRepo.saveRanking(winnerRanking);
 		await this.rankingRepo.saveRanking(loserRanking);
 
-		pubSub.publish('statsHaveBeenUpdated', { statsHaveBeenUpdated: winnerRanking , userId: winner.id });
-		pubSub.publish('statsHaveBeenUpdated', { statsHaveBeenUpdated: loserRanking , userId: loser.id });
+		pubSub.publish('statsHaveBeenUpdated', {
+			statsHaveBeenUpdated: winnerRanking,
+			userId: winner.id,
+		});
+		pubSub.publish('statsHaveBeenUpdated', {
+			statsHaveBeenUpdated: loserRanking,
+			userId: loser.id,
+		});
 	}
 
 	async findWinner(match: Match, players: User[]): Promise<User[]> {

@@ -2,29 +2,58 @@ import { useState, useEffect } from "react";
 import "../../styles/style.css";
 import * as i from "../../types/Interfaces";
 import { gql, useQuery } from "@apollo/client";
+import Manuel from "../Manual";
+import SettingsModal from "../settings/SettingsModal";
+import ChangePrivileges from "../chat/ChangePrivileges";
+import GroupStats from "../chat/GroupStats";
+import ChangePassword from "../chat/ChangePassword";
+import UserStats from "./UserStats";
+import NewChat from "../chat/NewChat";
+import JoinChannel from "../chat/JoinChannel";
+import CreateChannel from "../chat/CreateChannel";
 
-function Modal(props: i.ModalProps) {
+export default function Modal(props: i.ModalProps) {
 	const closeModal = () => {
 		props.setShowModal(false);
+		window.history.pushState(null, "", "home");
 	};
 
 	useEffect(() => {
+		setModalContent(props.modalState.type, props);
+
 		if (props.showModal) {
-			window.history.pushState(null, document.title, window.location.href);
+			const serializableModalState = props.modalState;
+			for (const key in serializableModalState) {
+				if (typeof serializableModalState[key] === "function") {
+					delete serializableModalState[key];
+				}
+			}
+			if (props.modalState.type != undefined)
+				window.history.pushState(
+					serializableModalState,
+					"",
+					`home?${props.modalState.type}`
+				);
 		}
-		// Listen to popstate event, which is fired when the history changes.
-		const handlePopstate = () => {
-			if (props.showModal) {
-				props.setShowModal(false);
-			} else {
+
+		const handlePopstate = (event: PopStateEvent) => {
+			const modalState = event.state;
+			if (modalState) {
 				props.setShowModal(true);
+				setModalContent(modalState.type, props);
+			} else {
+				props.setShowModal(false);
 			}
 		};
+
+		// Listen for popstate events whenever the component is mounted
 		window.addEventListener("popstate", handlePopstate);
+
+		// Clean up the event listener when the component is unmounted
 		return () => {
 			window.removeEventListener("popstate", handlePopstate);
 		};
-	}, [props.showModal]);
+	}, [props.modalState]);
 
 	return (
 		<>
@@ -42,7 +71,44 @@ function Modal(props: i.ModalProps) {
 	);
 }
 
-export default Modal;
+function setModalContent(type: string, props: any) {
+	switch (type) {
+		case "Manuel":
+			props.setContent(<Manuel />);
+			break;
+		case "GroupStats":
+			props.setContent(
+				<GroupStats {...props} setChatState={props.modalState.setChatState} />
+			);
+			break;
+		case "SettingsModal":
+			props.setContent(<SettingsModal {...props} user={props.modalState.user} />);
+			break;
+		case "ChangePrivileges":
+			props.setContent(
+				<ChangePrivileges {...props} setChatState={props.modalState.setChatState} />
+			);
+			break;
+		case "ChangePassword":
+			props.setContent(<ChangePassword {...props} />);
+			break;
+		case "UserStats":
+			props.setContent(<UserStats {...props} selectedUser={props.modalState.selectedUser} />);
+			break;
+		case "NewChat":
+			props.setContent(<NewChat {...props} setShowModal={props.modalState.setShowModal} />);
+			break;
+		case "JoinChannel":
+			props.setContent(<JoinChannel {...props} />);
+			break;
+		case "CreateChannel":
+			props.setContent(<CreateChannel {...props} />);
+			break;
+		default:
+			// console.log("Unexpected type", type);
+			break;
+	}
+}
 
 const CURRENT_USER = gql`
 	query currentUserQuery {
@@ -56,37 +122,45 @@ const CURRENT_USER = gql`
 	}
 `;
 
-export function createModalProps(): i.ModalProps {
+function useUser() {
 	const { loading, error, data } = useQuery(CURRENT_USER);
-
-	const [showModal, setShowModal] = useState<boolean>(false);
-	const [modalContent, setContent] = useState(<></>);
-
-	function toggleModal(content: JSX.Element) {
-		setContent(content);
-		setShowModal(true);
-	}
-
 	let userId = "";
 	let username = "";
 	let avatarfile = "";
+
 	if (!loading && !error) {
 		userId = data.currentUserQuery.id;
 		username = data.currentUserQuery.username;
 		avatarfile = data.currentUserQuery.avatar.file;
 	}
 
+	return { userId, username, avatarfile, loading, error };
+}
+
+export function createModalProps(): i.ModalProps {
+	const { userId, username, avatarfile } = useUser();
+	const [showModal, setShowModal] = useState<boolean>(false);
+	const [modalContent, setContent] = useState(<></>);
+	const [modalState, setmodalState] = useState({});
+	const [selectedGroup, setSelectedGroup] = useState({});
+
+	function toggleModal(state: any) {
+		setmodalState(state);
+		setShowModal(true);
+	}
+
 	const modalProps: i.ModalProps = {
 		userId,
 		username,
 		avatarfile,
-		toggleModal(content: JSX.Element) {
-			toggleModal(content);
-		},
+		modalState,
+		toggleModal,
 		showModal,
 		setShowModal,
 		modalContent,
 		setContent,
+		selectedGroup,
+		setSelectedGroup,
 	};
 	return modalProps;
 }

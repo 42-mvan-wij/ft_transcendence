@@ -178,8 +178,18 @@ export class GroupChatResolver {
 
 	@UseGuards(JwtAuthGuard)
 	@Mutation(() => Boolean)
-	async changePassword(@AuthUser() user: UserInfo, @Args('channel_id') channel_id: string, @Args('old_password') old_password: string, @Args('new_password') new_password: string) {
-		return this.group_chat_service.changePassword(user.userUid, channel_id, old_password, new_password);	
+	async changePassword(
+		@AuthUser() user: UserInfo,
+		@Args('channel_id') channel_id: string,
+		@Args('old_password') old_password: string,
+		@Args('new_password') new_password: string,
+	) {
+		return this.group_chat_service.changePassword(
+			user.userUid,
+			channel_id,
+			old_password,
+			new_password,
+		);
 	}
 
 	@ResolveField()
@@ -223,5 +233,10 @@ export class GroupChatResolver {
 	@Subscription(() => GroupChat)
 	channelCreated() {
 		return pubSub.asyncIterator('channelCreated');
+	}
+
+	@Subscription(() => GroupChat)
+	channelUpdated() {
+		return pubSub.asyncIterator('channelUpdated');
 	}
 }
