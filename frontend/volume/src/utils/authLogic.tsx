@@ -1,5 +1,5 @@
-import { useState, createContext, useContext, useEffect } from "react";
-import { gql, useLazyQuery, useMutation } from "@apollo/client";
+import { createContext, useContext } from "react";
+import { gql, useMutation } from "@apollo/client";
 import { useNavigate } from "react-router-dom";
 
 const LOGOUT_MUTATION = gql`
@@ -15,8 +15,7 @@ export interface IContextProps {
 export const AuthContext = createContext({} as IContextProps);
 
 export function AuthProvider({ children }: { children: any }): JSX.Element {
-	// const [login, setLogin] = useState(false);
-	const [logoutMutation, { loading, error, data }] = useMutation(LOGOUT_MUTATION);
+	const [logoutMutation] = useMutation(LOGOUT_MUTATION);
 	const navigate = useNavigate();
 
 	const handleLogout = async () => {

@@ -47,34 +47,4 @@ export class UserActivityService {
 			}
 		}
 	}
-
-	// TESTING
-	go_offline: any;
-
-	@Mutation(() => Boolean)
-	async setUserOnline(@Args('user_id') user_id: string) {
-		this.go_offline = setInterval(() => this.userIsOnlineTEST(user_id), 5000);
-		return true;
-	}
-
-	@Mutation (() => Boolean) 
-	async setUserOffline(@Args('user_id') user_id: string) {
-		clearInterval(this.go_offline);
-		return true;
-	}
-
-	async userIsOnlineTEST(userId: string) {
-		for (let i in this.online_users) {
-			if (this.online_users[i][0] === userId) {
-				this.online_users[i][1] = Date.now();
-				return true;
-			}
-		}
-		this.online_users.push([ userId, Date.now() ]);
-		const availability: Availability = new Availability;
-		availability.challengeStatus = ChallengeStatus.ONLINE;
-		pubSub.publish('challengeAvailabilityChanged', { challengeAvailabilityChanged: availability, userId: userId } );
-		console.log("user is online:", this.online_users[this.online_users.length - 1]);
-		return true;
-	}
 }

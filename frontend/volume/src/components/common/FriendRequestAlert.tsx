@@ -32,9 +32,6 @@ export default function FriendRequestAlert({ user }: { user: any }) {
 			{showModal && (
 				<div className="modal">
 					<div className="modal-content">
-						{/* <span className="close" onClick={() => setShowModal(false)}>
-							&times;
-						</span> */}
 						<div className="requestAlert">
 							<div className="avatar_container">
 								<img src={convertEncodedImage(user.avatar.file)} />
@@ -54,10 +51,8 @@ export default function FriendRequestAlert({ user }: { user: any }) {
 }
 
 function FriendAccept({ friend_id, setShowModal }: { friend_id: string; setShowModal: any }) {
-	const [
-		accept_friend,
-		{ data: accept_data, loading: accept_loading, error: accept_error, called: accept_called },
-	] = useMutation(ACCEPT_FRIEND);
+	const [accept_friend, { loading: accept_loading, error: accept_error }] =
+		useMutation(ACCEPT_FRIEND);
 
 	if (accept_loading) return <>Loading accept</>;
 	if (accept_error) return <>Error accept</>;
@@ -77,10 +72,8 @@ function FriendAccept({ friend_id, setShowModal }: { friend_id: string; setShowM
 }
 
 function FriendDeny({ friend_id, setShowModal }: { friend_id: string; setShowModal: any }) {
-	const [
-		deny_friend,
-		{ data: accept_data, loading: accept_loading, error: accept_error, called: accept_called },
-	] = useMutation(DENY_FRIEND);
+	const [deny_friend, { loading: accept_loading, error: accept_error }] =
+		useMutation(DENY_FRIEND);
 
 	if (accept_loading) return <>Loading accept</>;
 	if (accept_error) return <>Error accept</>;

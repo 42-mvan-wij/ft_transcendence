@@ -13,10 +13,12 @@ import { useAuth } from "src/utils/authLogic";
 import Loading from "./authorization/Loading";
 import Error from "./Error";
 import { CURRENT_USER } from "src/utils/graphQLQueries";
+import UserIsOnline from "./common/UserIsOnline";
 
 function Home(): JSX.Element {
 	const modalProps: i.ModalProps = createModalProps();
 	const pongProps: i.PongProps = createPongProps();
+	UserIsOnline();
 
 	const { onLogout } = useAuth();
 	useEffect(() => {

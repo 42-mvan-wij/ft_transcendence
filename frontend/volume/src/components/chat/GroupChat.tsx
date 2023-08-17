@@ -185,7 +185,6 @@ export default function GroupChat({
 		return subscribeToMore({
 			document: SUBSCRIBE_BLOCK,
 			variables: {
-				channel_id: channel_id,
 				user_ids: data.group_chat.members.map((member: any) => member.id),
 			},
 			updateQuery: (prev, { subscriptionData }) => {

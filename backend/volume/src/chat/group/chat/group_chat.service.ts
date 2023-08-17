@@ -10,7 +10,7 @@ import { Not, In } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { pubSub } from 'src/app.module';
 
-const mute_table: { [_: string]: string[] } = {};
+const mute_table: { [_: string]: [string, NodeJS.Timeout][] } = {};
 
 @Injectable()
 export class GroupChatService {
@@ -151,7 +151,6 @@ export class GroupChatService {
 		return false;
 	}
 
-	// TODO: for all similar functions: Owner should be able to kick/ban/... admins
 	async mute(
 		channelId: string,
 		supposed_admin_id: string,
@@ -172,30 +171,41 @@ export class GroupChatService {
 		);
 		if (index < 0)
 			throw new Error(`User with id ${userId} is not a member`);
-		if (channel.admins.some((admin) => admin.id === userId))
-			throw new Error(
-				`User with id ${userId} is an admin, can only kick non-admins`,
+		if (channel.owner.id != supposed_admin_id) {
+			if (channel.admins.some((admin) => admin.id === userId))
+				throw new Error(
+					`User with id ${userId} is an admin, can only kick non-admins`,
+				);
+		}
+		const timeoutId = setTimeout(
+			() => this.unmute(channelId, userId),
+			timeout * 60 * 1000,
+		);
+		if (this.isMuted(userId, channelId)) {
+			const index = mute_table[channelId].findIndex(
+				(user) => user[0] === userId,
 			);
-		// if (this.isMuted(userId, channelId))
-		// throw new Error(`User with id ${userId} is already muted`);
+			clearTimeout(mute_table[channelId][index][1]);
+			mute_table[channelId][index][1] = timeoutId;
+			return channel;
+		}
 		if (!mute_table[channelId]) {
 			mute_table[channelId] = [];
 		}
-		mute_table[channelId].push(userId);
-		setTimeout(() => this.unmute(channelId, userId), timeout * 60 * 1000);
-		console.log('set:', mute_table);
+		mute_table[channelId].push([userId, timeoutId]);
 		return channel;
 	}
 
 	isMuted(userId: string, channelId: string): boolean {
-		console.log('test:', mute_table);
 		if (!mute_table[channelId]) return false;
-		return mute_table[channelId]?.some((user) => user === userId);
+		return mute_table[channelId].some((user) => user[0] === userId);
 	}
 
 	private async unmute(channelId: string, userId: string) {
 		if (!mute_table[channelId]) return;
-		const index = mute_table[channelId].findIndex((user) => user == userId);
+		const index = mute_table[channelId].findIndex(
+			(user) => user[0] == userId,
+		);
 		mute_table[channelId].splice(index, 1);
 	}
 
@@ -214,10 +224,19 @@ export class GroupChatService {
 		);
 		if (index < 0)
 			throw new Error(`User with id ${userId} is not a member`);
-		if (channel.admins.some((admin) => admin.id === userId))
-			throw new Error(
-				`User with id ${userId} is an admin, can only kick non-admins`,
-			);
+		if (channel.owner.id != supposed_admin_id) {
+			if (channel.admins.some((admin) => admin.id === userId))
+				throw new Error(
+					`User with id ${userId} is an admin, can only kick non-admins`,
+				);
+		} else {
+			if (channel.admins.some((admin) => admin.id === userId)) {
+				const admin_index = channel.admins.findIndex(
+					(admin) => admin.id === userId,
+				);
+				channel.admins.splice(admin_index, 1);
+			}
+		}
 		channel.members.splice(index, 1);
 		const savedChannel = await this.channelRepository.save(channel);
 		pubSub.publish('channelUpdated', { channelUpdated: savedChannel });
@@ -240,10 +259,19 @@ export class GroupChatService {
 		);
 		if (index < 0)
 			throw new Error(`User with id ${userId} is not a member`);
-		if (channel.admins.some((admin) => admin.id === userId))
-			throw new Error(
-				`User with id ${userId} is an admin, can only ban non-admins`,
-			);
+		if (channel.owner.id != supposed_admin_id) {
+			if (channel.admins.some((admin) => admin.id === userId))
+				throw new Error(
+					`User with id ${userId} is an admin, can only ban non-admins`,
+				);
+		} else {
+			if (channel.admins.some((admin) => admin.id === userId)) {
+				const admin_index = channel.admins.findIndex(
+					(admin) => admin.id === userId,
+				);
+				channel.admins.splice(admin_index, 1);
+			}
+		}
 		channel.banned_users.push(channel.members[index]);
 		channel.members.splice(index, 1);
 		const savedChannel = await this.channelRepository.save(channel);
@@ -329,7 +357,7 @@ export class GroupChatService {
 			members: true,
 		});
 		return mute_table[channel.id].map((userId) =>
-			channel_with_members.members.find((user) => user.id == userId),
+			channel_with_members.members.find((user) => user.id === userId[0]),
 		);
 	}
 
@@ -396,6 +424,12 @@ export class GroupChatService {
 				new_owner = channel.admins[0];
 			} else if (channel.members[0]) {
 				new_owner = channel.members[0];
+				const user = await this.userService.getUserById(
+					channel.members[0].id,
+				);
+				if (!user)
+					throw new Error(`User with id ${user_id} does not exist`);
+				channel.admins.push(user);
 			} else {
 				this.channelRepository.delete(channel.id);
 				return channel;
@@ -405,4 +439,40 @@ export class GroupChatService {
 		return this.channelRepository.save(channel);
 	}
 
+	async changePassword(
+		user_id: string,
+		channel_id: string,
+		old_password: string,
+		new_password: string,
+	) {
+		const channel = await this.getChannelById(channel_id, { owner: true });
+		if (!channel)
+			throw new Error(`Channel with id ${channel_id} does not exist`);
+		if (channel.owner.id !== user_id)
+			throw new Error(`User with id ${user_id} is not the owner`);
+		const same_password = await new Promise<boolean>((resolve, reject) => {
+			bcrypt.compare(
+				old_password,
+				channel.password,
+				function (err, result) {
+					if (err) reject(err);
+					resolve(result);
+				},
+			);
+		});
+		if (same_password) {
+			const salt_rounds = 10;
+			const promise = new Promise<string>((resolve, reject) => {
+				bcrypt.hash(new_password, salt_rounds, function (err, hash) {
+					if (err) reject(err);
+					resolve(hash);
+				});
+			});
+			channel.password = await promise;
+			await this.channelRepository.save(channel);
+			return true;
+		} else {
+			return false;
+		}
+	}
 }

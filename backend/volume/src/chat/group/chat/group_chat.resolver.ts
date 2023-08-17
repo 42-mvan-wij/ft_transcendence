@@ -41,7 +41,7 @@ export class GroupChatResolver {
 		);
 	}
 
-	@Query(() => GroupChat) // TODO: add guards, to check if the user is a member of the channel, else disallow (also do this in other places)
+	@Query(() => GroupChat)
 	async group_chat(@Args('id') id: string) {
 		return this.group_chat_service.getChannelById(id);
 	}
@@ -173,6 +173,22 @@ export class GroupChatResolver {
 		return await this.group_chat_service.leaveGroupChat(
 			channel_id,
 			user.userUid,
+		);
+	}
+
+	@UseGuards(JwtAuthGuard)
+	@Mutation(() => Boolean)
+	async changePassword(
+		@AuthUser() user: UserInfo,
+		@Args('channel_id') channel_id: string,
+		@Args('old_password') old_password: string,
+		@Args('new_password') new_password: string,
+	) {
+		return this.group_chat_service.changePassword(
+			user.userUid,
+			channel_id,
+			old_password,
+			new_password,
 		);
 	}
 
