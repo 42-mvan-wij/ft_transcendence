@@ -1,6 +1,5 @@
 import "../../styles/style.css";
 import { useState } from "react";
-import * as i from "../../types/Interfaces";
 import PrivateChannel from "./JoinPrivate";
 import PublicChannel from "./JoinPublic";
 

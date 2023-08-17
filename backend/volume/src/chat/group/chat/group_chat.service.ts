@@ -112,7 +112,9 @@ export class GroupChatService {
 				`User with id ${userId} is banned from channel with id ${channelId}`,
 			);
 		channel.members.push(user);
-		return await this.channelRepository.save(channel);
+		const savedChannel = await this.channelRepository.save(channel);
+		pubSub.publish('channelCreated', { channelCreated: savedChannel });
+		return savedChannel;
 	}
 
 	async joinPrivate(
@@ -145,7 +147,8 @@ export class GroupChatService {
 		});
 		if (same_password) {
 			channel.members.push(user);
-			await this.channelRepository.save(channel);
+			const savedChannel = await this.channelRepository.save(channel);
+			pubSub.publish('channelCreated', { channelCreated: savedChannel });
 			return true;
 		}
 		return false;
@@ -436,7 +439,9 @@ export class GroupChatService {
 			}
 			channel.owner = new_owner;
 		}
-		return this.channelRepository.save(channel);
+		const savedChannel = await this.channelRepository.save(channel);
+		pubSub.publish('channelCreated', { channelCreated: savedChannel });
+		return savedChannel;
 	}
 
 	async changePassword(

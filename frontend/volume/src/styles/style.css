@@ -1131,13 +1131,16 @@ div.background {
 .modal_user_profile_settings .qr_code_container {
   display: flex;
   position: center;
-  height: 10em;
   margin-top: 2em;
-  width: 10em;
 }
 .modal_user_profile_settings qr_code_container img {
   max-height: 100%;
   max-width: 100%;
+}
+.modal_user_profile_settings .QRExplainer {
+  margin-left: 2em;
+  display: flex;
+  align-items: center;
 }
 
 .white_block {

@@ -29,7 +29,11 @@ const JOIN_GROUP_CHAT = gql`
 	}
 `;
 
-export default function PublicChannel(setShowModal: any) {
+export default function PublicChannel({
+	setShowModal,
+}: {
+	setShowModal: (showModal: boolean) => void;
+}) {
 	const { loading, data, error, refetch } = useQuery(GET_ALL_PUBLIC_CHANNELS);
 	const [joinGroupChat, { loading: joinLoading, error: joinError }] =
 		useMutation(JOIN_GROUP_CHAT);

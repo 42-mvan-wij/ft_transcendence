@@ -2,8 +2,12 @@ import { ApolloError } from "@apollo/client";
 import { gqlErrorCode, gqlErrorMsg } from "src/utils/gqlErrorData";
 
 function Error({ gqlError }: { gqlError: ApolloError }): JSX.Element {
-	const statusCode = gqlErrorCode(gqlError);
-	const errorMsg = gqlErrorMsg(gqlError);
+	let statusCode = gqlErrorCode(gqlError);
+	let errorMsg = gqlErrorMsg(gqlError);
+	if (statusCode == undefined || errorMsg == undefined) {
+		statusCode = "500";
+		errorMsg = "Internal Server Error";
+	}
 	return (
 		<div className="div-1">
 			<div className="play-button">

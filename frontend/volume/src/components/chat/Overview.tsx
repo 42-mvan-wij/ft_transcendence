@@ -63,6 +63,15 @@ const GET_CHANNELS = gql`
 						}
 					}
 				}
+				lastMessage {
+					author {
+						id
+						blocked_by_me
+					}
+					content
+					dateSent
+				}
+				isPublic
 				members {
 					id
 					username
@@ -276,8 +285,8 @@ function Overview({
 	}, [loading]);
 
 	if (dataFresh == false) {
-		setDataFresh(true);
 		refetch();
+		setDataFresh(true);
 	}
 
 	if (error) return <p>Error: {error.message}</p>;

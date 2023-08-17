@@ -25,7 +25,7 @@ const CREATE_PERSONAL_CHAT = gql`
 `;
 
 // TODO: Make avatars work
-export default function NewChat(setShowModal: (showModal: boolean) => void) {
+export default function NewChat({ setShowModal }: { setShowModal: (showModal: boolean) => void }) {
 	const { loading, data, error, refetch } = useQuery(GET_ALL_CHATS, {
 		fetchPolicy: "network-only",
 	});

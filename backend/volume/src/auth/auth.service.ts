@@ -43,10 +43,7 @@ async function postTemporaryCode(intraCode: string): Promise<string> {
 	}
 }
 
-async function downloadIntraAvatar(
-	url: string,
-	axiosConfig: any,
-): Promise<UploadAvatarInput> {
+async function downloadIntraAvatar(url: string): Promise<UploadAvatarInput> {
 	const file = await axios
 		.get(url, {
 			responseType: 'arraybuffer',
@@ -100,7 +97,6 @@ export class AuthService {
 		if (!user) {
 			const intraAvatar = await downloadIntraAvatar(
 				response.data.image.versions.small,
-				axiosConfig,
 			);
 			const uniqueUsername = await this.createUniqueUsername();
 			user = await this.userService.create({
@@ -125,7 +121,7 @@ export class AuthService {
 		);
 	}
 
-	async isCookieValid(request: Request): Promise<Boolean> {
+	async isCookieValid(request: Request): Promise<boolean> {
 		const reqCookie = request.cookies['session_cookie'];
 
 		if (reqCookie == undefined) return false;

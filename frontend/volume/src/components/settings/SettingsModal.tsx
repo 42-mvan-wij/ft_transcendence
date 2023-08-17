@@ -6,7 +6,7 @@ import { SET_TWO_FA_MUTATION } from "src/utils/graphQLMutations";
 import { CURRENT_USER, QR_CODE_QUERY } from "src/utils/graphQLQueries";
 import ProfileForm from "./ProfileForm";
 
-export default function SettingsModule(user: any): JSX.Element {
+export default function SettingsModule({ user }: { user: any }): JSX.Element {
 	const [TwoFAFormMutation] = useMutation(SET_TWO_FA_MUTATION, {
 		refetchQueries: [{ query: CURRENT_USER }, { query: QR_CODE_QUERY }],
 	});
@@ -42,6 +42,11 @@ export default function SettingsModule(user: any): JSX.Element {
 					</label>
 					<div className="qr_code_container">
 						{checked && <img src={QRCodeState.data.QRCodeQuery} alt="error no code" />}
+						{checked && (
+							<div className="QRExplainer">
+								Scan this QR code with your Google Authenticator app
+							</div>
+						)}
 					</div>
 				</form>
 			</div>
