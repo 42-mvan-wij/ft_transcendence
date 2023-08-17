@@ -289,7 +289,7 @@ function Overview({
 		setDataFresh(true);
 	}
 
-	if (error) return <p>Error: {error.message}</p>;
+	if (error) return <></>;
 	if (loading) return <p>Loading...</p>;
 
 	function renderChat(channel: any) {

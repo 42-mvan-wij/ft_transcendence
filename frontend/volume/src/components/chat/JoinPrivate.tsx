@@ -60,7 +60,7 @@ export default function PrivateChannel(props: any) {
 	if (data && data.all_available_private_channels.length === 0) return <p>No channels to join</p>;
 	if (joinError) return <p>Error: {joinError.message}</p>;
 	if (joinLoading) return <p>Joining...</p>;
-	if (error) return <p>Error</p>;
+	if (error) return <></>;
 	if (loading) return <p>Loading...</p>;
 
 	const filteredChannels = data.all_available_private_channels.filter((channel: any) => {

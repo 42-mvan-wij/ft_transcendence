@@ -231,7 +231,7 @@ export default function GroupChat({
 		if (e.key === "Enter" && message !== "") sendMessage();
 	};
 
-	if (error) return <p>Error</p>;
+	if (error) return <></>;
 	if (loading) return <p>Loading...</p>;
 
 	const current_user = data.currentUserQuery;
