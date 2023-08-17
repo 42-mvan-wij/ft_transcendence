@@ -27,6 +27,9 @@ const GET_CHANNELS = gql`
 				members {
 					id
 					username
+					avatar {
+						file
+					}
 				}
 			}
 			group_chats {
