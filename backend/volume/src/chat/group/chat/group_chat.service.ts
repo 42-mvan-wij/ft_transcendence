@@ -416,47 +416,4 @@ export class GroupChatService {
 		}
 		return this.channelRepository.save(channel);
 	}
-
-	// TESTING
-
-	async TESTING_join(
-		user_name: string,
-		channel_name: string,
-	): Promise<number> {
-		const channel = await this.channelRepository.findOne({
-			where: { name: channel_name },
-			relations: { banned_users: true, members: true },
-		});
-		const user = await this.userService.getUser(user_name);
-		this.join(user.id, channel.id);
-		return 1;
-	}
-
-	async TESTING_leaveGroupChat(
-		user_name: string,
-		channel_name: string,
-	): Promise<number> {
-		const channel = await this.channelRepository.findOne({
-			where: { name: channel_name },
-		});
-		const user = await this.userService.getUser(user_name);
-		this.leaveGroupChat(channel.id, user.id);
-		return 1;
-	}
-
-	async TESTING_createGroupChat(
-		user_name: string,
-		channel_name: string,
-		password: string,
-	) {
-		const channelInput = new CreateGroupChannelInput();
-		const user = await this.userService.getUser(user_name);
-		channelInput.name = channel_name;
-		channelInput.logo = '';
-		channelInput.password = password;
-		channelInput.member_ids = [];
-
-		this.create(channelInput, user.id);
-		return 3;
-	}
 }

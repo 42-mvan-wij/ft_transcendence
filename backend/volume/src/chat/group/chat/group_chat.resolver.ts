@@ -41,7 +41,7 @@ export class GroupChatResolver {
 		);
 	}
 
-	@Query(() => GroupChat) // TODO: add guards, to check if the user is a member of the channel, else disallow (also do this in other places)
+	@Query(() => GroupChat)
 	async group_chat(@Args('id') id: string) {
 		return this.group_chat_service.getChannelById(id);
 	}
