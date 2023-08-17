@@ -47,6 +47,7 @@ export default function ProfileForm({ user }: { user: any }): JSX.Element {
 				}
 			}
 		);
+		alert("Profile updated!");
 	};
 
 	const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {

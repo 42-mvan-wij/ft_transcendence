@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import { UserService } from 'src/user/user.service';
 import { User } from 'src/user/entities/user.entity';
 import { PersonalMessage } from '../message/entities/personal_message.entity';
+import { pubSub } from 'src/app.module';
 
 @Injectable()
 export class PersonalChatService {
@@ -29,7 +30,9 @@ export class PersonalChatService {
 		const channel = this.channelRepository.create({
 			members,
 		});
-		return await this.channelRepository.save(channel);
+		const savedChannel = await this.channelRepository.save(channel);
+		pubSub.publish('channelCreated', { channelCreated: savedChannel });
+		return savedChannel;
 	}
 
 	async getMembers(channel: PersonalChat): Promise<Array<User>> {
