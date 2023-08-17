@@ -24,7 +24,7 @@ export default function NewUserForm(): JSX.Element {
 		event.preventDefault();
 		const formData = new FormData(usernameInput, picture);
 
-		if (formData.isIncomplete()) {
+		if (formData.username == "") {
 			setIsEmptyForm(true);
 			return;
 		} else {
@@ -72,7 +72,7 @@ export default function NewUserForm(): JSX.Element {
 
 	return (
 		<form className="profile_form" method="post" onSubmit={handleSubmit}>
-			{isEmptyForm && <p className="empty-form-message">Please fill all fields</p>}
+			{isEmptyForm && <p className="empty-form-message">Please fill in a username</p>}
 			<h3>Profile Picture </h3>
 			<div className="change_avatar">
 				<div className="avatar_container">
