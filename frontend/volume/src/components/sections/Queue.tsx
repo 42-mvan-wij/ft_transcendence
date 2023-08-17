@@ -173,6 +173,7 @@ function JoinQueueElement() {
 	}, [user_data]);
 
 	if (user_loading) return <h3 className="queueMessage">Loading user</h3>;
+	if (user_error) return <>error loading user</>;
 
 	const handleClick = (event: any) => {
 		event.preventDefault();

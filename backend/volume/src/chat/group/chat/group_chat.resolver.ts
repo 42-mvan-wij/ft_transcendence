@@ -5,6 +5,7 @@ import {
 	Query,
 	ResolveField,
 	Resolver,
+	Subscription,
 } from '@nestjs/graphql';
 import { GroupChat } from './entities/group_chat.entity';
 import { CreateGroupChannelInput } from './dto/create_group_chat.input';
@@ -13,6 +14,7 @@ import { UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { AuthUser } from 'src/auth/decorators/auth-user.decorator';
 import { UserInfo } from 'src/auth/user-info.interface';
+import { pubSub } from 'src/app.module';
 
 @Resolver(() => GroupChat)
 export class GroupChatResolver {
@@ -39,7 +41,7 @@ export class GroupChatResolver {
 		);
 	}
 
-	@Query(() => GroupChat) // TODO: add guards, to check if the user is a member of the channel, else disallow (also do this in other places)
+	@Query(() => GroupChat)
 	async group_chat(@Args('id') id: string) {
 		return this.group_chat_service.getChannelById(id);
 	}
@@ -216,5 +218,10 @@ export class GroupChatResolver {
 		const messages = channel.messages ?? (await this.messages(channel));
 		if (messages.length > 0) return messages[messages.length - 1];
 		return null;
+	}
+
+	@Subscription(() => GroupChat)
+	channelCreated() {
+		return pubSub.asyncIterator('channelCreated');
 	}
 }

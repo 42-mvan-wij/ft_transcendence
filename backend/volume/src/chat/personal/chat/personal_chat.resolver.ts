@@ -23,7 +23,7 @@ export class PersonalChatResolver {
 		return this.personal_chat_service.getAllChannels();
 	}
 
-	@Query(() => PersonalChat) // TODO: add guards, to check if the user is a member of the channel, else disallow (also do this in other places)
+	@Query(() => PersonalChat)
 	async personal_chat(@Args('id') id: string) {
 		return this.personal_chat_service.getChannelById(id);
 	}

@@ -2,7 +2,7 @@ import "../../styles/style.css";
 import UserStats from "../common/UserStats";
 import { convertEncodedImage } from "../../utils/convertEncodedImage";
 import ChangePrivileges from "./ChangePrivileges";
-import { gql, useMutation, useQuery } from "@apollo/client";
+import { gql, useMutation } from "@apollo/client";
 import { ChatState } from "../../utils/constants";
 import ChangePassword from "./ChangePassword";
 
@@ -33,6 +33,7 @@ const LEAVE_GROUP_CHAT = gql`
 
 function RenderActions(props: any) {
 	const userIsAdmin = props.selectedGroup.admins.some((admin: any) => admin.id === props.userId);
+	const userIsOwner = props.selectedGroup.owner.id === props.userId;
 	const isPrivateChannel = !props.selectedGroup.isPublic;
 	const actions = [];
 
@@ -57,7 +58,7 @@ function RenderActions(props: any) {
 			</a>
 		);
 
-	if (isPrivateChannel && userIsAdmin)
+	if (isPrivateChannel && userIsOwner)
 		actions.push(
 			<a
 				className="link"
@@ -69,6 +70,7 @@ function RenderActions(props: any) {
 		);
 
 	const [LeaveGroupChat, { loading, error }] = useMutation(LEAVE_GROUP_CHAT);
+	if (loading || error) console.log(loading, error);
 	async function Leave(channelId: string) {
 		try {
 			const { data } = await LeaveGroupChat({
@@ -133,7 +135,7 @@ export function goBackToGroupStats(props: any) {
 					)
 				}
 			>
-				back to groupstats
+				back to options
 			</div>
 		</>
 	);

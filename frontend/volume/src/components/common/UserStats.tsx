@@ -5,7 +5,7 @@ import MatchHistory from "./MatchHistory";
 import * as i from "../../types/Interfaces";
 import { convertEncodedImage } from "src/utils/convertEncodedImage";
 import { useFriendsData } from "src/utils/useFriendsData";
-import { gql, useMutation, useQuery } from "@apollo/client";
+import { gql, useMutation } from "@apollo/client";
 import { useOutgoingRequests } from "src/utils/useOutgoingRequests";
 import {
 	useChallengeAvailability,

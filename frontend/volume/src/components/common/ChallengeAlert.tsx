@@ -49,10 +49,8 @@ export default function ChallengeAlert({ user }: { user: any }) {
 }
 
 function AcceptChallenge({ friend_id, setShowModal }: { friend_id: string; setShowModal: any }) {
-	const [
-		accept_friend,
-		{ data: accept_data, loading: accept_loading, error: accept_error, called: accept_called },
-	] = useMutation(ACCEPT_CHALLENGE);
+	const [accept_friend, { loading: accept_loading, error: accept_error }] =
+		useMutation(ACCEPT_CHALLENGE);
 
 	if (accept_loading) return <>Loading accept</>;
 	if (accept_error) return <>Error accept</>;
@@ -72,10 +70,8 @@ function AcceptChallenge({ friend_id, setShowModal }: { friend_id: string; setSh
 }
 
 function DenyChallenge({ friend_id, setShowModal }: { friend_id: string; setShowModal: any }) {
-	const [
-		deny_friend,
-		{ data: accept_data, loading: accept_loading, error: accept_error, called: accept_called },
-	] = useMutation(DENY_CHALLENGE);
+	const [deny_friend, { loading: accept_loading, error: accept_error }] =
+		useMutation(DENY_CHALLENGE);
 	const [counter, setCounter] = useState(CHALLENGE_TIME_OUT / 1000);
 
 	useEffect(() => {

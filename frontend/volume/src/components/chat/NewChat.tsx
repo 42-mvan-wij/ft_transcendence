@@ -24,7 +24,6 @@ const CREATE_PERSONAL_CHAT = gql`
 	}
 `;
 
-// TODO: Make avatars work
 export default function NewChat({
 	setShowModal,
 	refetchChannels,

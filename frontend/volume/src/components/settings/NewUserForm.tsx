@@ -10,7 +10,7 @@ import { gqlErrorCode } from "src/utils/gqlErrorData";
 
 export default function NewUserForm({ user }): JSX.Element {
 	const navigate = useNavigate();
-	const [formMutation, formMutationState] = useMutation(FORM_MUTATION, {
+	const [formMutation] = useMutation(FORM_MUTATION, {
 		refetchQueries: [{ query: CURRENT_USER }],
 	});
 

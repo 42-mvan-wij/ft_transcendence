@@ -2,10 +2,8 @@ import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import { pubSub } from 'src/app.module';
 import { QueuedMatch } from './queuedmatch.model';
 import { UserService } from 'src/user/user.service';
-import { CreateUserInput } from 'src/user/dto/create-user.input';
 import { User } from 'src/user/entities/user.entity';
 import { UserAvatarService } from 'src/user/user-avatar.service';
-import { Avatar } from 'src/user/entities/avatar.entity';
 import { Availability } from './queuestatus.model';
 import { QueueStatus, ChallengeStatus } from './queuestatus.model';
 import { Challenge } from './challenge.model';
@@ -26,7 +24,7 @@ export class QueueService {
 	users_looking_for_match: string[] = [];
 	queued_matches: QueuedMatch[] = [];
 	current_match: QueuedMatch;
-	is_challenger: string[] = []; // TODO: as soon as challenge is sent, the challengers id should be in here so he cannot join queue anymore untill challenge is accepted or denied
+	is_challenger: string[] = [];
 	challenges: Challenge[] = [];
 
 	async getStatus(user_id: string) {
@@ -329,7 +327,6 @@ export class QueueService {
 
 	async acceptChallenge(user_id: string, challenger_id: string) {
 		this.addChallengeMatch(user_id, challenger_id);
-		// TODO: pubsub message that challenge is accepted
 		for (let i = 0; i < this.is_challenger.length; i++) {
 			if (challenger_id === this.is_challenger[i]) {
 				this.is_challenger.splice(i, 1);
@@ -343,7 +340,6 @@ export class QueueService {
 	}
 	
 	async denyChallenge(user_id: string, friend_id: string) {
-		// TODO: pubsub message that challege is denied
 		for (let i = 0; i < this.is_challenger.length; i++) {
 			if (friend_id === this.is_challenger[i]) {
 				this.is_challenger.splice(i, 1);
@@ -353,118 +349,5 @@ export class QueueService {
 		pubSub.publish('ownChallengeAvailabilityChanged', { ownChallengeAvailabilityChanged: challengeAvailable, userId: friend_id } );
 		pubSub.publish('incomingChallenge',  { incomingChallenge: null, userId: user_id } );
 		return true;
-	}
-
-	/*
-	TESTING								// FIXME: REMOVE BEFORE TURNIN
-	*/
-	putInQueue(id: string): number {
-		this.users_looking_for_match.push(id);
-		return 3;
-	}
-
-	async createMatches(number:number) {
-		switch (number) {
-			default:
-				this.createMatch('jbedaux')
-			case 15:
-				this.createMatch('mweitenb');
-			case 14:
-				this.createMatch('Marius');
-			case 13:
-				this.createMatch('Justin');
-			case 12:
-				this.createMatch('Milan');
-			case 11:
-				this.createMatch('Jonathan');
-			case 10:
-				this.createMatch('Marius1');
-			case 9:
-				this.createMatch('Justin1');
-			case 8:
-				this.createMatch('Milan1');
-			case 7:
-				this.createMatch('Jonathan1');
-			case 6:
-				this.createMatch('Henk1');
-			case 5:
-				this.createMatch('Henk2');
-			case 4:
-				this.createMatch('Henk3');
-			case 3:
-				this.createMatch('Henk4');
-			case 2:
-				this.createMatch('Henk5');
-			case 1:
-				this.createMatch('Henk6');
-		}
-		return 4;
-	}
-
-	private async createMatch(username: string) {
-		const name: string = username;
-		const user = await this.userService.getUser(name);
-		if (user) await this.joinQueue(user.id);
-	}
-
-	async fillDbUser() {
-		await this.randomUser('Marius');
-		await this.randomUser('Justin');
-		await this.randomUser('Milan');
-		await this.randomUser('Jonathan');
-		await this.randomUser('Marius1');
-		await this.randomUser('Justin1');
-		await this.randomUser('Milan1');
-		await this.randomUser('Jonathan1');
-		await this.randomUser('Henk1');
-		await this.randomUser('Henk2');
-		await this.randomUser('Henk3');
-		await this.randomUser('Henk4');
-		await this.randomUser('Henk5');
-		await this.randomUser('Henk6');
-		return 3;
-	}
-
-	queuePrint() {
-		console.log('\t\t\t USER queue op backend');
-		console.log(this.users_looking_for_match);
-		console.log('\t\t\t MATCH queue op backend');
-		console.log(this.queued_matches);
-		return 3;
-	}
-
-	async randomUser(name: string) {
-		const newUserInput: CreateUserInput = {
-			username: name,
-			intraId: name + '_intra_id',
-		};
-
-		const newUser = await this.userService.create(newUserInput);
-		this.changeUserAvatar(newUser);
-	}
-
-	async addAvatarToUser(username: string) {
-		const user = await this.userService.getUser(username);
-		this.changeUserAvatar(user);
-		return 3;
-	}
-
-	private async changeUserAvatar(user: User) {
-		const avatar = new Avatar();
-		avatar.parentUserUid = user.id;
-		avatar.file = 'd';
-		avatar.filename = 'd';
-		user.avatar = await this.userAvatarService.createOrUpdate(avatar);
-		this.userService.save(user);
-	}
-
-	removeQueue() {
-		this.queued_matches.splice(0, this.queued_matches.length);
-		this.users_looking_for_match.splice(
-			0,
-			this.users_looking_for_match.length,
-		);
-		pubSub.publish('queueChanged', { queueChanged: this.queued_matches });
-		return 3;
 	}
 }
