@@ -5,7 +5,6 @@ import PublicChannel from "./JoinPublic";
 
 export default function JoinChannel(props: any) {
 	const [toggleChannel, setToggleChannel] = useState(false);
-	console.log("props", props);
 
 	return (
 		<div className="new_chat">

@@ -114,6 +114,7 @@ export class GroupChatService {
 		channel.members.push(user);
 		const savedChannel = await this.channelRepository.save(channel);
 		pubSub.publish('channelCreated', { channelCreated: savedChannel });
+		pubSub.publish('channelUpdated', { channelUpdated: savedChannel });
 		return savedChannel;
 	}
 
@@ -149,6 +150,7 @@ export class GroupChatService {
 			channel.members.push(user);
 			const savedChannel = await this.channelRepository.save(channel);
 			pubSub.publish('channelCreated', { channelCreated: savedChannel });
+			pubSub.publish('channelUpdated', { channelUpdated: savedChannel });
 			return true;
 		}
 		return false;
@@ -441,6 +443,7 @@ export class GroupChatService {
 		}
 		const savedChannel = await this.channelRepository.save(channel);
 		pubSub.publish('channelCreated', { channelCreated: savedChannel });
+		pubSub.publish('channelUpdated', { channelUpdated: savedChannel });
 		return savedChannel;
 	}
 
@@ -481,9 +484,16 @@ export class GroupChatService {
 		}
 	}
 
-	async isNotAMemberOfChannel(user_id: string, channel_id: string) : Promise<boolean> {
-		const channel = await this.getChannelById(channel_id, { members: true });
-		const check = await channel.members.findIndex((member) => member.id === user_id);
+	async isNotAMemberOfChannel(
+		user_id: string,
+		channel_id: string,
+	): Promise<boolean> {
+		const channel = await this.getChannelById(channel_id, {
+			members: true,
+		});
+		const check = await channel.members.findIndex(
+			(member) => member.id === user_id,
+		);
 		if (check >= 0) {
 			return false;
 		}

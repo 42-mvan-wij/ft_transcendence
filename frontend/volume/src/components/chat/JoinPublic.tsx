@@ -49,6 +49,11 @@ export default function PublicChannel({
 		if (channelCreated) refetch();
 	}, [channelCreated, refetch]);
 
+	// refetch when page is loaded
+	useEffect(() => {
+		refetch();
+	}, [refetch]);
+
 	async function Join(channelId: string) {
 		try {
 			await joinGroupChat({

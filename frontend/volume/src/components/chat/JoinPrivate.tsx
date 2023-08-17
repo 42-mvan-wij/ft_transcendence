@@ -43,6 +43,11 @@ export default function PrivateChannel({
 		if (channelCreated) refetch();
 	}, [channelCreated, refetch]);
 
+	// refetch when page is loaded
+	useEffect(() => {
+		refetch();
+	}, [refetch]);
+
 	// passwords for each channel
 	const [passwords, setPasswords] = useState<{ [key: string]: string }>({});
 

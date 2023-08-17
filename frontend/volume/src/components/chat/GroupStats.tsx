@@ -62,7 +62,9 @@ function RenderActions(props: any) {
 		);
 
 	const [LeaveGroupChat, { loading, error }] = useMutation(LEAVE_GROUP_CHAT);
-	if (loading || error) console.log(loading, error);
+	if (loading) return <>Loading</>;
+	if (error) return <></>;
+
 	async function Leave(channelId: string) {
 		try {
 			const { data } = await LeaveGroupChat({
