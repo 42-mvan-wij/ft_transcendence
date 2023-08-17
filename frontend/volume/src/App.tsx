@@ -11,7 +11,6 @@ import UserIsOnline from "./components/common/UserIsOnline";
 import NotFound from "./components/NotFound";
 
 function App() {
-	UserIsOnline();
 	return (
 		<>
 			<AuthProvider>
