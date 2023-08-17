@@ -22,6 +22,5 @@ export default function useChannelCreatedSubscription() {
 	}, [subscriptionData]);
 
 	if (subscriptionError) console.log("subscriptionError", subscriptionError);
-
 	return { channelCreated };
 }

@@ -63,7 +63,7 @@ export default function PrivateChannel(props: any) {
 	if (error) return <p>Error</p>;
 	if (loading) return <p>Loading...</p>;
 
-	const filteredChannels = data.all_available_public_channels.filter((channel: any) => {
+	const filteredChannels = data.all_available_private_channels.filter((channel: any) => {
 		const bannedUsers = channel.banned_users;
 		if (bannedUsers) {
 			for (let i = 0; i < bannedUsers.length; i++) {
