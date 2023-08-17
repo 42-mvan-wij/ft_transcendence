@@ -483,11 +483,10 @@ export class GroupChatService {
 
 	async isNotAMemberOfChannel(user_id: string, channel_id: string) : Promise<boolean> {
 		const channel = await this.getChannelById(channel_id, { members: true });
-		const check = channel.members.findIndex((member) => member.id === user_id);
+		const check = await channel.members.findIndex((member) => member.id === user_id);
 		if (check >= 0) {
 			return false;
 		}
 		return true;
 	}
-
 }
