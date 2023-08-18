@@ -200,10 +200,15 @@ export default function Overview({
 					return Object.assign({}, prev, {
 						currentUserQuery: {
 							...prev.currentUserQuery,
-							group_chats: [
-								...prev.currentUserQuery.group_chats.slice(0, personal_chat_index),
+							personal_chats: [
+								...prev.currentUserQuery.personal_chats.slice(
+									0,
+									personal_chat_index
+								),
 								new_personal_chat,
-								...prev.currentUserQuery.group_chats.slice(personal_chat_index + 1),
+								...prev.currentUserQuery.personal_chats.slice(
+									personal_chat_index + 1
+								),
 							],
 						},
 					});
