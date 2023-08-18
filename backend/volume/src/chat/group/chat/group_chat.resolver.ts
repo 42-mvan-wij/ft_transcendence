@@ -107,7 +107,7 @@ export class GroupChatResolver {
 	}
 
 	@UseGuards(JwtAuthGuard)
-	@Mutation(() => GroupChat)
+	@Mutation(() => GroupChat, { nullable: true })
 	async mute(
 		@AuthUser() user: UserInfo,
 		@Args('channel_id') channel_id: string,
@@ -123,7 +123,7 @@ export class GroupChatResolver {
 	}
 
 	@UseGuards(JwtAuthGuard)
-	@Mutation(() => GroupChat)
+	@Mutation(() => GroupChat, { nullable: true })
 	async kick(
 		@AuthUser() user: UserInfo,
 		@Args('channel_id') channel_id: string,
@@ -137,7 +137,7 @@ export class GroupChatResolver {
 	}
 
 	@UseGuards(JwtAuthGuard)
-	@Mutation(() => GroupChat)
+	@Mutation(() => GroupChat, { nullable: true })
 	async ban(
 		@AuthUser() user: UserInfo,
 		@Args('channel_id') channel_id: string,
@@ -151,7 +151,7 @@ export class GroupChatResolver {
 	}
 
 	@UseGuards(JwtAuthGuard)
-	@Mutation(() => GroupChat)
+	@Mutation(() => GroupChat, { nullable: true })
 	async unban(
 		@AuthUser() user: UserInfo,
 		@Args('channel_id') channel_id: string,
