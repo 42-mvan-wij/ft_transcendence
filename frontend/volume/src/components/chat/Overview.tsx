@@ -130,7 +130,7 @@ enum MessageType {
 	PERSONAL,
 }
 
-function Overview({
+export default function Overview({
 	props,
 	setSelectedChannel,
 	setChatState,
@@ -236,7 +236,6 @@ function Overview({
 			updateQuery: (prev, { subscriptionData }) => {
 				if (!subscriptionData.data) return prev;
 				const block_update = subscriptionData.data.multi_block_state_changed;
-				console.log({ block_update });
 				const new_group_chats: any = [];
 				for (const group_chat of prev.currentUserQuery.group_chats) {
 					if (group_chat.lastMessage?.author?.id === block_update.user_id) {
@@ -289,7 +288,7 @@ function Overview({
 		setDataFresh(true);
 	}
 
-	if (error) return <p>Error: {error.message}</p>;
+	if (error) return <></>;
 	if (loading) return <p>Loading...</p>;
 
 	function renderChat(channel: any) {
@@ -392,5 +391,3 @@ function renderNewChatOptions(props: i.ModalProps) {
 		</div>
 	);
 }
-
-export default Overview;

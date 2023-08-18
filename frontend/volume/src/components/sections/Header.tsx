@@ -25,7 +25,7 @@ function Player({ user, className }: { user: any; className: string }) {
 
 	if (!player) return <></>;
 	if (loading) return <>Loading</>;
-	if (error) return <>Error</>;
+	if (error) return <></>;
 
 	if (className === "player_left")
 		return (

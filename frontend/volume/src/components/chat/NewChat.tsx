@@ -50,7 +50,7 @@ export default function NewChat({ setShowModal }: { setShowModal: (showModal: bo
 	if (joinError) return <p>Error: {joinError.message}</p>;
 	if (joinLoading) return <p>Joining...</p>;
 
-	if (error) return <p>Error {error.message}</p>;
+	if (error) return <></>;
 	if (loading) return <p>Loading...</p>;
 	return (
 		<div className="new_chat">
