@@ -67,8 +67,4 @@ export class GroupChat {
 		description: 'Determines if the channel is public or not',
 	})
 	isPublic: boolean;
-
-	@Column({ default: true })
-	@Field(() => Boolean )
-	isGroup: Boolean;
 }
