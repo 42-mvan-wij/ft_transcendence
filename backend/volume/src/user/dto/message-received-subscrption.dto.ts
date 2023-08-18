@@ -6,7 +6,7 @@ export const MessageUnion = createUnionType({
 	name: 'MessageUnion',
 	types: () => [GroupMessage, PersonalMessage] as const,
 	resolveType: (value) => {
-		if (value.channel.isGroup) {
+		if ('isPublic' in value.channel) {
 			return GroupMessage;
 		}
 		return PersonalMessage;
