@@ -53,7 +53,7 @@ function Stats({ userId }: { userId: string }) {
 
 	if (loading) return <div> Loading </div>;
 	if (!stats) return <></>;
-	if (error) return <div> Error </div>;
+	if (error) return <></>;
 	return (
 		<div className="stat_block">
 			<h2>Stats</h2>

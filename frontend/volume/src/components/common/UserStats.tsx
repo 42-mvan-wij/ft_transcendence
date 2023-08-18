@@ -61,14 +61,14 @@ export default function UserStats(modalProps: i.ModalProps & { selectedUser: any
 
 	if (challenge_available_error) return <></>;
 	if (own_challenge_available_error) return <></>;
-	if (error) return <>Error friends</>;
+	if (error) return <></>;
 	if (challenge_error) return <>challenge error</>;
-	if (errorOutgoing) return <>error</>;
-	if (errorRemove) return <>error</>;
-	if (errorRequest) return <>error</>;
-	if (block_error) return <>error blocking user</>;
-	if (unblock_error) return <>error unblocking user</>;
-	if (block_state_error) return <>error loading user's block status</>;
+	if (errorOutgoing) return <></>;
+	if (errorRemove) return <></>;
+	if (errorRequest) return <></>;
+	if (block_error) return <></>;
+	if (unblock_error) return <></>;
+	if (block_state_error) return <></>;
 
 	let status: string;
 	if (friends.find((friend: any) => friend.id === modalProps.selectedUser.id)) {

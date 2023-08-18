@@ -64,6 +64,7 @@ function RenderActions(props: any) {
 	const [LeaveGroupChat, { loading, error }] = useMutation(LEAVE_GROUP_CHAT);
 	if (loading) return <>Loading</>;
 	if (error) return <></>;
+
 	async function Leave(channelId: string) {
 		const { data } = await LeaveGroupChat({
 			variables: { channelId: channelId },

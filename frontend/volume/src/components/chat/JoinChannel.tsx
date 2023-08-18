@@ -23,9 +23,9 @@ export default function JoinChannel(props: any) {
 				</a>
 			</div>
 			{toggleChannel ? (
-				<PrivateChannel setShowModal={props.setShowModal} />
+				<PrivateChannel userId={props.userId} setShowModal={props.setShowModal} />
 			) : (
-				<PublicChannel setShowModal={props.setShowModal} />
+				<PublicChannel userId={props.userId} setShowModal={props.setShowModal} />
 			)}
 		</div>
 	);

@@ -61,7 +61,7 @@ function Friends(props: i.ModalProps & { selectedUser: any }) {
 	const { friends, loading, error } = useFriendsData(props.selectedUser.id);
 
 	if (loading) return <div>Loading friends</div>;
-	if (error) return <div>Error friends</div>;
+	if (error) return <></>;
 	if (!friends) return <div>No friends</div>;
 	return (
 		<div className="stat_block">

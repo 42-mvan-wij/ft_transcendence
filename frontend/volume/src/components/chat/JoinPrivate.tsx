@@ -12,6 +12,9 @@ const GET_ALL_PRIVATE_CHANNELS = gql`
 			members {
 				username
 			}
+			banned_users {
+				id
+			}
 		}
 	}
 `;
@@ -23,9 +26,11 @@ const JOIN_PRIVATE_GROUP_CHAT = gql`
 `;
 
 export default function PrivateChannel({
+	userId,
 	setShowModal,
 }: {
-	setShowModal: (showModal: boolean) => void;
+	userId: string;
+	setShowModal: any;
 }) {
 	const [selectedChannel, setSelectedChannel] = useState<string | null>(null);
 	const { loading, data, error, refetch } = useQuery(GET_ALL_PRIVATE_CHANNELS);
@@ -37,6 +42,11 @@ export default function PrivateChannel({
 	useEffect(() => {
 		if (channelCreated) refetch();
 	}, [channelCreated, refetch]);
+
+	// refetch when page is loaded
+	useEffect(() => {
+		refetch();
+	}, [refetch]);
 
 	// passwords for each channel
 	const [passwords, setPasswords] = useState<{ [key: string]: string }>({});
@@ -61,12 +71,20 @@ export default function PrivateChannel({
 	if (data && data.all_available_private_channels.length === 0) return <p>No channels to join</p>;
 	if (joinError) return <p>Error: {joinError.message}</p>;
 	if (joinLoading) return <p>Joining...</p>;
-	if (error) return <p>Error</p>;
+	if (error) return <></>;
 	if (loading) return <p>Loading...</p>;
 
+	const filteredChannels = data.all_available_private_channels.filter((channel: any) => {
+		const bannedUsers = channel.banned_users;
+		if (bannedUsers) {
+			for (let i = 0; i < bannedUsers.length; i++)
+				if (bannedUsers[i].id === userId) return false;
+		}
+		return true;
+	});
 	return (
 		<div className="new_chat">
-			{data.all_available_private_channels.map((chat: any) => (
+			{filteredChannels.map((chat: any) => (
 				<div className="chooseChannel" key={chat.id}>
 					<Channel
 						chat={chat}

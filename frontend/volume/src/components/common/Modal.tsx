@@ -24,9 +24,8 @@ export default function Modal(props: i.ModalProps) {
 		if (props.showModal) {
 			const serializableModalState = props.modalState;
 			for (const key in serializableModalState) {
-				if (typeof serializableModalState[key] === "function") {
+				if (typeof serializableModalState[key] === "function")
 					delete serializableModalState[key];
-				}
 			}
 			if (props.modalState.type != undefined)
 				window.history.pushState(
