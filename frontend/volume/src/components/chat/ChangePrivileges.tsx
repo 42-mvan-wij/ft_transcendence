@@ -95,19 +95,20 @@ function AdminPrivileges(props: any) {
 	async function handleAdminAction(): Promise<void> {
 		const mutation = memberIsAdmin ? demoteAdminMutation : promoteAdminMutation;
 
-		try {
-			await mutation({
-				variables: {
-					channelId: props.selectedGroup.id,
-					userId: props.member.id,
-				},
-			});
-			const alertMsg = memberIsAdmin ? " is no longer admin" : " is now admin";
-			alert(props.member.username + alertMsg);
+		const moteMut = await mutation({
+			variables: {
+				channelId: props.selectedGroup.id,
+				userId: props.member.id,
+			},
+		});
+		if (!moteMut.data.promote || !moteMut.data.demote) {
+			alert("Cannot change user rights, please go back to chat overview");
 			props.setShowModal(false);
-		} catch (error) {
-			console.error("An error occurred while handling the admin action:", error);
+			return;
 		}
+		const alertMsg = memberIsAdmin ? " is no longer admin" : " is now admin";
+		alert(props.member.username + alertMsg);
+		props.setShowModal(false);
 	}
 	return (
 		<div className="link admin" onClick={handleAdminAction}>
@@ -119,18 +120,19 @@ function AdminPrivileges(props: any) {
 function KickUser(props: any) {
 	const [kickMemberMutation] = useMutation(KICK_MEMBER);
 	async function kickMember(): Promise<void> {
-		try {
-			await kickMemberMutation({
-				variables: {
-					channelId: props.selectedGroup.id,
-					userId: props.member.id,
-				},
-			});
-			alert(props.member.username + "has been kicked from this channel");
+		const kickMut = await kickMemberMutation({
+			variables: {
+				channelId: props.selectedGroup.id,
+				userId: props.member.id,
+			},
+		});
+		if (!kickMut.data.kick) {
+			alert("Cannot kick");
 			props.setShowModal(false);
-		} catch (error) {
-			console.error("An error occurred while handling the admin action:", error);
+			return;
 		}
+		alert(props.member.username + "has been kicked from this channel");
+		props.setShowModal(false);
 	}
 	return (
 		<div className="link" onClick={kickMember}>
@@ -150,19 +152,20 @@ function BanUser(props: any) {
 	async function handleBanAction(): Promise<void> {
 		const mutation = memberIsBanned ? unbanMemberMutation : banMemberMutation;
 
-		try {
-			await mutation({
-				variables: {
-					channelId: props.selectedGroup.id,
-					userId: props.member.id,
-				},
-			});
-			const alertMsg = memberIsBanned ? " is no longer banned" : " is now banned";
-			alert(props.member.username + alertMsg);
+		const banMut = await mutation({
+			variables: {
+				channelId: props.selectedGroup.id,
+				userId: props.member.id,
+			},
+		});
+		if (!banMut.data.ban) {
+			alert("Could not (un)ban");
 			props.setShowModal(false);
-		} catch (error) {
-			console.error("An error occurred while handling the admin action:", error);
+			return;
 		}
+		const alertMsg = memberIsBanned ? " is no longer banned" : " is now banned";
+		alert(props.member.username + alertMsg);
+		props.setShowModal(false);
 	}
 	const linkText = memberIsBanned ? "unban" : "ban";
 	return (
@@ -177,27 +180,25 @@ const MUTE_TIME_SEC = 60;
 function MuteUser(props: any) {
 	const [muteMemberMutation] = useMutation(MUTE_MEMBER);
 	async function muteMember(): Promise<void> {
-		try {
-			await muteMemberMutation({
-				variables: {
-					channelId: props.selectedGroup.id,
-					userId: props.member.id,
-					timeout: MUTE_TIME_SEC,
-				},
-			});
-
-			const now = new Date();
-			const time = new Date(now.getTime() + MUTE_TIME_SEC * 1000);
-			const timeString = time.toLocaleString("nl-NL", {
-				timeZone: "Europe/Amsterdam",
-				hour12: false,
-			});
+		const muteTrue = await muteMemberMutation({
+			variables: {
+				channelId: props.selectedGroup.id,
+				userId: props.member.id,
+				timeout: MUTE_TIME_SEC,
+			},
+		});
+		const now = new Date();
+		const time = new Date(now.getTime() + MUTE_TIME_SEC * 1000);
+		const timeString = time.toLocaleString("nl-NL", {
+			timeZone: "Europe/Amsterdam",
+			hour12: false,
+		});
+		if (muteTrue.data.mute) {
 			alert(props.member.username + " is now muted until " + timeString);
-
-			props.setShowModal(false);
-		} catch (error) {
-			console.error("An error occurred while handling the admin action:", error);
+		} else {
+			alert("Cannot mute user");
 		}
+		props.setShowModal(false);
 	}
 	return (
 		<div className="link mute" onClick={muteMember}>

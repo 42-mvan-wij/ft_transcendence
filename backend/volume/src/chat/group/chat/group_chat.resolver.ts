@@ -79,7 +79,7 @@ export class GroupChatResolver {
 	}
 
 	@UseGuards(JwtAuthGuard)
-	@Mutation(() => GroupChat)
+	@Mutation(() => GroupChat, { nullable: true })
 	async promote(
 		@AuthUser() user: UserInfo,
 		@Args('channel_id') channel_id: string,
@@ -93,7 +93,7 @@ export class GroupChatResolver {
 	}
 
 	@UseGuards(JwtAuthGuard)
-	@Mutation(() => GroupChat)
+	@Mutation(() => GroupChat, { nullable: true })
 	async demote(
 		@AuthUser() user: UserInfo,
 		@Args('channel_id') channel_id: string,
@@ -107,7 +107,7 @@ export class GroupChatResolver {
 	}
 
 	@UseGuards(JwtAuthGuard)
-	@Mutation(() => GroupChat)
+	@Mutation(() => GroupChat, { nullable: true })
 	async mute(
 		@AuthUser() user: UserInfo,
 		@Args('channel_id') channel_id: string,
@@ -123,7 +123,7 @@ export class GroupChatResolver {
 	}
 
 	@UseGuards(JwtAuthGuard)
-	@Mutation(() => GroupChat)
+	@Mutation(() => GroupChat, { nullable: true })
 	async kick(
 		@AuthUser() user: UserInfo,
 		@Args('channel_id') channel_id: string,
@@ -137,7 +137,7 @@ export class GroupChatResolver {
 	}
 
 	@UseGuards(JwtAuthGuard)
-	@Mutation(() => GroupChat)
+	@Mutation(() => GroupChat, { nullable: true })
 	async ban(
 		@AuthUser() user: UserInfo,
 		@Args('channel_id') channel_id: string,
@@ -151,7 +151,7 @@ export class GroupChatResolver {
 	}
 
 	@UseGuards(JwtAuthGuard)
-	@Mutation(() => GroupChat)
+	@Mutation(() => GroupChat, { nullable: true })
 	async unban(
 		@AuthUser() user: UserInfo,
 		@Args('channel_id') channel_id: string,
@@ -165,7 +165,7 @@ export class GroupChatResolver {
 	}
 
 	@UseGuards(JwtAuthGuard)
-	@Mutation(() => GroupChat)
+	@Mutation(() => GroupChat, { nullable: true })
 	async leaveGroupChat(
 		@AuthUser() user: UserInfo,
 		@Args('channel_id') channel_id: string,
@@ -177,7 +177,7 @@ export class GroupChatResolver {
 	}
 
 	@UseGuards(JwtAuthGuard)
-	@Mutation(() => Boolean)
+	@Mutation(() => Boolean, { nullable: true })
 	async changePassword(
 		@AuthUser() user: UserInfo,
 		@Args('channel_id') channel_id: string,
@@ -224,7 +224,6 @@ export class GroupChatResolver {
 
 	@ResolveField()
 	async lastMessage(@Parent() channel: GroupChat) {
-		// NOTE: maybe there is a better way to do this
 		const messages = channel.messages ?? (await this.messages(channel));
 		if (messages.length > 0) return messages[messages.length - 1];
 		return null;
