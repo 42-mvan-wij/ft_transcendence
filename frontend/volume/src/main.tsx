@@ -9,6 +9,13 @@ import App from "./App";
 import "./styles/style.css";
 import { getMainDefinition } from "@apollo/client/utilities";
 
+import { IntrospectionFragmentMatcher } from "apollo-cache-inmemory";
+import introspectionQueryResultData from "./fragmentTypes.json";
+
+const fragmentMatcher = new IntrospectionFragmentMatcher({
+	introspectionQueryResultData,
+});
+
 const httpLink = new HttpLink({
 	uri: `https://${import.meta.env["VITE_DOMAIN"]}/api/graphql`,
 	credentials: "include",
