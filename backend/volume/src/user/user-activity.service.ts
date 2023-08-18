@@ -21,16 +21,20 @@ export class UserActivityService {
 		setInterval(() => this.checkUserTimestamp(), 11000);
 	}
 
-	online_users: [string, number][] = [];
+	online_users: [string, number, number][] = [];
 
 	async userIsOnline(userId: string) {
 		for (const i in this.online_users) {
 			if (this.online_users[i][0] === userId) {
-				this.online_users[i][1] = Date.now();
+				this.online_users[i][2]++;
+				if (this.online_users[i][2] > 7) {
+					this.online_users[i][1] = Date.now();
+					this.online_users[i][2] = 0;
+				}
 				return true;
 			}
 		}
-		this.online_users.push([userId, Date.now()]);
+		this.online_users.push([userId, Date.now(), 0]);
 		const availability: Availability = new Availability();
 		availability.challengeStatus = ChallengeStatus.ONLINE;
 		pubSub.publish('challengeAvailabilityChanged', {
