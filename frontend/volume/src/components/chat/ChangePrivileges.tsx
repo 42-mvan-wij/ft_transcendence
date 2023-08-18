@@ -92,19 +92,20 @@ function AdminPrivileges(props: any) {
 	async function handleAdminAction(): Promise<void> {
 		const mutation = memberIsAdmin ? demoteAdminMutation : promoteAdminMutation;
 
-		try {
-			await mutation({
-				variables: {
-					channelId: props.selectedGroup.id,
-					userId: props.member.id,
-				},
-			});
-			const alertMsg = memberIsAdmin ? " is no longer admin" : " is now admin";
-			alert(props.member.username + alertMsg);
+		const moteMut = await mutation({
+			variables: {
+				channelId: props.selectedGroup.id,
+				userId: props.member.id,
+			},
+		});
+		if (!moteMut.data.promote || !moteMut.data.demote) {
+			alert("Cannot change user rights, please go back to chat overview");
 			props.setShowModal(false);
-		} catch (error) {
-			console.error("An error occurred while handling the admin action:", error);
+			return;
 		}
+		const alertMsg = memberIsAdmin ? " is no longer admin" : " is now admin";
+		alert(props.member.username + alertMsg);
+		props.setShowModal(false);
 	}
 	return (
 		<div className="link admin" onClick={handleAdminAction}>

@@ -62,17 +62,19 @@ function RenderActions(props: any) {
 		);
 
 	const [LeaveGroupChat, { loading, error }] = useMutation(LEAVE_GROUP_CHAT);
-	if (loading || error) console.log(loading, error);
+	if (loading) return <>Loading</>;
+	if (error) return <></>;
 	async function Leave(channelId: string) {
-		try {
-			const { data } = await LeaveGroupChat({
-				variables: { channelId: channelId },
-			});
+		const { data } = await LeaveGroupChat({
+			variables: { channelId: channelId },
+		});
+		if (!data.leaveGroupChat) {
+			alert("Cannot leave channel, please go back to chat overview");
 			props.setShowModal(false);
-			props.setChatState(ChatState.overview);
-		} catch (error) {
-			console.log("Error leaving ", error);
+			return;
 		}
+		props.setShowModal(false);
+		props.setChatState(ChatState.overview);
 	}
 	actions.push(
 		<a className="link" key="leave" onClick={() => Leave(props.selectedGroup.id)}>

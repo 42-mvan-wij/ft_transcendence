@@ -301,15 +301,13 @@ export class GroupChatService {
 			admins: true,
 		});
 		if (!channel)
-			throw new Error(`Channel with id ${channel_id} does not exist`);
+			return null;
 		if (channel.owner.id !== supposed_owner_id)
-			throw new Error(
-				`User with id ${supposed_owner_id} is not the channel owner`,
-			);
+			return null;
 		const user = await this.userService.getUserById(user_id);
-		if (!user) throw new Error(`User with id ${user_id} does not exist`);
+		if (!user) return null;
 		if (!channel.members.some((member) => member.id === user_id))
-			throw new Error(`User with id ${user_id} is not a member`);
+			return null;
 		channel.admins.push(user);
 		const savedChannel = await this.channelRepository.save(channel);
 		pubSub.publish('channelUpdated', { channelUpdated: savedChannel });
@@ -327,14 +325,12 @@ export class GroupChatService {
 			admins: true,
 		});
 		if (!channel)
-			throw new Error(`Channel with id ${channel_id} does not exist`);
+			return null;
 		if (channel.owner.id !== supposed_owner_id)
-			throw new Error(
-				`User with id ${supposed_owner_id} is not the channel owner`,
-			);
+			return null;
 		const index = channel.admins.findIndex((admin) => admin.id === user_id);
 		if (index < 0)
-			throw new Error(`User with id ${user_id} is not an admin`);
+			return null;
 		channel.admins.splice(index, 1);
 		const savedChannel = await this.channelRepository.save(channel);
 		pubSub.publish('channelUpdated', { channelUpdated: savedChannel });
@@ -398,7 +394,7 @@ export class GroupChatService {
 			admins: true,
 		});
 		if (!channel)
-			throw new Error(`Channel with id ${channel_id} does not exist`);
+			return null;
 		const admin_index = channel.admins.findIndex(
 			(admin) => admin.id === user_id,
 		);
@@ -407,7 +403,7 @@ export class GroupChatService {
 			(member) => member.id === user_id,
 		);
 		if (member_index >= 0) channel.members.splice(member_index, 1);
-		else throw new Error(`User ${user_id} is not in channel ${channel_id}`);
+		else return null;
 		if (channel.owner.id === user_id) {
 			let new_owner: User;
 			if (channel.admins[0]) {
@@ -418,7 +414,7 @@ export class GroupChatService {
 					channel.members[0].id,
 				);
 				if (!user)
-					throw new Error(`User with id ${user_id} does not exist`);
+					return null;
 				channel.admins.push(user);
 			} else {
 				this.channelRepository.delete(channel.id);
@@ -439,9 +435,9 @@ export class GroupChatService {
 	) {
 		const channel = await this.getChannelById(channel_id, { owner: true });
 		if (!channel)
-			throw new Error(`Channel with id ${channel_id} does not exist`);
+			return null;
 		if (channel.owner.id !== user_id)
-			throw new Error(`User with id ${user_id} is not the owner`);
+			return null;
 		const same_password = await new Promise<boolean>((resolve, reject) => {
 			bcrypt.compare(
 				old_password,
