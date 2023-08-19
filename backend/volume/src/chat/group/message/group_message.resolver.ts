@@ -51,12 +51,6 @@ export class GroupMessageResolver {
 
 	@Subscription(() => GroupMessage, {
 		filter: async (payload, variables) => {
-			console.log({
-				payload: {
-					group_message_sent: await payload.group_message_sent,
-				},
-				variables,
-			});
 			if (variables.channel_id === null) return true;
 			return (
 				(await payload.group_message_sent).channel.id ===

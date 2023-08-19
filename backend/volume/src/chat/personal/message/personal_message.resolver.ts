@@ -57,12 +57,6 @@ export class PersonalMessageResolver {
 
 	@Subscription(() => PersonalMessage, {
 		filter: async (payload, variables) => {
-			console.log({
-				payload: {
-					personal_message_sent: await payload.personal_message_sent,
-				},
-				variables,
-			});
 			if (variables.channel_id === null) return true;
 			return (
 				(await payload.personal_message_sent).channel.id ===
