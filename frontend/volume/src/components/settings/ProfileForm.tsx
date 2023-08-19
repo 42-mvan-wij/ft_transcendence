@@ -38,6 +38,7 @@ export default function ProfileForm({ user }: { user: any }): JSX.Element {
 			() => {
 				setPreexistingUsername(false);
 				setFileTooBig(false);
+				alert("Profile updated!");
 				return;
 			},
 			(error: ApolloError) => {
@@ -47,7 +48,6 @@ export default function ProfileForm({ user }: { user: any }): JSX.Element {
 				}
 			}
 		);
-		alert("Profile updated!");
 	};
 
 	const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
