@@ -394,6 +394,7 @@ export class GroupChatService {
 			owner: true,
 			members: true,
 			admins: true,
+			messages: true,
 		});
 		if (!channel)
 			return null;
@@ -420,6 +421,7 @@ export class GroupChatService {
 				channel.admins.push(user);
 			} else {
 				this.channelRepository.delete(channel.id);
+				pubSub.publish('channelUpdated', { channelUpdated: channel });
 				return channel;
 			}
 			channel.owner = new_owner;

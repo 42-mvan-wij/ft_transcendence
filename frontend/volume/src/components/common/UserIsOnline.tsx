@@ -2,8 +2,7 @@ import { ApolloError, gql, useMutation } from "@apollo/client";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-// const USER_ONLINE_CHECK = 4000;
-const USER_ONLINE_CHECK = 500;
+const USER_ONLINE_CHECK = 1500;
 
 const USER_IS_ONLINE = gql`
 	mutation Mutation {

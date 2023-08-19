@@ -43,7 +43,6 @@ export class AuthResolver {
 		} else if (TwoFAState == true) {
 			return true;
 		} else {
-			console.log('unsetting');
 			await this.userService.unsetTwoFA(user);
 			return false;
 		}

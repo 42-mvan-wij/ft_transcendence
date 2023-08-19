@@ -40,7 +40,7 @@ export class GroupChat {
 	@Field(() => [User], { nullable: true })
 	banned_users: User[];
 
-	@OneToMany(() => GroupMessage, (message) => message.channel)
+	@OneToMany(() => GroupMessage, (message) => message.channel, { onDelete: "SET NULL" })
 	@Field(() => [GroupMessage], { nullable: true })
 	messages: GroupMessage[];
 

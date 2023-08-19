@@ -6,7 +6,7 @@ import {
 import { pubSub } from 'src/app.module';
 import { QueueService } from 'src/pong/queue/queue.service';
 
-const USER_TIME_OUT = 8100;
+const USER_TIME_OUT = 9100;
 
 @Injectable()
 export class UserActivityService {
@@ -27,7 +27,7 @@ export class UserActivityService {
 		for (const i in this.online_users) {
 			if (this.online_users[i][0] === userId) {
 				this.online_users[i][2]++;
-				if (this.online_users[i][2] > 7) {
+				if (this.online_users[i][2] > 2) {
 					this.online_users[i][1] = Date.now();
 					this.online_users[i][2] = 0;
 				}
