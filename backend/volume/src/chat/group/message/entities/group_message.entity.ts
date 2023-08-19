@@ -24,7 +24,7 @@ export class GroupMessage {
 	@Field()
 	dateSent: Date;
 
-	@ManyToOne(() => GroupChat, (channel) => channel.messages)
+	@ManyToOne(() => GroupChat, (channel) => channel.messages, { onDelete: "SET NULL" })
 	@Field(() => GroupChat)
 	channel: GroupChat;
 
