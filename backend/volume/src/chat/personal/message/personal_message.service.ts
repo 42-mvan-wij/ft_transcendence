@@ -25,16 +25,6 @@ export class PersonalMessageService {
 		const channel = await this.channelService.getChannelById(
 			createMessageInput.channel_id,
 		);
-
-		console.log(
-			'received message: ',
-			createMessageInput.content,
-			' from ',
-			author.username,
-			' in channel ',
-			channel.id,
-		);
-
 		const message = this.messageRepository.create({
 			author,
 			channel,
