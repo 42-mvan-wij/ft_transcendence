@@ -94,14 +94,13 @@ function AdminPrivileges(props: any) {
 
 	async function handleAdminAction(): Promise<void> {
 		const mutation = memberIsAdmin ? demoteAdminMutation : promoteAdminMutation;
-
 		const moteMut = await mutation({
 			variables: {
 				channelId: props.selectedGroup.id,
 				userId: props.member.id,
 			},
 		});
-		if (!moteMut.data.promote || !moteMut.data.demote) {
+		if (!moteMut.data.promote && !moteMut.data.demote) {
 			alert("Cannot change user rights, please go back to chat overview");
 			props.setShowModal(false);
 			return;
@@ -127,7 +126,7 @@ function KickUser(props: any) {
 			},
 		});
 		if (!kickMut.data.kick) {
-			alert("Cannot kick");
+			alert("Cannot kick user, please go back to chat overview");
 			props.setShowModal(false);
 			return;
 		}
@@ -158,8 +157,8 @@ function BanUser(props: any) {
 				userId: props.member.id,
 			},
 		});
-		if (!banMut.data.ban) {
-			alert("Could not (un)ban");
+		if (!banMut.data.ban && !banMut.data.unban) {
+			alert("Could not (un)ban user, please go back to chat overview");
 			props.setShowModal(false);
 			return;
 		}
@@ -196,7 +195,7 @@ function MuteUser(props: any) {
 		if (muteTrue.data.mute) {
 			alert(props.member.username + " is now muted until " + timeString);
 		} else {
-			alert("Cannot mute user");
+			alert("Cannot mute user, please go back to chat overview");
 		}
 		props.setShowModal(false);
 	}
