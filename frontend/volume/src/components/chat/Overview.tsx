@@ -338,6 +338,7 @@ export default function Overview({
 	);
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function getAllChats(data: any, userId: string) {
 	let allChats = data.currentUserQuery.personal_chats.concat(data.currentUserQuery.group_chats);
 

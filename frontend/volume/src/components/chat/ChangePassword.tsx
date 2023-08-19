@@ -13,6 +13,7 @@ const CHANGE_PASSWORD = gql`
 `;
 
 export default function ChangePassword(props: any) {
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [changePassword, { data }] = useMutation(CHANGE_PASSWORD);
 	const [old_password, setOldPassword] = useState("");
 	const [new_password, setNewPassword] = useState("");

@@ -36,6 +36,7 @@ export default function NewUserForm(): JSX.Element {
 			},
 		});
 		result.then(
+			// eslint-disable-next-line @typescript-eslint/no-unused-vars
 			(data) => {
 				navigate("/home");
 			},

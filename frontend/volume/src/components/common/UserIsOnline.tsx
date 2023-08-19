@@ -21,6 +21,7 @@ export default function UserIsOnline() {
 					{
 					}
 				},
+				// eslint-disable-next-line @typescript-eslint/no-unused-vars
 				(error: ApolloError) => {
 					navigate("/login");
 				}
