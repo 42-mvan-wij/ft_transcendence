@@ -8,6 +8,7 @@ import Error from "../Error";
 import { gqlErrorCode } from "src/utils/gqlErrorData";
 
 function NewUser(): JSX.Element {
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const { loading, error, data } = useQuery(CURRENT_USER);
 
 	if (loading) return <Loading />;
