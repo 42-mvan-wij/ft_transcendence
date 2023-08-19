@@ -343,12 +343,6 @@ function getAllChats(data: any, userId: string) {
 
 	allChats = allChats.map((chat: any) => {
 		const newChat = { ...chat };
-		if (!newChat.logo) {
-			newChat.logo =
-				userId === newChat.members[0]
-					? newChat.members[0]?.avatar.file
-					: newChat.members[1]?.avatar.file;
-		}
 		return newChat;
 	});
 
