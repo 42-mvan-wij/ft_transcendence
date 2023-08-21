@@ -60,7 +60,6 @@ export default function ProfileForm({ user }: { user: any }): JSX.Element {
 			setPicture({ filename: "", file: user.avatar.file });
 			return;
 		}
-
 		const fileReader = new FileReader();
 		const file = event.target.files[0];
 		const fileName = file.name;
@@ -85,6 +84,7 @@ export default function ProfileForm({ user }: { user: any }): JSX.Element {
 						id="changeAvatar"
 						type="file"
 						name="profilePicture"
+						accept="image/png, image/gif, image/jpeg"
 						onChange={handleFileChange}
 					/>
 					<h3>Select a new image</h3>
