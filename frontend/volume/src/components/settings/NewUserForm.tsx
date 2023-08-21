@@ -83,6 +83,7 @@ export default function NewUserForm(): JSX.Element {
 						id="changeAvatar"
 						type="file"
 						name="profilePicture"
+						accept="image/png, image/gif, image/jpeg"
 						onChange={handleFileChange}
 					/>
 					<h3>Select a profile picture</h3>
