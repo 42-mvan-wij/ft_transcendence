@@ -63,11 +63,6 @@ export default function ProfileForm({ user }: { user: any }): JSX.Element {
 		const fileReader = new FileReader();
 		const file = event.target.files[0];
 		const fileName = file.name;
-		// const fileExtension = file.name.split('.').pop();
-		// if (fileExtension != "png" && fileExtension != "jpg" && fileExtension != "jpeg") {
-		// 	alert("Selected file is not an image, please select a PNG or JPEG file.");
-		// 	return;
-		// }
 
 		fileReader.onloadend = (e: any) => {
 			const fileContent = e.currentTarget.result as string;
