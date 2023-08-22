@@ -135,6 +135,12 @@ const CHANNEL_UPDATED_SUBSCRIPTION = gql`
 	}
 `;
 
+const KICKED_FROM_CHANNEL_SUBSCRIPTION = gql`
+	subscription {
+		kickFromChannel
+	}
+`;
+
 export default function GroupChat({
 	props,
 	setChatState,
@@ -156,11 +162,24 @@ export default function GroupChat({
 		CHANNEL_UPDATED_SUBSCRIPTION
 	);
 
+	const { data: kickedSubscriptionData, error: kickedSubscriptionError } = useSubscription(
+		KICKED_FROM_CHANNEL_SUBSCRIPTION
+	);
+
+	useEffect(() => {
+		if (kickedSubscriptionData?.kickFromChannel === channel_id) {
+			renderOverview();
+		}
+	}, [kickedSubscriptionData]);
+
 	useEffect(() => {
 		if (subscriptionData) props.setSelectedGroup(subscriptionData.channelUpdated);
 	}, [subscriptionData]);
 
-	if (subscriptionError) console.log("subscriptionError", subscriptionError);
+	if (subscriptionError) {
+		console.log("subscriptionError", subscriptionError);
+		renderOverview();
+	}
 
 	useEffect(() => {
 		return subscribeToMore({

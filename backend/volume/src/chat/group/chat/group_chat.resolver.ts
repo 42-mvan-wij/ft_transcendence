@@ -11,7 +11,11 @@ import { GroupChat } from './entities/group_chat.entity';
 import { CreateGroupChannelInput } from './dto/create_group_chat.input';
 import { GroupChatService } from './group_chat.service';
 import { UseGuards } from '@nestjs/common';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import {
+	JwtAuthGuard,
+	JwtSubscriptionGuard,
+} from 'src/auth/guards/jwt-auth.guard';
+import { getSubscriptionUser } from 'src/utils/getSubscriptionUser';
 import { AuthUser } from 'src/auth/decorators/auth-user.decorator';
 import { UserInfo } from 'src/auth/user-info.interface';
 import { pubSub } from 'src/app.module';
@@ -237,5 +241,16 @@ export class GroupChatResolver {
 	@Subscription(() => GroupChat)
 	channelUpdated() {
 		return pubSub.asyncIterator('channelUpdated');
+	}
+
+	@UseGuards(JwtSubscriptionGuard)
+	@Subscription(() => String, {
+		filter: (payload, _, context) => {
+			const user = getSubscriptionUser(context);
+			return (payload.userId === user.userUid);
+		},
+	})
+	async kickFromChannel() {
+		return pubSub.asyncIterator('kickFromChannel');
 	}
 }
