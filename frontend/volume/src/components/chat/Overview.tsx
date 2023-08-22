@@ -1,7 +1,7 @@
 import "../../styles/style.css";
 import * as i from "../../types/Interfaces";
 import { ChatState } from "../../utils/constants";
-import { gql, useQuery } from "@apollo/client";
+import { gql, useQuery, useSubscription } from "@apollo/client";
 import { convertEncodedImage } from "src/utils/convertEncodedImage";
 import { useEffect, useState } from "react";
 import useChannelCreatedSubscription from "src/utils/useChannelsCreatedSub";
@@ -125,6 +125,12 @@ const SUBSCRIBE_BLOCK = gql`
 	}
 `;
 
+const KICKED_FROM_CHANNEL_SUBSCRIPTION = gql`
+	subscription {
+		kickFromChannel
+	}
+`;
+
 enum MessageType {
 	GROUP,
 	PERSONAL,
@@ -141,6 +147,16 @@ export default function Overview({
 }) {
 	const [dataFresh, setDataFresh] = useState(false);
 	const { loading, error, data, refetch, subscribeToMore } = useQuery(GET_CHANNELS);
+
+	const { data: kickedSubscriptionData, error: kickedSubscriptionError } = useSubscription(
+		KICKED_FROM_CHANNEL_SUBSCRIPTION
+	);
+
+	useEffect(() => {
+		if (kickedSubscriptionData ?? false) {
+			refetch();
+		}
+	}, [kickedSubscriptionData]);
 
 	useEffect(() => {
 		return subscribeToMore({

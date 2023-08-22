@@ -233,6 +233,7 @@ export class GroupChatService {
 		}
 		channel.members.splice(index, 1);
 		const savedChannel = await this.channelRepository.save(channel);
+		pubSub.publish('kickFromChannel', { kickFromChannel: channelId, userId });
 		pubSub.publish('channelUpdated', { channelUpdated: savedChannel });
 		return savedChannel;
 	}
